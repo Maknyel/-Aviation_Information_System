@@ -34,7 +34,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <!-- Calendar Widget -->
         <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar />
+          <SimpleCalendar :events="calendarEvents" @monthChange="handleMonthChange" />
 
           <!-- Upcoming Requests Section -->
           <div class="mt-6">
@@ -101,11 +101,18 @@
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-800">Venue Usage</h3>
-            <div class="flex items-center gap-2 text-sm text-gray-600">
-              <span>December 2025</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+            <div class="flex items-center gap-2">
+              <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
+              <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
             </div>
           </div>
           <div class="h-64 flex items-center justify-center">
@@ -131,11 +138,18 @@
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-800">Maintenance</h3>
-            <div class="flex items-center gap-2 text-sm text-gray-600">
-              <span>December 2025</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+            <div class="flex items-center gap-2">
+              <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
+              <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
             </div>
           </div>
           <div class="h-64 flex items-center justify-center">
@@ -185,9 +199,40 @@ const {
   upcomingRequests,
   venueUsageData,
   maintenanceData,
+  calendarEvents,
   loading,
   loadAllDashboardData,
+  fetchCalendarEvents,
+  fetchVenueUsage,
+  fetchMaintenanceData,
 } = useDashboard();
+
+// Chart date navigation
+const chartDate = ref(new Date());
+
+const chartMonthYear = computed(() => {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
+  return chartDate.value.toLocaleDateString('en-US', options);
+});
+
+const canGoNextMonth = computed(() => {
+  const now = new Date();
+  return chartDate.value < new Date(now.getFullYear(), now.getMonth(), 1);
+});
+
+const previousChartMonth = () => {
+  chartDate.value = new Date(chartDate.value.getFullYear(), chartDate.value.getMonth() - 1, 1);
+  fetchVenueUsage(chartDate.value.getMonth() + 1, chartDate.value.getFullYear());
+  fetchMaintenanceData(chartDate.value.getMonth() + 1, chartDate.value.getFullYear());
+};
+
+const nextChartMonth = () => {
+  if (canGoNextMonth.value) {
+    chartDate.value = new Date(chartDate.value.getFullYear(), chartDate.value.getMonth() + 1, 1);
+    fetchVenueUsage(chartDate.value.getMonth() + 1, chartDate.value.getFullYear());
+    fetchMaintenanceData(chartDate.value.getMonth() + 1, chartDate.value.getFullYear());
+  }
+};
 
 // Computed properties for chart colors
 const chartColors = computed(() => {
@@ -222,6 +267,10 @@ const getStatusColor = (status: string) => {
     completed: 'bg-green-600',
   };
   return colors[status] || 'bg-gray-500';
+};
+
+const handleMonthChange = (data: { month: number; year: number }) => {
+  fetchCalendarEvents(data.month, data.year);
 };
 
 onMounted(() => {

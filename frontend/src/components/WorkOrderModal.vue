@@ -1,6 +1,6 @@
 <template>
   <Modal v-model="isOpen" title="Work Order Request">
-    <form @submit.prevent="submitForm" class="space-y-6">
+    <form @submit.prevent="submitForm" class="space-y-4">
       <!-- Location and Room Number -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -41,8 +41,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Time</label>
           <input
             v-model="formData.time"
-            type="text"
-            placeholder="2:00pm"
+            type="time"
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
           />
@@ -113,9 +112,9 @@
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
           >
-            <option value="medium">Medium Priority</option>
             <option value="urgent">Urgent</option>
             <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
             <option value="low">Low Priority</option>
           </select>
         </div>

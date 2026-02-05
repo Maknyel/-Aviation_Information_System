@@ -1,6 +1,6 @@
 <template>
   <Modal v-model="isOpen" title="Facility Request">
-    <form @submit.prevent="submitForm" class="space-y-6">
+    <form @submit.prevent="submitForm" class="space-y-4">
       <!-- Venue Requested and Location/Room Number -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -48,8 +48,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Time of Event</label>
           <input
             v-model="formData.time_of_event"
-            type="text"
-            placeholder="e.g., 9:00am - 5:00pm"
+            type="time"
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
           />
@@ -68,8 +67,8 @@
 
       <!-- Details of Request -->
       <div>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Details of Request</h3>
-        <div class="grid grid-cols-2 gap-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Details of Request</h3>
+        <div class="grid grid-cols-2 gap-3">
           <!-- Row 1 -->
           <label class="flex items-center gap-2 cursor-pointer">
             <input v-model="formData.chair" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
@@ -128,23 +127,23 @@
         </div>
 
         <!-- Others Description -->
-        <div v-if="formData.others" class="mt-4">
+        <div v-if="formData.others" class="mt-3">
           <textarea
             v-model="formData.others_description"
             placeholder="Please specify other requirements..."
-            rows="3"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            rows="2"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent text-sm"
           ></textarea>
         </div>
       </div>
 
       <!-- Error Message -->
-      <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+      <div v-if="error" class="p-3 bg-red-50 border border-red-200 rounded-lg">
         <p class="text-sm text-red-600">{{ error }}</p>
       </div>
 
       <!-- Success Message -->
-      <div v-if="success" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+      <div v-if="success" class="p-3 bg-green-50 border border-green-200 rounded-lg">
         <p class="text-sm text-green-600">{{ success }}</p>
       </div>
     </form>

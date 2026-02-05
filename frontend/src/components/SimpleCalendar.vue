@@ -1,5 +1,21 @@
 <template>
   <div class="calendar-widget">
+    <!-- Year Navigation -->
+    <div class="flex items-center justify-between mb-2">
+      <button @click="previousYear" class="p-2 hover:bg-gray-100 rounded text-sm" title="Previous Year">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+        </svg>
+      </button>
+      <span class="text-sm font-semibold text-gray-600">{{ currentYear }}</span>
+      <button @click="nextYear" :disabled="!canGoNextYear" class="p-2 hover:bg-gray-100 rounded text-sm disabled:opacity-30 disabled:cursor-not-allowed" title="Next Year">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Month Navigation -->
     <div class="flex items-center justify-between mb-4">
       <button @click="previousMonth" class="p-2 hover:bg-gray-100 rounded">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -7,7 +23,7 @@
         </svg>
       </button>
       <h3 class="text-lg font-semibold text-gray-800">{{ monthYear }}</h3>
-      <button @click="nextMonth" class="p-2 hover:bg-gray-100 rounded">
+      <button @click="nextMonth" :disabled="!canGoNextMonth" class="p-2 hover:bg-gray-100 rounded disabled:opacity-30 disabled:cursor-not-allowed">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
@@ -22,22 +38,107 @@
       <div
         v-for="(day, index) in calendarDays"
         :key="index"
+        @click="selectDay(day)"
         :class="[
-          'p-2 rounded cursor-pointer transition-colors',
+          'p-2 rounded cursor-pointer transition-colors relative',
           day.isCurrentMonth ? 'text-gray-800' : 'text-gray-300',
-          day.isToday ? 'bg-aviation-olive text-white font-bold' : 'hover:bg-gray-100'
+          day.isToday ? 'bg-aviation-olive text-white font-bold' : 'hover:bg-gray-100',
+          day.hasEvents ? 'font-semibold' : ''
         ]"
       >
-        {{ day.date }}
+        <div>{{ day.date }}</div>
+        <div v-if="day.hasEvents && day.isCurrentMonth" class="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+          <div
+            v-for="(event, idx) in day.events.slice(0, 3)"
+            :key="idx"
+            :class="[
+              'w-1 h-1 rounded-full',
+              event.type === 'facility' ? 'bg-blue-500' : 'bg-orange-500'
+            ]"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events Modal -->
+    <div
+      v-if="selectedDay"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      @click.self="selectedDay = null"
+    >
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-800">
+            Events on {{ formatDate(selectedDay.fullDate) }}
+          </h3>
+          <button @click="selectedDay = null" class="p-1 hover:bg-gray-100 rounded">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-y-auto max-h-[60vh]">
+          <div v-if="selectedDay.events.length === 0" class="text-center text-gray-500 py-8">
+            No events on this day
+          </div>
+          <div v-else class="space-y-3">
+            <div
+              v-for="event in selectedDay.events"
+              :key="`${event.type}-${event.id}`"
+              class="p-3 rounded-lg border"
+              :class="event.type === 'facility' ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'"
+            >
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-2 h-2 rounded-full"
+                    :class="event.type === 'facility' ? 'bg-blue-500' : 'bg-orange-500'"
+                  ></div>
+                  <h4 class="font-semibold text-gray-800">{{ event.title }}</h4>
+                </div>
+                <span
+                  class="px-2 py-1 text-xs rounded capitalize"
+                  :class="getStatusBadgeClass(event.status)"
+                >
+                  {{ event.status }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">
+                <span class="font-medium">Type:</span> {{ event.type === 'facility' ? 'Facility Request' : 'Work Order' }}
+              </p>
+              <p v-if="event.priority" class="text-xs text-gray-600">
+                <span class="font-medium">Priority:</span>
+                <span :class="getPriorityClass(event.priority)" class="capitalize">{{ event.priority }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+
+interface CalendarEvent {
+  id: number;
+  type: 'facility' | 'work_order';
+  title: string;
+  date: string;
+  status: string;
+  priority?: string;
+}
+
+interface Props {
+  events?: CalendarEvent[];
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits(['monthChange']);
 
 const currentDate = ref(new Date());
+const selectedDay = ref<any>(null);
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -45,6 +146,12 @@ const monthYear = computed(() => {
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
   return currentDate.value.toLocaleDateString('en-US', options);
 });
+
+const getEventsForDate = (year: number, month: number, day: number) => {
+  if (!props.events) return [];
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return props.events.filter(event => event.date === dateStr);
+};
 
 const calendarDays = computed(() => {
   const year = currentDate.value.getFullYear();
@@ -60,35 +167,69 @@ const calendarDays = computed(() => {
 
   // Previous month days
   const prevMonthLastDay = new Date(year, month, 0).getDate();
+  const prevMonth = month === 0 ? 11 : month - 1;
+  const prevYear = month === 0 ? year - 1 : year;
+
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const day = prevMonthLastDay - i;
+    const events = getEventsForDate(prevYear, prevMonth, day);
     days.push({
-      date: prevMonthLastDay - i,
+      date: day,
+      fullDate: new Date(prevYear, prevMonth, day),
       isCurrentMonth: false,
-      isToday: false
+      isToday: false,
+      hasEvents: events.length > 0,
+      events
     });
   }
 
   // Current month days
   const today = new Date();
   for (let i = 1; i <= daysInMonth; i++) {
+    const events = getEventsForDate(year, month, i);
     days.push({
       date: i,
+      fullDate: new Date(year, month, i),
       isCurrentMonth: true,
-      isToday: year === today.getFullYear() && month === today.getMonth() && i === today.getDate()
+      isToday: year === today.getFullYear() && month === today.getMonth() && i === today.getDate(),
+      hasEvents: events.length > 0,
+      events
     });
   }
 
   // Next month days to fill the grid
   const remainingDays = 42 - days.length;
+  const nextMonth = month === 11 ? 0 : month + 1;
+  const nextYear = month === 11 ? year + 1 : year;
+
   for (let i = 1; i <= remainingDays; i++) {
+    const events = getEventsForDate(nextYear, nextMonth, i);
     days.push({
       date: i,
+      fullDate: new Date(nextYear, nextMonth, i),
       isCurrentMonth: false,
-      isToday: false
+      isToday: false,
+      hasEvents: events.length > 0,
+      events
     });
   }
 
   return days;
+});
+
+const currentYear = computed(() => {
+  return currentDate.value.getFullYear();
+});
+
+const canGoNextMonth = computed(() => {
+  const now = new Date();
+  const nextMonthDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+  return nextMonthDate <= new Date(now.getFullYear(), now.getMonth(), 1);
+});
+
+const canGoNextYear = computed(() => {
+  const now = new Date();
+  return currentDate.value.getFullYear() < now.getFullYear();
 });
 
 const previousMonth = () => {
@@ -96,6 +237,58 @@ const previousMonth = () => {
 };
 
 const nextMonth = () => {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+  if (canGoNextMonth.value) {
+    currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+  }
 };
+
+const previousYear = () => {
+  currentDate.value = new Date(currentDate.value.getFullYear() - 1, currentDate.value.getMonth(), 1);
+};
+
+const nextYear = () => {
+  if (canGoNextYear.value) {
+    currentDate.value = new Date(currentDate.value.getFullYear() + 1, currentDate.value.getMonth(), 1);
+  }
+};
+
+const selectDay = (day: any) => {
+  if (day.isCurrentMonth) {
+    selectedDay.value = day;
+  }
+};
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const getStatusBadgeClass = (status: string) => {
+  const classes: { [key: string]: string } = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    approved: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800',
+    canceled: 'bg-gray-100 text-gray-800',
+    in_progress: 'bg-blue-100 text-blue-800',
+    completed: 'bg-green-100 text-green-800',
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800';
+};
+
+const getPriorityClass = (priority: string) => {
+  const classes: { [key: string]: string } = {
+    urgent: 'text-red-600 font-bold',
+    high: 'text-orange-600 font-semibold',
+    medium: 'text-yellow-600',
+    low: 'text-green-600',
+  };
+  return classes[priority] || '';
+};
+
+// Watch for month changes and emit event
+watch(currentDate, () => {
+  emit('monthChange', {
+    month: currentDate.value.getMonth() + 1,
+    year: currentDate.value.getFullYear()
+  });
+});
 </script>

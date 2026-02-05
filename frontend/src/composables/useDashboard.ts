@@ -93,9 +93,13 @@ export function useDashboard() {
     }
   };
 
-  const fetchVenueUsage = async () => {
+  const fetchVenueUsage = async (month?: number, year?: number) => {
     try {
-      const response = await fetch(`${API_URL}/dashboard/venue-usage`, {
+      const params = new URLSearchParams();
+      if (month) params.append('month', month.toString());
+      if (year) params.append('year', year.toString());
+
+      const response = await fetch(`${API_URL}/dashboard/venue-usage?${params}`, {
         headers: getAuthHeaders(),
       });
 
@@ -109,9 +113,13 @@ export function useDashboard() {
     }
   };
 
-  const fetchMaintenanceData = async () => {
+  const fetchMaintenanceData = async (month?: number, year?: number) => {
     try {
-      const response = await fetch(`${API_URL}/dashboard/maintenance-data`, {
+      const params = new URLSearchParams();
+      if (month) params.append('month', month.toString());
+      if (year) params.append('year', year.toString());
+
+      const response = await fetch(`${API_URL}/dashboard/maintenance-data?${params}`, {
         headers: getAuthHeaders(),
       });
 

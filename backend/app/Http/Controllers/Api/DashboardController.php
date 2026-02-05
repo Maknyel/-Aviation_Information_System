@@ -120,11 +120,21 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $isAdmin = $user->role->name === 'Admin';
+        $month = $request->input('month');
+        $year = $request->input('year');
 
         $query = FacilityRequest::query();
 
         if (!$isAdmin) {
             $query->where('user_id', $user->id);
+        }
+
+        // Filter by month and year if provided
+        if ($year) {
+            $query->whereYear('date_of_event', $year);
+        }
+        if ($month) {
+            $query->whereMonth('date_of_event', $month);
         }
 
         // Group by venue
@@ -152,11 +162,21 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $isAdmin = $user->role->name === 'Admin';
+        $month = $request->input('month');
+        $year = $request->input('year');
 
         $query = WorkOrder::query();
 
         if (!$isAdmin) {
             $query->where('user_id', $user->id);
+        }
+
+        // Filter by month and year if provided
+        if ($year) {
+            $query->whereYear('date', $year);
+        }
+        if ($month) {
+            $query->whereMonth('date', $month);
         }
 
         // Group by location

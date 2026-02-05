@@ -6,7 +6,8 @@
       "Bash(ionic start:*)",
       "Bash(npm install:*)",
       "Bash(npx tailwindcss init -p)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(dir:*)"
     ]
   }
 }
