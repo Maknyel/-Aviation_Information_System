@@ -10,7 +10,7 @@
       <!-- Action Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Facility Request Card -->
-        <div class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div @click="showFacilityModal = true" class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Facility<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Work Order Request Card -->
-        <div class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div @click="showWorkOrderModal = true" class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Work<br/>Order<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,6 +186,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Facility Request Modal -->
+    <FacilityRequestModal v-model="showFacilityModal" @success="handleFacilityRequestSuccess" />
+
+    <!-- Work Order Modal -->
+    <WorkOrderModal v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
   </AppLayout>
 </template>
 
@@ -194,8 +200,22 @@ import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
+import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
+import WorkOrderModal from '@/components/WorkOrderModal.vue';
 
 const user = ref<any>(null);
+const showFacilityModal = ref(false);
+const showWorkOrderModal = ref(false);
+
+const handleFacilityRequestSuccess = (request: any) => {
+  console.log('Facility request submitted:', request);
+  // You can add logic here to refresh the dashboard or show a notification
+};
+
+const handleWorkOrderSuccess = (workOrder: any) => {
+  console.log('Work order submitted:', workOrder);
+  // You can add logic here to refresh the dashboard or show a notification
+};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');

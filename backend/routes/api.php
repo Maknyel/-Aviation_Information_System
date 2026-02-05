@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\FacilityRequestController;
+use App\Http\Controllers\Api\WorkOrderController;
+use App\Http\Controllers\Api\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +29,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Facility Request routes
     Route::apiResource('facility-requests', FacilityRequestController::class);
     Route::patch('/facility-requests/{id}/status', [FacilityRequestController::class, 'updateStatus']);
+
+    // Work Order routes
+    Route::apiResource('work-orders', WorkOrderController::class);
+    Route::patch('/work-orders/{id}/status', [WorkOrderController::class, 'updateStatus']);
+
+    // Dashboard routes
+    Route::get('/dashboard/statistics', [DashboardController::class, 'getStatistics']);
+    Route::get('/dashboard/upcoming-requests', [DashboardController::class, 'getUpcomingRequests']);
+    Route::get('/dashboard/venue-usage', [DashboardController::class, 'getVenueUsage']);
+    Route::get('/dashboard/maintenance-data', [DashboardController::class, 'getMaintenanceData']);
+    Route::get('/dashboard/calendar-events', [DashboardController::class, 'getCalendarEvents']);
 });

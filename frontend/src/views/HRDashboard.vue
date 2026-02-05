@@ -15,10 +15,14 @@
           <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
               <h2 class="text-xl font-semibold text-gray-800">Facility Request</h2>
-              <button class="p-2 hover:bg-gray-100 rounded-lg transition-all">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              <button
+                @click="showFacilityModal = true"
+                class="px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
+                New Request
               </button>
             </div>
 
@@ -116,6 +120,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Facility Request Modal -->
+    <FacilityRequestModal v-model="showFacilityModal" @success="handleRequestSuccess" />
   </AppLayout>
 </template>
 
@@ -123,9 +130,11 @@
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
+import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 
 const user = ref<any>(null);
 const activeFilter = ref('all');
+const showFacilityModal = ref(false);
 
 const filters = [
   { label: 'All', value: 'all' },
@@ -134,6 +143,11 @@ const filters = [
   { label: 'Disapproved', value: 'disapproved' },
   { label: 'Canceled', value: 'canceled' },
 ];
+
+const handleRequestSuccess = (request: any) => {
+  console.log('Facility request submitted:', request);
+  // You can add logic here to refresh the list or show a notification
+};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');

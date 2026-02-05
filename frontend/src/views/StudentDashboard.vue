@@ -10,7 +10,7 @@
       <!-- Action Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Facility Request Card -->
-        <div class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div @click="showFacilityModal = true" class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Facility<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Work Order Request Card -->
-        <div class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div @click="showWorkOrderModal = true" class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Work<br/>Order<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,21 +39,17 @@
           <!-- Upcoming Requests Section -->
           <div class="mt-6">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
-            <div class="space-y-3">
-              <div class="p-3 bg-gray-50 rounded-lg border-l-4 border-aviation-olive">
+            <div v-if="loading" class="text-center text-gray-500 text-sm py-4">Loading...</div>
+            <div v-else-if="upcomingRequests.length === 0" class="text-center text-gray-500 text-sm py-4">No upcoming requests</div>
+            <div v-else class="space-y-3">
+              <div v-for="request in upcomingRequests.slice(0, 3)" :key="`${request.type}-${request.id}`" class="p-3 bg-gray-50 rounded-lg border-l-4 border-aviation-olive">
                 <div class="flex items-center gap-2 mb-2">
-                  <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <h4 class="text-sm font-semibold text-gray-800">Multi Purpose Hall</h4>
+                  <div class="w-2 h-2 rounded-full" :class="getStatusColor(request.status)"></div>
+                  <h4 class="text-sm font-semibold text-gray-800">{{ request.title }}</h4>
                 </div>
-                <p class="text-xs text-gray-500 mb-2">Status: Pending</p>
-                <div class="flex gap-2">
-                  <button class="px-3 py-1 bg-aviation-olive bg-opacity-10 text-aviation-olive text-xs rounded hover:bg-opacity-20 transition-all flex-1">
-                    Send to HR
-                  </button>
-                  <button class="px-3 py-1 bg-aviation-olive text-white text-xs rounded hover:bg-opacity-90 transition-all flex-1">
-                    Details
-                  </button>
-                </div>
+                <p class="text-xs text-gray-600 mb-1">{{ request.subtitle }}</p>
+                <p class="text-xs text-gray-500 mb-2">{{ request.date }} at {{ request.time }}</p>
+                <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded capitalize">{{ request.status }}</span>
               </div>
             </div>
           </div>
@@ -63,37 +59,37 @@
         <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
           <!-- Facility Requests Today -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_requests_today }}</div>
             <p class="text-xs text-gray-600 font-medium">Facility Requests Today</p>
           </div>
 
           <!-- Facility Pending Requests -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_pending_requests }}</div>
             <p class="text-xs text-gray-600 font-medium">Facility Pending Requests</p>
           </div>
 
           <!-- Pending Maintenance -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.pending_maintenance }}</div>
             <p class="text-xs text-gray-600 font-medium">Pending Maintenance</p>
           </div>
 
           <!-- Work Orders Today -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.work_orders_today }}</div>
             <p class="text-xs text-gray-600 font-medium">Work Orders Today</p>
           </div>
 
           <!-- Facility Approved Requests -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_approved_requests }}</div>
             <p class="text-xs text-gray-600 font-medium">Facility Approved Requests</p>
           </div>
 
           <!-- Urgent Repairs -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.urgent_repairs }}</div>
             <p class="text-xs text-gray-600 font-medium">Urgent Repairs</p>
           </div>
         </div>
@@ -113,33 +109,20 @@
             </div>
           </div>
           <div class="h-64 flex items-center justify-center">
+            <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
+            <div v-else-if="venueUsageData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
             <StatsChart
+              v-else
               type="doughnut"
-              :labels="['Building A', 'Covered Court', 'Building B', 'Hangar', 'Others']"
-              :data="[15, 15, 20, 10, 20]"
-              :backgroundColor="['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E']"
+              :labels="venueUsageData.labels"
+              :data="venueUsageData.values"
+              :backgroundColor="chartColors"
             />
           </div>
-          <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#4A7C59] rounded-full"></div>
-              <span class="text-gray-600">Building A <span class="font-semibold">15%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#5A8C69] rounded-full"></div>
-              <span class="text-gray-600">Covered Court <span class="font-semibold">15%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#6C9A6C] rounded-full"></div>
-              <span class="text-gray-600">Building B <span class="font-semibold">20%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#7DAA7D] rounded-full"></div>
-              <span class="text-gray-600">Hangar <span class="font-semibold">10%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#8EBA8E] rounded-full"></div>
-              <span class="text-gray-600">Others <span class="font-semibold">20%</span></span>
+          <div v-if="!loading && venueUsageData.labels.length > 0" class="mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div v-for="(label, index) in venueUsageData.labels" :key="label" class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: chartColors[index] }"></div>
+              <span class="text-gray-600">{{ label }}</span>
             </div>
           </div>
         </div>
@@ -156,53 +139,96 @@
             </div>
           </div>
           <div class="h-64 flex items-center justify-center">
+            <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
+            <div v-else-if="maintenanceData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
             <StatsChart
+              v-else
               type="doughnut"
-              :labels="['Building A', 'Covered Court', 'Building B', 'Hangar', 'Others']"
-              :data="[15, 15, 10, 10, 33]"
-              :backgroundColor="['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E']"
+              :labels="maintenanceData.labels"
+              :data="maintenanceData.values"
+              :backgroundColor="maintenanceColors"
             />
           </div>
-          <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#4A7C59] rounded-full"></div>
-              <span class="text-gray-600">Building A <span class="font-semibold">15%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#5A8C69] rounded-full"></div>
-              <span class="text-gray-600">Covered Court <span class="font-semibold">15%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#6C9A6C] rounded-full"></div>
-              <span class="text-gray-600">Building B <span class="font-semibold">10%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#7DAA7D] rounded-full"></div>
-              <span class="text-gray-600">Hangar <span class="font-semibold">10%</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-[#8EBA8E] rounded-full"></div>
-              <span class="text-gray-600">Others <span class="font-semibold">33%</span></span>
+          <div v-if="!loading && maintenanceData.labels.length > 0" class="mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div v-for="(label, index) in maintenanceData.labels" :key="label" class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: maintenanceColors[index] }"></div>
+              <span class="text-gray-600">{{ label }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Facility Request Modal -->
+    <FacilityRequestModal v-model="showFacilityModal" @success="handleFacilityRequestSuccess" />
+
+    <!-- Work Order Modal -->
+    <WorkOrderModal v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
+import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
+import WorkOrderModal from '@/components/WorkOrderModal.vue';
+import { useDashboard } from '@/composables/useDashboard';
 
 const user = ref<any>(null);
+const showFacilityModal = ref(false);
+const showWorkOrderModal = ref(false);
+
+const {
+  statistics,
+  upcomingRequests,
+  venueUsageData,
+  maintenanceData,
+  loading,
+  loadAllDashboardData,
+} = useDashboard();
+
+// Computed properties for chart colors
+const chartColors = computed(() => {
+  const baseColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E'];
+  const labels = venueUsageData.value.labels.length;
+  return baseColors.slice(0, labels);
+});
+
+const maintenanceColors = computed(() => {
+  const baseColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E'];
+  const labels = maintenanceData.value.labels.length;
+  return baseColors.slice(0, labels);
+});
+
+const handleFacilityRequestSuccess = (request: any) => {
+  console.log('Facility request submitted:', request);
+  loadAllDashboardData(); // Refresh dashboard data
+};
+
+const handleWorkOrderSuccess = (workOrder: any) => {
+  console.log('Work order submitted:', workOrder);
+  loadAllDashboardData(); // Refresh dashboard data
+};
+
+const getStatusColor = (status: string) => {
+  const colors: { [key: string]: string } = {
+    pending: 'bg-yellow-500',
+    approved: 'bg-green-500',
+    rejected: 'bg-red-500',
+    canceled: 'bg-gray-500',
+    in_progress: 'bg-blue-500',
+    completed: 'bg-green-600',
+  };
+  return colors[status] || 'bg-gray-500';
+};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');
   if (userStr) {
     user.value = JSON.parse(userStr);
   }
+  loadAllDashboardData();
 });
 </script>
