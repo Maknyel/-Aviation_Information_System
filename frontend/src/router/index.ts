@@ -4,6 +4,10 @@ import LoginPage from '../views/LoginPage.vue'
 import CalendarPage from '../views/CalendarPage.vue'
 import RequestsPage from '../views/RequestsPage.vue'
 import NotificationsPage from '../views/NotificationsPage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
+import StudentDashboard from '../views/StudentDashboard.vue'
+import StaffDashboard from '../views/StaffDashboard.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,7 +22,36 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/home',
     name: 'Home',
-    component: HomePage,
+    redirect: (to) => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const role = user?.role?.name;
+
+        if (role === 'Student') return '/student-dashboard';
+        if (role === 'Staff') return '/staff-dashboard';
+        if (role === 'Admin') return '/admin-dashboard';
+      }
+      return '/student-dashboard';
+    },
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/student-dashboard',
+    name: 'StudentDashboard',
+    component: StudentDashboard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/staff-dashboard',
+    name: 'StaffDashboard',
+    component: StaffDashboard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin-dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboard,
     meta: { requiresAuth: true }
   },
   {
@@ -37,6 +70,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/notifications',
     name: 'Notifications',
     component: NotificationsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage,
     meta: { requiresAuth: true }
   }
 ]

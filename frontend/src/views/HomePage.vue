@@ -1,24 +1,47 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <AppHeader @toggleSidebar="toggleSidebar" />
+  <AppLayout>
+    <div class="max-w-7xl mx-auto">
+      <!-- Welcome Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+        <p class="text-gray-600">Welcome back, {{ user?.name }}!</p>
+      </div>
 
-    <!-- Main Layout -->
-    <div class="flex flex-1">
-      <!-- Sidebar -->
-      <AppSidebar :user="user" :isOpen="sidebarOpen" @toggle="toggleSidebar" />
+          <!-- STUDENT DASHBOARD -->
+          <div v-if="user?.role?.name === 'Student'">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Calendar Widget -->
+              <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <SimpleCalendar />
+              </div>
 
-      <!-- Main Content -->
-      <main class="flex-1 bg-gradient-to-br from-aviation-white to-gray-50 p-6 overflow-auto">
-        <div class="max-w-7xl mx-auto">
-          <!-- Welcome Header -->
-          <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-            <p class="text-gray-600">Welcome back, {{ user?.name }}!</p>
+              <!-- Upcoming Requests -->
+              <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
+                <div class="space-y-4">
+                  <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h4 class="font-semibold text-gray-800">Multi Purpose Hall</h4>
+                        <p class="text-sm text-gray-600">Leadership Seminar - January 15-16, 2026</p>
+                      </div>
+                      <span class="px-3 py-1 bg-aviation-olive text-white text-sm rounded-full">Pending</span>
+                    </div>
+                  </div>
+                  <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="text-center text-gray-500 text-sm py-8">
+                      No more upcoming requests
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Dashboard Cards Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <!-- ADMIN/STAFF DASHBOARD -->
+          <div v-else>
+            <!-- Dashboard Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <!-- Facility Request Card -->
             <div class="bg-aviation-olive rounded-xl shadow-lg p-6 text-white">
               <div class="flex items-center justify-between mb-4">
@@ -60,70 +83,77 @@
               <p class="text-gray-600 text-sm">Approved facility requests</p>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Facility Maintenance</h3>
-                <div class="text-3xl font-bold text-aviation-olive">0</div>
+              <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-gray-800">Facility Maintenance</h3>
+                  <div class="text-3xl font-bold text-aviation-olive">0</div>
+                </div>
+                <p class="text-gray-600 text-sm">Under maintenance</p>
               </div>
-              <p class="text-gray-600 text-sm">Under maintenance</p>
             </div>
-          </div>
 
-          <!-- Calendar and Upcoming Requests -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Calendar Widget -->
-            <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">January 2026</h3>
-              <div class="calendar">
-                <div class="grid grid-cols-7 gap-2 text-center text-sm">
-                  <div class="font-semibold text-gray-600">Mon</div>
-                  <div class="font-semibold text-gray-600">Tue</div>
-                  <div class="font-semibold text-gray-600">Wed</div>
-                  <div class="font-semibold text-gray-600">Thu</div>
-                  <div class="font-semibold text-gray-600">Fri</div>
-                  <div class="font-semibold text-gray-600">Sat</div>
-                  <div class="font-semibold text-gray-600">Sun</div>
+            <!-- Statistics Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" v-if="user?.role?.name === 'Admin'">
+              <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Requests</h3>
+                <div class="h-64">
+                  <StatsChart
+                    type="bar"
+                    :labels="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']"
+                    :data="[12, 19, 8, 15, 10, 14]"
+                    title="Requests"
+                  />
+                </div>
+              </div>
 
-                  <div v-for="day in 31" :key="day" class="p-2 hover:bg-aviation-olive hover:text-white rounded cursor-pointer transition-colors">
-                    {{ day }}
-                  </div>
+              <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Request Status</h3>
+                <div class="h-64">
+                  <StatsChart
+                    type="doughnut"
+                    :labels="['Pending', 'Approved', 'Rejected']"
+                    :data="[15, 25, 5]"
+                    :backgroundColor="['#6C9A6C', '#90EE90', '#FF6B6B']"
+                  />
                 </div>
               </div>
             </div>
 
-            <!-- Upcoming Requests -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
-              <div class="space-y-4">
-                <div class="p-4 bg-gray-50 rounded-lg">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h4 class="font-semibold text-gray-800">Multi Purpose Hall</h4>
-                      <p class="text-sm text-gray-600">Leadership Seminar - January 15-16, 2026</p>
+            <!-- Calendar and Upcoming Requests -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Calendar Widget -->
+              <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <SimpleCalendar />
+              </div>
+
+              <!-- Upcoming Requests -->
+              <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
+                <div class="space-y-4">
+                  <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h4 class="font-semibold text-gray-800">Multi Purpose Hall</h4>
+                        <p class="text-sm text-gray-600">Leadership Seminar - January 15-16, 2026</p>
+                      </div>
+                      <span class="px-3 py-1 bg-aviation-olive text-white text-sm rounded-full">Pending</span>
                     </div>
-                    <span class="px-3 py-1 bg-aviation-olive text-white text-sm rounded-full">Pending</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
-import AppSidebar from '@/components/AppSidebar.vue';
+import AppLayout from '@/components/AppLayout.vue';
+import SimpleCalendar from '@/components/SimpleCalendar.vue';
+import StatsChart from '@/components/StatsChart.vue';
 
 const user = ref<any>(null);
-const sidebarOpen = ref(false);
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');

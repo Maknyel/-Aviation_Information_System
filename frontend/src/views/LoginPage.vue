@@ -27,7 +27,7 @@
                 type="email"
                 required
                 placeholder="Enter your email"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
               />
             </div>
 
@@ -39,7 +39,7 @@
                 type="password"
                 required
                 placeholder="Enter your password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
               />
             </div>
 
@@ -67,14 +67,14 @@
         </div>
 
         <!-- Test Accounts -->
-        <div class="mt-8 bg-white bg-opacity-80 rounded-lg p-6 text-center shadow-sm">
+        <!-- <div class="mt-8 bg-white bg-opacity-80 rounded-lg p-6 text-center shadow-sm">
           <p class="font-semibold text-gray-700 mb-3">Test Accounts:</p>
           <div class="space-y-1 text-sm text-gray-600">
             <p>admin@aviation.com - password</p>
             <p>staff@aviation.com - password</p>
             <p>student@aviation.com - password</p>
           </div>
-        </div>
+        </div> -->
       </div>
     </main>
   </div>

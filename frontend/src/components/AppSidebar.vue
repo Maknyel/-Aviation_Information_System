@@ -59,6 +59,10 @@ const emit = defineEmits(['toggle']);
 const route = useRoute();
 
 const isActive = (path: string) => {
+  // Special handling for dashboard menu item
+  if (path === '/home') {
+    return route.path.includes('dashboard');
+  }
   return route.path === path;
 };
 
