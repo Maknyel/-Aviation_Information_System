@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer create-project:*)",
+      "Bash(php artisan:*)",
+      "Bash(ionic start:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init -p)"
+    ]
+  }
+}
