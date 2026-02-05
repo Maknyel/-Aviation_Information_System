@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader />
+    <AppHeader @toggleSidebar="toggleSidebar" />
 
     <!-- Main Layout -->
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <AppSidebar :user="user" />
+      <AppSidebar :user="user" :isOpen="sidebarOpen" @toggle="toggleSidebar" />
 
       <!-- Main Content -->
       <main class="flex-1 bg-gradient-to-br from-aviation-white to-gray-50 p-6 overflow-auto">
@@ -119,6 +119,11 @@ import AppHeader from '@/components/AppHeader.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 
 const user = ref<any>(null);
+const sidebarOpen = ref(false);
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');

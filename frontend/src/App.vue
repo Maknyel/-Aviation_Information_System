@@ -1,9 +1,7 @@
 <template>
-  <ion-app>
-    <ion-router-outlet />
-  </ion-app>
+  <router-view />
 </template>
 
 <script setup lang="ts">
-import { IonApp, IonRouterOutlet } from '@ionic/vue';
+// Using standard Vue Router since we're using minimal Ionic components
 </script>

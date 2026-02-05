@@ -1,6 +1,19 @@
 <template>
-  <aside class="w-64 bg-white shadow-lg h-full">
-    <div class="p-4">
+  <!-- Mobile Sidebar Overlay -->
+  <div
+    v-if="isOpen"
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+    @click="emit('toggle')"
+  ></div>
+
+  <!-- Sidebar -->
+  <aside
+    :class="[
+      'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0',
+      isOpen ? 'translate-x-0' : '-translate-x-full'
+    ]"
+  >
+    <div class="p-4 h-full overflow-y-auto">
       <!-- User Profile Section -->
       <div class="mb-6 pb-4 border-b border-gray-200">
         <div class="flex items-center gap-3">
@@ -20,6 +33,7 @@
           v-for="item in menuItems"
           :key="item.path"
           :to="item.path"
+          @click="emit('toggle')"
           class="flex items-center gap-3 px-4 py-3 mb-2 rounded-lg transition-all"
           :class="isActive(item.path) ? 'bg-aviation-olive text-white' : 'text-gray-700 hover:bg-gray-100'"
         >
@@ -37,7 +51,10 @@ import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   user: any;
+  isOpen: boolean;
 }>();
+
+const emit = defineEmits(['toggle']);
 
 const route = useRoute();
 

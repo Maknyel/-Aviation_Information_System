@@ -71,10 +71,8 @@
           <p class="font-semibold text-gray-700 mb-3">Test Accounts:</p>
           <div class="space-y-1 text-sm text-gray-600">
             <p>admin@aviation.com - password</p>
-            <p>hr@aviation.com - password</p>
-            <p>employees@aviation.com - password</p>
             <p>staff@aviation.com - password</p>
-            <p>students@aviation.com - password</p>
+            <p>student@aviation.com - password</p>
           </div>
         </div>
       </div>
