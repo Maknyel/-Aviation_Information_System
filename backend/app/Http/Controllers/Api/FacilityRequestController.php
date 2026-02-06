@@ -152,14 +152,16 @@ class FacilityRequestController extends Controller
     }
 
     /**
-     * Update status of facility request (Admin only)
+     * Update status of facility request (Admin and Staff only)
      */
     public function updateStatus(Request $request, $id)
     {
-        if ($request->user()->role->name !== 'Admin') {
+        $userRole = $request->user()->role->name;
+
+        if ($userRole !== 'Admin' && $userRole !== 'Staff') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only admins can update request status'
+                'message' => 'Only admins and staff can update request status'
             ], 403);
         }
 

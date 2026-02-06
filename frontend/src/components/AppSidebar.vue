@@ -135,18 +135,19 @@ const menuItems = computed(() => {
   if (role === 'Admin') {
     return [
       ...baseMenu,
-      { path: '/requests', label: 'Requests', icon: RequestsIcon },
-      { path: '/notifications', label: 'Notifications', icon: NotificationIcon },
+      { path: '/requests', label: 'Request', icon: RequestsIcon },
+      { path: '/notifications', label: 'Notification', icon: NotificationIcon },
     ];
   } else if (role === 'Staff') {
     return [
       ...baseMenu,
-      { path: '/requests', label: 'My Requests', icon: RequestsIcon },
+      { path: '/requests', label: 'Request', icon: RequestsIcon },
+      { path: '/notifications', label: 'Notification', icon: NotificationIcon },
     ];
   } else if (role === 'Student') {
     return [
       ...baseMenu,
-      { path: '/requests', label: 'My Requests', icon: RequestsIcon },
+      { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   }
 

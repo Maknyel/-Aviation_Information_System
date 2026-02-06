@@ -36,7 +36,7 @@
         <div class="lg:col-span-1 space-y-6">
           <!-- Calendar Widget -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <SimpleCalendar />
+            <SimpleCalendar @dateUpdated="handleDateUpdated" />
           </div>
 
           <!-- Upcoming Requests Section -->
@@ -48,7 +48,15 @@
                   <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <h4 class="text-sm font-semibold text-gray-800">Multi Purpose Hall</h4>
                 </div>
+                <p class="text-xs text-gray-600 mb-1">Leadership Seminar</p>
                 <p class="text-xs text-gray-500 mb-2">Status: Pending</p>
+                <button
+                  @click="viewRequestDetails('facility', 1)"
+                  :disabled="loadingDetails"
+                  class="w-full px-3 py-1.5 text-xs font-medium text-white bg-aviation-olive rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                >
+                  Details
+                </button>
               </div>
             </div>
           </div>
@@ -59,38 +67,56 @@
           <!-- Stats Cards Grid -->
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
             <!-- Facility Requests Today -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Facility Requests Today</p>
             </div>
 
             <!-- Facility Pending Requests -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Facility Pending Requests</p>
             </div>
 
             <!-- Pending Maintenance -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Pending Maintenance</p>
             </div>
 
             <!-- Work Orders Today -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Work Orders Today</p>
             </div>
 
             <!-- Facility Approved Requests -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Facility Approved Requests</p>
             </div>
 
             <!-- Urgent Repairs -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-              <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
+                
+              </div>
               <p class="text-xs text-gray-600 font-medium">Urgent Repairs</p>
             </div>
           </div>
@@ -192,6 +218,12 @@
 
     <!-- Work Order Modal -->
     <WorkOrderModal v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
+
+    <!-- Facility Request Details Modal -->
+    <FacilityRequestDetailsModal v-model="showDetailsModal" :request="selectedRequest" @statusUpdated="handleStatusUpdated" />
+
+    <!-- Work Order Details Modal -->
+    <WorkOrderDetailsModal v-model="showWorkOrderDetailsModal" :order="selectedWorkOrder" @statusUpdated="handleStatusUpdated" />
   </AppLayout>
 </template>
 
@@ -202,10 +234,18 @@ import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
 import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 import WorkOrderModal from '@/components/WorkOrderModal.vue';
+import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
+import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
+import { API_URL } from '@/config/api';
 
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
+const showDetailsModal = ref(false);
+const selectedRequest = ref<any>(null);
+const loadingDetails = ref(false);
+const showWorkOrderDetailsModal = ref(false);
+const selectedWorkOrder = ref<any>(null);
 
 const handleFacilityRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);
@@ -215,6 +255,69 @@ const handleFacilityRequestSuccess = (request: any) => {
 const handleWorkOrderSuccess = (workOrder: any) => {
   console.log('Work order submitted:', workOrder);
   // You can add logic here to refresh the dashboard or show a notification
+};
+
+const handleDateUpdated = () => {
+  console.log('Event date updated - refreshing dashboard');
+  // Refresh dashboard data when date is updated
+  window.location.reload();
+};
+
+const viewRequestDetails = async (type: string, id: number) => {
+  if (type === 'facility') {
+    loadingDetails.value = true;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/facility-requests/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch request details');
+      }
+
+      selectedRequest.value = data.data;
+      showDetailsModal.value = true;
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+    } finally {
+      loadingDetails.value = false;
+    }
+  } else if (type === 'work_order') {
+    loadingDetails.value = true;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/work-orders/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch work order details');
+      }
+
+      selectedWorkOrder.value = data.data;
+      showWorkOrderDetailsModal.value = true;
+    } catch (error) {
+      console.error('Error fetching work order details:', error);
+    } finally {
+      loadingDetails.value = false;
+    }
+  }
+};
+
+const handleStatusUpdated = () => {
+  console.log('Status updated - refreshing dashboard');
+  window.location.reload();
 };
 
 onMounted(() => {

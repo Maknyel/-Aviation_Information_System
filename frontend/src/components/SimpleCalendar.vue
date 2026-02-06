@@ -106,12 +106,73 @@
               <p class="text-xs text-gray-600 mb-1">
                 <span class="font-medium">Type:</span> {{ event.type === 'facility' ? 'Facility Request' : 'Work Order' }}
               </p>
-              <p v-if="event.priority" class="text-xs text-gray-600">
+              <p v-if="event.priority" class="text-xs text-gray-600 mb-2">
                 <span class="font-medium">Priority:</span>
                 <span :class="getPriorityClass(event.priority)" class="capitalize">{{ event.priority }}</span>
               </p>
+              <button
+                @click="openEditModal(event)"
+                class="mt-2 w-full px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-colors"
+                :class="event.type === 'facility' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-orange-500 hover:bg-orange-600'"
+              >
+                Change Date
+              </button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Date Modal -->
+    <div
+      v-if="editingEvent"
+      class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-50"
+      @click.self="closeEditModal"
+    >
+      <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full">
+        <div class="p-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">Update Event Date</h3>
+        </div>
+        <div class="p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Event</label>
+            <p class="text-sm text-gray-600">{{ editingEvent.title }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Current Date</label>
+            <p class="text-sm text-gray-600 mb-3">{{ formatEditDate(editingEvent.date) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">New Date</label>
+            <input
+              v-model="newDate"
+              type="date"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            />
+          </div>
+          <div v-if="updateError" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-600">{{ updateError }}</p>
+          </div>
+          <div v-if="updateSuccess" class="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p class="text-sm text-green-600">{{ updateSuccess }}</p>
+          </div>
+        </div>
+        <div class="p-4 border-t border-gray-200 flex justify-end gap-3">
+          <button
+            @click="closeEditModal"
+            :disabled="updating"
+            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            @click="updateEventDate"
+            :disabled="updating || !newDate"
+            class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
+          >
+            {{ updating ? 'Updating...' : 'Update Date' }}
+          </button>
         </div>
       </div>
     </div>
@@ -120,6 +181,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { API_URL } from '@/config/api';
 
 interface CalendarEvent {
   id: number;
@@ -135,10 +197,15 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['monthChange']);
+const emit = defineEmits(['monthChange', 'dateUpdated']);
 
 const currentDate = ref(new Date());
 const selectedDay = ref<any>(null);
+const editingEvent = ref<CalendarEvent | null>(null);
+const newDate = ref('');
+const updating = ref(false);
+const updateError = ref('');
+const updateSuccess = ref('');
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -282,6 +349,77 @@ const getPriorityClass = (priority: string) => {
     low: 'text-green-600',
   };
   return classes[priority] || '';
+};
+
+const formatEditDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const openEditModal = (event: CalendarEvent) => {
+  editingEvent.value = event;
+  newDate.value = event.date;
+  updateError.value = '';
+  updateSuccess.value = '';
+};
+
+const closeEditModal = () => {
+  editingEvent.value = null;
+  newDate.value = '';
+  updateError.value = '';
+  updateSuccess.value = '';
+};
+
+const updateEventDate = async () => {
+  if (!editingEvent.value || !newDate.value) return;
+
+  updating.value = true;
+  updateError.value = '';
+  updateSuccess.value = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const endpoint = editingEvent.value.type === 'facility'
+      ? 'facility-requests'
+      : 'work-orders';
+
+    const dateField = editingEvent.value.type === 'facility'
+      ? 'date_of_event'
+      : 'date';
+
+    const response = await fetch(`${API_URL}/${endpoint}/${editingEvent.value.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        [dateField]: newDate.value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update date');
+    }
+
+    updateSuccess.value = 'Date updated successfully!';
+
+    // Emit event to refresh data
+    emit('dateUpdated');
+
+    // Close modal after delay
+    setTimeout(() => {
+      closeEditModal();
+      selectedDay.value = null;
+    }, 1500);
+  } catch (err: any) {
+    updateError.value = err.message || 'Failed to update date';
+  } finally {
+    updating.value = false;
+  }
 };
 
 // Watch for month changes and emit event

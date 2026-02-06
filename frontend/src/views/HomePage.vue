@@ -12,7 +12,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Calendar Widget -->
               <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <SimpleCalendar />
+                <SimpleCalendar @dateUpdated="handleDateUpdated" />
               </div>
 
               <!-- Upcoming Requests -->
@@ -123,7 +123,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Calendar Widget -->
               <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <SimpleCalendar />
+                <SimpleCalendar @dateUpdated="handleDateUpdated" />
               </div>
 
               <!-- Upcoming Requests -->
@@ -154,6 +154,12 @@ import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
 
 const user = ref<any>(null);
+
+const handleDateUpdated = () => {
+  console.log('Event date updated - refreshing page');
+  // Refresh page when date is updated
+  window.location.reload();
+};
 
 onMounted(() => {
   const userStr = localStorage.getItem('user');

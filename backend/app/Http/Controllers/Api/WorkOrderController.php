@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WorkOrderController extends Controller
 {
@@ -160,19 +161,21 @@ class WorkOrderController extends Controller
     }
 
     /**
-     * Update status of work order (Admin only)
+     * Update status of work order (Admin and Staff only)
      */
     public function updateStatus(Request $request, $id)
     {
-        if ($request->user()->role->name !== 'Admin') {
+        $userRole = $request->user()->role->name;
+
+        if ($userRole !== 'Admin' && $userRole !== 'Staff') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only admins can update work order status'
+                'message' => 'Only admins and staff can update work order status'
             ], 403);
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,in_progress,completed,canceled'
+            'status' => 'required|in:pending,approved,rejected,in_progress,completed,canceled'
         ]);
 
         $workOrder = WorkOrder::findOrFail($id);

@@ -30,14 +30,17 @@
         </div>
       </div>
 
-      <!-- Layout Grid: Calendar, Upcoming Requests, Stats -->
+      <!-- Layout Grid: Calendar, Stats, Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Calendar Widget -->
-        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar :events="calendarEvents" @monthChange="handleMonthChange" />
+        <!-- Left Column: Calendar and Upcoming Requests -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Calendar Widget -->
+          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <SimpleCalendar :events="calendarEvents" @monthChange="handleMonthChange" @dateUpdated="handleDateUpdated" />
+          </div>
 
           <!-- Upcoming Requests Section -->
-          <div class="mt-6">
+          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
             <div v-if="loading" class="text-center text-gray-500 text-sm py-4">Loading...</div>
             <div v-else-if="upcomingRequests.length === 0" class="text-center text-gray-500 text-sm py-4">No upcoming requests</div>
@@ -49,124 +52,148 @@
                 </div>
                 <p class="text-xs text-gray-600 mb-1">{{ request.subtitle }}</p>
                 <p class="text-xs text-gray-500 mb-2">{{ request.date }} at {{ request.time }}</p>
-                <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded capitalize">{{ request.status }}</span>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded capitalize">{{ request.status }}</span>
+                  <button
+                    @click="viewRequestDetails(request)"
+                    :disabled="loadingDetails"
+                    class="ml-auto px-3 py-1 bg-aviation-olive text-white text-xs rounded hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                  >
+                    Details
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Stats Cards Grid -->
-        <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-          <!-- Facility Requests Today -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_requests_today }}</div>
-            <p class="text-xs text-gray-600 font-medium">Facility Requests Today</p>
-          </div>
+        <!-- Right Columns: Stats Cards and Charts -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Stats Cards Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Facility Requests Today -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_requests_today }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Facility Requests Today</p>
+            </div>
 
-          <!-- Facility Pending Requests -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_pending_requests }}</div>
-            <p class="text-xs text-gray-600 font-medium">Facility Pending Requests</p>
-          </div>
+            <!-- Facility Pending Requests -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_pending_requests }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Facility Pending Requests</p>
+            </div>
 
-          <!-- Pending Maintenance -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.pending_maintenance }}</div>
-            <p class="text-xs text-gray-600 font-medium">Pending Maintenance</p>
-          </div>
+            <!-- Pending Maintenance -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.pending_maintenance }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Pending Maintenance</p>
+            </div>
 
-          <!-- Work Orders Today -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.work_orders_today }}</div>
-            <p class="text-xs text-gray-600 font-medium">Work Orders Today</p>
-          </div>
+            <!-- Work Orders Today -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.work_orders_today }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Work Orders Today</p>
+            </div>
 
-          <!-- Facility Approved Requests -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_approved_requests }}</div>
-            <p class="text-xs text-gray-600 font-medium">Facility Approved Requests</p>
-          </div>
+            <!-- Facility Approved Requests -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.facility_approved_requests }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Facility Approved Requests</p>
+            </div>
 
-          <!-- Urgent Repairs -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow">
-            <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.urgent_repairs }}</div>
-            <p class="text-xs text-gray-600 font-medium">Urgent Repairs</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Venue Usage Chart -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Venue Usage</h3>
-            <div class="flex items-center gap-2">
-              <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-              </button>
-              <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
-              <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </button>
+            <!-- Urgent Repairs -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
+              <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ loading ? '...' : statistics.urgent_repairs }}</div>
+              </div>
+              <p class="text-xs text-gray-600 font-medium">Urgent Repairs</p>
             </div>
           </div>
-          <div class="h-64 flex items-center justify-center">
-            <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
-            <div v-else-if="venueUsageData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
-            <StatsChart
-              v-else
-              type="doughnut"
-              :labels="venueUsageData.labels"
-              :data="venueUsageData.values"
-              :backgroundColor="chartColors"
-            />
-          </div>
-          <div v-if="!loading && venueUsageData.labels.length > 0" class="mt-4 grid grid-cols-2 gap-3 text-xs">
-            <div v-for="(label, index) in venueUsageData.labels" :key="label" class="flex items-center gap-2">
-              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: chartColors[index] }"></div>
-              <span class="text-gray-600">{{ label }}</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Maintenance Chart -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Maintenance</h3>
-            <div class="flex items-center gap-2">
-              <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-              </button>
-              <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
-              <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </button>
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Venue Usage Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold text-gray-800">Venue Usage</h3>
+                <div class="flex items-center gap-2">
+                  <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
+                  <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="h-48 flex items-center justify-center">
+                <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
+                <div v-else-if="venueUsageData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
+                <StatsChart
+                  v-else
+                  type="doughnut"
+                  :labels="venueUsageData.labels"
+                  :data="venueUsageData.values"
+                  :backgroundColor="chartColors"
+                />
+              </div>
+              <div v-if="!loading && venueUsageData.labels.length > 0" class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div v-for="(label, index) in venueUsageData.labels" :key="label" class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: chartColors[index] }"></div>
+                  <span class="text-gray-600">{{ label }}</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="h-64 flex items-center justify-center">
-            <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
-            <div v-else-if="maintenanceData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
-            <StatsChart
-              v-else
-              type="doughnut"
-              :labels="maintenanceData.labels"
-              :data="maintenanceData.values"
-              :backgroundColor="maintenanceColors"
-            />
-          </div>
-          <div v-if="!loading && maintenanceData.labels.length > 0" class="mt-4 grid grid-cols-2 gap-3 text-xs">
-            <div v-for="(label, index) in maintenanceData.labels" :key="label" class="flex items-center gap-2">
-              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: maintenanceColors[index] }"></div>
-              <span class="text-gray-600">{{ label }}</span>
+
+            <!-- Maintenance Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold text-gray-800">Maintenance</h3>
+                <div class="flex items-center gap-2">
+                  <button @click="previousChartMonth" class="p-1 hover:bg-gray-100 rounded">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  <span class="text-sm text-gray-600 min-w-[120px] text-center">{{ chartMonthYear }}</span>
+                  <button @click="nextChartMonth" :disabled="!canGoNextMonth" :class="canGoNextMonth ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'" class="p-1 rounded">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="h-48 flex items-center justify-center">
+                <div v-if="loading" class="text-gray-500 text-sm">Loading chart...</div>
+                <div v-else-if="maintenanceData.labels.length === 0" class="text-gray-500 text-sm">No data available</div>
+                <StatsChart
+                  v-else
+                  type="doughnut"
+                  :labels="maintenanceData.labels"
+                  :data="maintenanceData.values"
+                  :backgroundColor="maintenanceColors"
+                />
+              </div>
+              <div v-if="!loading && maintenanceData.labels.length > 0" class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div v-for="(label, index) in maintenanceData.labels" :key="label" class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: maintenanceColors[index] }"></div>
+                  <span class="text-gray-600">{{ label }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -178,6 +205,12 @@
 
     <!-- Work Order Modal -->
     <WorkOrderModal v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
+
+    <!-- Facility Request Details Modal -->
+    <FacilityRequestDetailsModal v-model="showDetailsModal" :request="selectedRequest" @statusUpdated="handleStatusUpdated" />
+
+    <!-- Work Order Details Modal -->
+    <WorkOrderDetailsModal v-model="showWorkOrderDetailsModal" :order="selectedWorkOrder" />
   </AppLayout>
 </template>
 
@@ -188,11 +221,19 @@ import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
 import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 import WorkOrderModal from '@/components/WorkOrderModal.vue';
+import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
+import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { useDashboard } from '@/composables/useDashboard';
+import { API_URL } from '@/config/api';
 
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
+const showDetailsModal = ref(false);
+const selectedRequest = ref<any>(null);
+const loadingDetails = ref(false);
+const showWorkOrderDetailsModal = ref(false);
+const selectedWorkOrder = ref<any>(null);
 
 const {
   statistics,
@@ -257,6 +298,11 @@ const handleWorkOrderSuccess = (workOrder: any) => {
   loadAllDashboardData(); // Refresh dashboard data
 };
 
+const handleDateUpdated = () => {
+  console.log('Event date updated');
+  loadAllDashboardData(); // Refresh all dashboard data including calendar
+};
+
 const getStatusColor = (status: string) => {
   const colors: { [key: string]: string } = {
     pending: 'bg-yellow-500',
@@ -271,6 +317,63 @@ const getStatusColor = (status: string) => {
 
 const handleMonthChange = (data: { month: number; year: number }) => {
   fetchCalendarEvents(data.month, data.year);
+};
+
+const viewRequestDetails = async (request: any) => {
+  if (request.type === 'facility') {
+    loadingDetails.value = true;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/facility-requests/${request.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch request details');
+      }
+
+      selectedRequest.value = data.data;
+      showDetailsModal.value = true;
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+    } finally {
+      loadingDetails.value = false;
+    }
+  } else if (request.type === 'work_order') {
+    loadingDetails.value = true;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/work-orders/${request.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch work order details');
+      }
+
+      selectedWorkOrder.value = data.data;
+      showWorkOrderDetailsModal.value = true;
+    } catch (error) {
+      console.error('Error fetching work order details:', error);
+    } finally {
+      loadingDetails.value = false;
+    }
+  }
+};
+
+const handleStatusUpdated = () => {
+  console.log('Facility request status updated');
+  loadAllDashboardData(); // Refresh all dashboard data
 };
 
 onMounted(() => {

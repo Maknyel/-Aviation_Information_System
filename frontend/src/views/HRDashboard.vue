@@ -116,7 +116,7 @@
 
         <!-- Calendar Widget -->
         <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar />
+          <SimpleCalendar @dateUpdated="handleDateUpdated" />
         </div>
       </div>
     </div>
@@ -147,6 +147,12 @@ const filters = [
 const handleRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);
   // You can add logic here to refresh the list or show a notification
+};
+
+const handleDateUpdated = () => {
+  console.log('Event date updated - refreshing dashboard');
+  // Refresh dashboard data when date is updated
+  window.location.reload();
 };
 
 onMounted(() => {
