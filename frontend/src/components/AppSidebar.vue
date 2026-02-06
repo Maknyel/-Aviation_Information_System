@@ -136,7 +136,6 @@ const menuItems = computed(() => {
     return [
       ...baseMenu,
       { path: '/requests', label: 'Request', icon: RequestsIcon },
-      { path: '/notifications', label: 'Notification', icon: NotificationIcon },
     ];
   } else if (role === 'Staff') {
     return [

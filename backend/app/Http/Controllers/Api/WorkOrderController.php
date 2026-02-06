@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\WorkOrder;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -67,6 +69,23 @@ class WorkOrderController extends Controller
         }
 
         $workOrder = WorkOrder::create($validated);
+
+        // Create notification for staff only
+        $staffUsers = User::whereHas('role', function ($query) {
+            $query->where('name', 'Staff');
+        })->get();
+
+        foreach ($staffUsers as $staff) {
+            Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'work_order',
+                'reference_id' => $workOrder->id,
+                'title' => 'New Work Order',
+                'message' => $request->user()->name . ' has submitted a new work order for ' . $validated['location'],
+                'is_read' => false,
+                'is_deleted' => false,
+            ]);
+        }
 
         return response()->json([
             'success' => true,

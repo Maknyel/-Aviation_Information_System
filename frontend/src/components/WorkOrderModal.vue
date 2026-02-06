@@ -10,7 +10,7 @@
             type="text"
             placeholder="Building D"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
 
@@ -20,7 +20,7 @@
             v-model="formData.room_number"
             type="text"
             placeholder="Room 1038"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
       </div>
@@ -33,7 +33,7 @@
             v-model="formData.date"
             type="date"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
 
@@ -43,7 +43,7 @@
             v-model="formData.time"
             type="time"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
       </div>
@@ -59,7 +59,7 @@
             placeholder="Broken Fan"
             rows="4"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           ></textarea>
         </div>
 
@@ -73,7 +73,7 @@
                 @change="handleImageChange"
                 accept="image/*"
                 ref="imageInput"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent text-sm"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black text-sm"
               />
               <p class="text-xs text-gray-500 mt-1">Max size: 2MB (JPEG, JPG, PNG, GIF)</p>
             </div>
@@ -101,7 +101,7 @@
             v-model="formData.requisitioner"
             type="text"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
 
@@ -110,7 +110,7 @@
           <select
             v-model="formData.priority"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           >
             <option value="urgent">Urgent</option>
             <option value="high">High Priority</option>

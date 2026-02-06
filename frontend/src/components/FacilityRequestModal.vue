@@ -8,7 +8,7 @@
           <select
             v-model="formData.venue_requested"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           >
             <option value="">Select Venue</option>
             <option value="Multi Purpose Hall">Multi Purpose Hall</option>
@@ -26,7 +26,7 @@
             v-model="formData.location_room_number"
             type="text"
             placeholder="Please specify the location/ room number for Bldg A, Bldg B, Hangar"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent text-sm"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black text-sm"
           />
         </div>
       </div>
@@ -38,7 +38,7 @@
           v-model="formData.title_of_event"
           type="text"
           required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
         />
       </div>
 
@@ -50,7 +50,7 @@
             v-model="formData.time_of_event"
             type="time"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
 
@@ -60,7 +60,7 @@
             v-model="formData.date_of_event"
             type="date"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
           />
         </div>
       </div>
@@ -132,7 +132,7 @@
             v-model="formData.others_description"
             placeholder="Please specify other requirements..."
             rows="2"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent text-sm"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black text-sm"
           ></textarea>
         </div>
       </div>

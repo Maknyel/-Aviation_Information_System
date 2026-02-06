@@ -37,7 +37,7 @@
     <template #footer>
       <div class="flex justify-end gap-3">
         <button
-          v-if="canApprove"
+          v-if="canApprove && order?.status === 'pending'"
           type="button"
           @click="handleStatusUpdate('approved')"
           :disabled="updating"
@@ -46,7 +46,7 @@
           {{ updating ? 'Updating...' : 'Approved' }}
         </button>
         <button
-          v-if="canApprove"
+          v-if="canApprove && order?.status === 'pending'"
           type="button"
           @click="handleStatusUpdate('rejected')"
           :disabled="updating"
@@ -55,7 +55,7 @@
           {{ updating ? 'Updating...' : 'Disapproved' }}
         </button>
         <button
-          v-if="!canApprove"
+          v-if="!canApprove || order?.status !== 'pending'"
           type="button"
           @click="close"
           class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"

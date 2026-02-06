@@ -9,8 +9,21 @@
 
       <!-- Requests List -->
       <div class="bg-white rounded-xl shadow-lg border border-gray-100">
-        <div class="p-6 border-b border-gray-200">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-800">All Requests</h2>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Sort by User:</label>
+            <select
+              v-model="selectedUserId"
+              @change="handleUserFilter"
+              class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+            >
+              <option value="all">All Users</option>
+              <option v-for="userId in uniqueUserIds" :key="userId" :value="userId">
+                {{ getUserName(userId) }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <div class="p-6 space-y-4">
@@ -101,52 +114,79 @@ const selectedRequest = ref<any>(null);
 const loadingDetails = ref(false);
 const showWorkOrderDetailsModal = ref(false);
 const selectedWorkOrder = ref<any>(null);
-const facilityRequests = ref<any[]>([]);
-const workOrders = ref<any[]>([]);
+const notifications = ref<any[]>([]);
 const loading = ref(false);
+const selectedUserId = ref<string>('all');
 
 const allRequests = computed(() => {
-  const facility = facilityRequests.value.map(req => ({ ...req, type: 'facility' }));
-  const workOrder = workOrders.value.map(req => ({ ...req, type: 'workorder' }));
+  let requests = notifications.value.map(notification => {
+    const refData = notification.reference_data;
+    if (!refData) return null;
 
-  // Combine and sort by date (newest first)
-  return [...facility, ...workOrder].sort((a, b) => {
-    const dateA = new Date(a.type === 'facility' ? a.date_of_event : a.date);
-    const dateB = new Date(b.type === 'facility' ? b.date_of_event : b.date);
-    return dateB.getTime() - dateA.getTime();
-  });
+    if (notification.type === 'facility_request') {
+      return {
+        ...refData,
+        type: 'facility',
+        notification_id: notification.id,
+        is_read: notification.is_read
+      };
+    } else if (notification.type === 'work_order') {
+      return {
+        ...refData,
+        type: 'workorder',
+        notification_id: notification.id,
+        is_read: notification.is_read
+      };
+    }
+    return null;
+  }).filter(Boolean);
+
+  // Filter by selected user if not "all"
+  if (selectedUserId.value !== 'all') {
+    requests = requests.filter(request => request.user_id === parseInt(selectedUserId.value));
+  }
+
+  return requests;
 });
+
+const uniqueUserIds = computed(() => {
+  const userIds = new Set<number>();
+  notifications.value.forEach(notification => {
+    const refData = notification.reference_data;
+    if (refData?.user_id) {
+      userIds.add(refData.user_id);
+    }
+  });
+  return Array.from(userIds).sort((a, b) => a - b);
+});
+
+const getUserName = (userId: number): string => {
+  const request = notifications.value.find(n => n.reference_data?.user_id === userId);
+  return request?.reference_data?.user?.name || `User ${userId}`;
+};
+
+const handleUserFilter = () => {
+  // The computed property will automatically update
+};
 
 const fetchAllRequests = async () => {
   loading.value = true;
   try {
     const token = localStorage.getItem('token');
 
-    // Fetch facility requests
-    const facilityResponse = await fetch(`${API_URL}/facility-requests`, {
+    // Fetch notifications
+    const response = await fetch(`${API_URL}/notifications`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
-    const facilityData = await facilityResponse.json();
-    if (facilityResponse.ok) {
-      facilityRequests.value = facilityData.data || [];
-    }
-
-    // Fetch work orders
-    const workOrderResponse = await fetch(`${API_URL}/work-orders`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-    const workOrderData = await workOrderResponse.json();
-    if (workOrderResponse.ok) {
-      workOrders.value = workOrderData.data || [];
+    const data = await response.json();
+    if (response.ok) {
+      notifications.value = data.data || [];
     }
   } catch (error) {
-    console.error('Error fetching requests:', error);
+    console.error('Error fetching notifications:', error);
   } finally {
     loading.value = false;
   }

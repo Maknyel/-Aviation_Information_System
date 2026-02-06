@@ -41,23 +41,32 @@
 
           <!-- Upcoming Requests Section -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Upcoming Requests</h3>
             <div v-if="loading" class="text-center text-gray-500 text-sm py-4">Loading...</div>
             <div v-else-if="upcomingRequests.length === 0" class="text-center text-gray-500 text-sm py-4">No upcoming requests</div>
             <div v-else class="space-y-3">
-              <div v-for="request in upcomingRequests.slice(0, 3)" :key="`${request.type}-${request.id}`" class="p-3 bg-gray-50 rounded-lg border-l-4 border-aviation-olive">
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="w-2 h-2 rounded-full" :class="getStatusColor(request.status)"></div>
-                  <h4 class="text-sm font-semibold text-gray-800">{{ request.title }}</h4>
+              <div v-for="request in upcomingRequests.slice(0, 3)" :key="`${request.type}-${request.id}`" class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-start gap-2">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
+                    <div>
+                      <h4 class="text-sm font-semibold text-gray-800">{{ request.title }}</h4>
+                      <p class="text-xs text-gray-600 mt-0.5">{{ request.subtitle }}</p>
+                      <p class="text-xs text-gray-500 mt-1">{{ request.time }}, {{ request.date }}</p>
+                    </div>
+                  </div>
+                  <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span class="capitalize font-medium">{{ request.status }}</span></span>
                 </div>
-                <p class="text-xs text-gray-600 mb-1">{{ request.subtitle }}</p>
-                <p class="text-xs text-gray-500 mb-2">{{ request.date }} at {{ request.time }}</p>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded capitalize">{{ request.status }}</span>
+                <div class="flex gap-2">
+                  <button
+                    class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    Send to HR
+                  </button>
                   <button
                     @click="viewRequestDetails(request)"
                     :disabled="loadingDetails"
-                    class="ml-auto px-3 py-1 bg-aviation-olive text-white text-xs rounded hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                    class="flex-1 px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 font-medium"
                   >
                     Details
                   </button>

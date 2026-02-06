@@ -33,7 +33,7 @@
                 <input
                   v-model="formData.name"
                   type="text"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -44,7 +44,7 @@
                 <input
                   v-model="formData.email"
                   type="email"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                   placeholder="Enter your email"
                 />
               </div>
@@ -60,7 +60,7 @@
                     <input
                       v-model="formData.current_password"
                       type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Enter current password"
                     />
                   </div>
@@ -71,7 +71,7 @@
                     <input
                       v-model="formData.password"
                       type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Enter new password (min 6 characters)"
                     />
                   </div>
@@ -82,7 +82,7 @@
                     <input
                       v-model="formData.password_confirmation"
                       type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Confirm new password"
                     />
                   </div>

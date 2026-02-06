@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\FacilityRequest;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FacilityRequestController extends Controller
@@ -62,6 +64,23 @@ class FacilityRequestController extends Controller
         $validated['status'] = 'pending';
 
         $facilityRequest = FacilityRequest::create($validated);
+
+        // Create notification for staff only
+        $staffUsers = User::whereHas('role', function ($query) {
+            $query->where('name', 'Staff');
+        })->get();
+
+        foreach ($staffUsers as $staff) {
+            Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'facility_request',
+                'reference_id' => $facilityRequest->id,
+                'title' => 'New Facility Request',
+                'message' => $request->user()->name . ' has submitted a new facility request for ' . $validated['venue_requested'],
+                'is_read' => false,
+                'is_deleted' => false,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
