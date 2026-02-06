@@ -18,7 +18,7 @@
                 </div>
                 <div>
                   <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*" class="hidden" />
-                  <button @click="$refs.fileInput.click()" class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-all">
+                  <button @click="fileInput?.click()" class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-all">
                     Change Picture
                   </button>
                   <p class="text-sm text-gray-500 mt-2">JPG, PNG or GIF (Max 2MB)</p>
@@ -134,6 +134,7 @@ const successMessage = ref('');
 const errorMessage = ref('');
 const profilePicturePreview = ref('');
 const selectedFile = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const formData = ref({
   name: '',
