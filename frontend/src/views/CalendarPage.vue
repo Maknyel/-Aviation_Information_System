@@ -10,21 +10,64 @@
       <!-- 3 Column Layout -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Column 1: Mini Calendar (2 columns wide) -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-3">
           <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-semibold text-gray-800">{{ miniMonthYear }}</h3>
-              <div class="flex gap-1">
-                <button @click="previousMiniMonth" class="p-1 hover:bg-gray-200 rounded">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            <div class="flex items-center gap-2 mb-4">
+              <!-- Mini Month Dropdown -->
+              <div class="relative flex-1">
+                <button
+                  @click="showMiniMonthDropdown = !showMiniMonthDropdown; showMiniYearDropdown = false"
+                  class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {{ miniMonthName }}
+                  <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                <button @click="nextMiniMonth" class="p-1 hover:bg-gray-200 rounded">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <div
+                  v-if="showMiniMonthDropdown"
+                  class="absolute left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
+                >
+                  <button
+                    v-for="(month, index) in monthNames"
+                    :key="index"
+                    @click="setMiniMonth(index); showMiniMonthDropdown = false"
+                    :class="[
+                      'w-full text-left px-2 py-1.5 text-xs transition-colors',
+                      miniCurrentDate.getMonth() === index ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100'
+                    ]"
+                  >
+                    {{ month }}
+                  </button>
+                </div>
+              </div>
+              <!-- Mini Year Dropdown -->
+              <div class="relative">
+                <button
+                  @click="showMiniYearDropdown = !showMiniYearDropdown; showMiniMonthDropdown = false"
+                  class="flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors gap-1"
+                >
+                  {{ miniCurrentDate.getFullYear() }}
+                  <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
+                <div
+                  v-if="showMiniYearDropdown"
+                  class="absolute right-0 mt-1 w-20 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
+                >
+                  <button
+                    v-for="year in yearOptions"
+                    :key="year"
+                    @click="setMiniYear(year); showMiniYearDropdown = false"
+                    :class="[
+                      'w-full text-left px-2 py-1.5 text-xs transition-colors',
+                      miniCurrentDate.getFullYear() === year ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100'
+                    ]"
+                  >
+                    {{ year }}
+                  </button>
+                </div>
               </div>
             </div>
             <div class="grid grid-cols-7 gap-1 text-center text-xs">
@@ -68,28 +111,65 @@
         </div>
 
         <!-- Column 2 & 3: Main Calendar (10 columns wide) -->
-        <div class="lg:col-span-10">
+        <div class="lg:col-span-9">
           <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
             <!-- Calendar Header -->
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-bold text-gray-800">{{ mainMonthYear }}</h2>
-              <div class="flex gap-2">
+            <div class="flex items-center gap-3 mb-6">
+              <!-- Main Month Dropdown -->
+              <div class="relative">
                 <button
-                  @click="previousMainMonth"
-                  class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  @click="showMainMonthDropdown = !showMainMonthDropdown; showMainYearDropdown = false"
+                  class="flex items-center gap-2 px-4 py-2 text-2xl font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                  {{ mainMonthName }}
+                  <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                <button
-                  @click="nextMainMonth"
-                  class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                <div
+                  v-if="showMainMonthDropdown"
+                  class="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  <button
+                    v-for="(month, index) in monthNames"
+                    :key="index"
+                    @click="setMainMonth(index); showMainMonthDropdown = false"
+                    :class="[
+                      'w-full text-left px-3 py-1.5 text-sm transition-colors',
+                      mainCurrentDate.getMonth() === index ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100'
+                    ]"
+                  >
+                    {{ month }}
+                  </button>
+                </div>
+              </div>
+              <!-- Main Year Dropdown -->
+              <div class="relative">
+                <button
+                  @click="showMainYearDropdown = !showMainYearDropdown; showMainMonthDropdown = false"
+                  class="flex items-center gap-2 px-4 py-2 text-2xl font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {{ mainCurrentDate.getFullYear() }}
+                  <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
+                <div
+                  v-if="showMainYearDropdown"
+                  class="absolute left-0 mt-1 w-28 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
+                >
+                  <button
+                    v-for="year in yearOptions"
+                    :key="year"
+                    @click="setMainYear(year); showMainYearDropdown = false"
+                    :class="[
+                      'w-full text-left px-3 py-1.5 text-sm transition-colors',
+                      mainCurrentDate.getFullYear() === year ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100'
+                    ]"
+                  >
+                    {{ year }}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -176,14 +256,41 @@ const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
 const selectedFacilityRequest = ref<any>(null);
 const selectedWorkOrder = ref<any>(null);
+const showMiniMonthDropdown = ref(false);
+const showMiniYearDropdown = ref(false);
+const showMainMonthDropdown = ref(false);
+const showMainYearDropdown = ref(false);
 
-const miniMonthYear = computed(() => {
-  return miniCurrentDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const miniMonthName = computed(() => monthNames[miniCurrentDate.value.getMonth()]);
+const mainMonthName = computed(() => monthNames[mainCurrentDate.value.getMonth()]);
+
+const yearOptions = computed(() => {
+  const thisYear = new Date().getFullYear();
+  const years = [];
+  for (let y = thisYear - 5; y <= thisYear + 1; y++) {
+    years.push(y);
+  }
+  return years;
 });
 
-const mainMonthYear = computed(() => {
-  return mainCurrentDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-});
+function setMiniMonth(index: number) {
+  miniCurrentDate.value = new Date(miniCurrentDate.value.getFullYear(), index, 1);
+}
+
+function setMiniYear(year: number) {
+  miniCurrentDate.value = new Date(year, miniCurrentDate.value.getMonth(), 1);
+}
+
+function setMainMonth(index: number) {
+  mainCurrentDate.value = new Date(mainCurrentDate.value.getFullYear(), index, 1);
+}
+
+function setMainYear(year: number) {
+  mainCurrentDate.value = new Date(year, mainCurrentDate.value.getMonth(), 1);
+}
+
 
 const miniCalendarDates = computed(() => {
   return generateCalendarDates(miniCurrentDate.value, false);
@@ -269,21 +376,6 @@ function getEventsForDate(date: Date) {
   });
 }
 
-function previousMiniMonth() {
-  miniCurrentDate.value = new Date(miniCurrentDate.value.getFullYear(), miniCurrentDate.value.getMonth() - 1, 1);
-}
-
-function nextMiniMonth() {
-  miniCurrentDate.value = new Date(miniCurrentDate.value.getFullYear(), miniCurrentDate.value.getMonth() + 1, 1);
-}
-
-function previousMainMonth() {
-  mainCurrentDate.value = new Date(mainCurrentDate.value.getFullYear(), mainCurrentDate.value.getMonth() - 1, 1);
-}
-
-function nextMainMonth() {
-  mainCurrentDate.value = new Date(mainCurrentDate.value.getFullYear(), mainCurrentDate.value.getMonth() + 1, 1);
-}
 
 function selectDate(dateInfo: any) {
   selectedDate.value = dateInfo.dateObj;

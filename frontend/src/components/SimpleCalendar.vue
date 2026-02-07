@@ -1,33 +1,66 @@
 <template>
   <div class="calendar-widget">
-    <!-- Year Navigation -->
-    <div class="flex items-center justify-between mb-2">
-      <button @click="previousYear" class="p-2 hover:bg-gray-100 rounded text-sm" title="Previous Year">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-        </svg>
-      </button>
-      <span class="text-sm font-semibold text-gray-600">{{ currentYear }}</span>
-      <button @click="nextYear" :disabled="!canGoNextYear" class="p-2 hover:bg-gray-100 rounded text-sm disabled:opacity-30 disabled:cursor-not-allowed" title="Next Year">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
-        </svg>
-      </button>
-    </div>
+    <!-- Year & Month Dropdowns -->
+    <div class="flex items-center gap-2 mb-4">
+      <!-- Month Dropdown -->
+      <div class="relative flex-1">
+        <button
+          @click="showMonthDropdown = !showMonthDropdown; showYearDropdown = false"
+          class="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          {{ monthName }}
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div
+          v-if="showMonthDropdown"
+          class="absolute left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
+        >
+          <button
+            v-for="(month, index) in monthNames"
+            :key="index"
+            @click="setMonth(index); showMonthDropdown = false"
+            :disabled="!isMonthSelectable(index)"
+            :class="[
+              'w-full text-left px-3 py-1.5 text-sm transition-colors',
+              currentDate.getMonth() === index ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100',
+              !isMonthSelectable(index) ? 'opacity-30 cursor-not-allowed' : ''
+            ]"
+          >
+            {{ month }}
+          </button>
+        </div>
+      </div>
 
-    <!-- Month Navigation -->
-    <div class="flex items-center justify-between mb-4">
-      <button @click="previousMonth" class="p-2 hover:bg-gray-100 rounded">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-      </button>
-      <h3 class="text-lg font-semibold text-gray-800">{{ monthYear }}</h3>
-      <button @click="nextMonth" :disabled="!canGoNextMonth" class="p-2 hover:bg-gray-100 rounded disabled:opacity-30 disabled:cursor-not-allowed">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
-      </button>
+      <!-- Year Dropdown -->
+      <div class="relative">
+        <button
+          @click="showYearDropdown = !showYearDropdown; showMonthDropdown = false"
+          class="flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors gap-2"
+        >
+          {{ currentYear }}
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div
+          v-if="showYearDropdown"
+          class="absolute right-0 mt-1 w-24 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-48 overflow-y-auto"
+        >
+          <button
+            v-for="year in yearOptions"
+            :key="year"
+            @click="setYear(year); showYearDropdown = false"
+            :class="[
+              'w-full text-left px-3 py-1.5 text-sm transition-colors',
+              currentYear === year ? 'bg-aviation-olive/10 text-aviation-olive font-medium' : 'text-gray-700 hover:bg-gray-100'
+            ]"
+          >
+            {{ year }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="grid grid-cols-7 gap-1 text-center text-sm">
@@ -200,6 +233,8 @@ const props = defineProps<Props>();
 const emit = defineEmits(['monthChange', 'dateUpdated']);
 
 const currentDate = ref(new Date());
+const showMonthDropdown = ref(false);
+const showYearDropdown = ref(false);
 const selectedDay = ref<any>(null);
 const editingEvent = ref<CalendarEvent | null>(null);
 const newDate = ref('');
@@ -209,10 +244,6 @@ const updateSuccess = ref('');
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const monthYear = computed(() => {
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
-  return currentDate.value.toLocaleDateString('en-US', options);
-});
 
 const getEventsForDate = (year: number, month: number, day: number) => {
   if (!props.events) return [];
@@ -288,36 +319,43 @@ const currentYear = computed(() => {
   return currentDate.value.getFullYear();
 });
 
-const canGoNextMonth = computed(() => {
-  const now = new Date();
-  const nextMonthDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
-  return nextMonthDate <= new Date(now.getFullYear(), now.getMonth(), 1);
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const monthName = computed(() => {
+  return monthNames[currentDate.value.getMonth()];
 });
 
-const canGoNextYear = computed(() => {
+const yearOptions = computed(() => {
   const now = new Date();
-  return currentDate.value.getFullYear() < now.getFullYear();
+  const thisYear = now.getFullYear();
+  const years = [];
+  for (let y = thisYear - 5; y <= thisYear; y++) {
+    years.push(y);
+  }
+  return years;
 });
 
-const previousMonth = () => {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1);
+const isMonthSelectable = (monthIndex: number) => {
+  const now = new Date();
+  if (currentDate.value.getFullYear() < now.getFullYear()) return true;
+  return monthIndex <= now.getMonth();
 };
 
-const nextMonth = () => {
-  if (canGoNextMonth.value) {
-    currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+const setMonth = (monthIndex: number) => {
+  currentDate.value = new Date(currentDate.value.getFullYear(), monthIndex, 1);
+};
+
+const setYear = (year: number) => {
+  const now = new Date();
+  let month = currentDate.value.getMonth();
+  // If selecting current year and current month is beyond now, clamp to current month
+  if (year === now.getFullYear() && month > now.getMonth()) {
+    month = now.getMonth();
   }
+  currentDate.value = new Date(year, month, 1);
 };
 
-const previousYear = () => {
-  currentDate.value = new Date(currentDate.value.getFullYear() - 1, currentDate.value.getMonth(), 1);
-};
 
-const nextYear = () => {
-  if (canGoNextYear.value) {
-    currentDate.value = new Date(currentDate.value.getFullYear() + 1, currentDate.value.getMonth(), 1);
-  }
-};
 
 const selectDay = (day: any) => {
   if (day.isCurrentMonth) {

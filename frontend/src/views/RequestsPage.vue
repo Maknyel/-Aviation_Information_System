@@ -14,7 +14,19 @@
           <!-- Header with Dropdown -->
           <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-gray-800">{{ requestType === 'facility' ? 'Facility Requests' : 'Work Order Requests' }}</h2>
+              <div class="relative">
+                <select
+                  v-model="requestType"
+                  @change="fetchRequests()"
+                  class="text-xl font-semibold text-gray-800 bg-transparent border-none outline-none cursor-pointer appearance-none pr-8"
+                >
+                  <option value="facility">Facility Requests</option>
+                  <option value="workorder">Work Order Requests</option>
+                </select>
+                <svg class="w-4 h-4 text-gray-500 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
               <button
                 @click="requestType === 'facility' ? showFacilityModal = true : showWorkOrderModal = true"
                 class="px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2"
@@ -23,32 +35,6 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
                 New Request
-              </button>
-            </div>
-
-            <!-- Request Type Toggle -->
-            <div class="flex gap-2 mb-4">
-              <button
-                @click="changeRequestType('facility')"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  requestType === 'facility'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                ]"
-              >
-                Facility Requests
-              </button>
-              <button
-                @click="changeRequestType('workorder')"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  requestType === 'workorder'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                ]"
-              >
-                Work Order Requests
               </button>
             </div>
 
@@ -99,7 +85,7 @@
                       {{ requestType === 'facility' ? (request.user?.name || request.title_of_event) : request.requisitioner }}
                     </p>
                     <p class="text-xs text-gray-500 mt-1">
-                      {{ requestType === 'facility' ? `${request.time_of_event}, ${request.date_of_event}` : `${request.time}, ${request.date}` }}
+                      {{ requestType === 'facility' ? `${formatTime(request.time_of_event)}, ${formatDate(request.date_of_event)}` : `${formatTime(request.time)}, ${formatDate(request.date)}` }}
                     </p>
                   </div>
                 </div>
@@ -181,6 +167,23 @@ const filters = [
   { label: 'Canceled', value: 'canceled' },
 ];
 
+const formatTime = (time: string) => {
+  if (!time) return '';
+  // Handle HH:mm or HH:mm:ss format
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours)) return time;
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const h = hours % 12 || 12;
+  return `${h}:${String(minutes).padStart(2, '0')} ${period}`;
+};
+
+const formatDate = (date: string) => {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
 const filteredRequests = computed(() => {
   if (activeFilter.value === 'all') {
     return requests.value;
@@ -220,11 +223,6 @@ const fetchRequests = async () => {
 const handleRequestSuccess = (request: any) => {
   console.log('Request submitted:', request);
   fetchRequests(); // Refresh the list
-};
-
-const changeRequestType = (type: 'facility' | 'workorder') => {
-  requestType.value = type;
-  fetchRequests();
 };
 
 const handleDateUpdated = () => {

@@ -129,23 +129,25 @@ const menuItems = computed(() => {
 
   const baseMenu = [
     { path: '/home', label: 'Dashboard', icon: DashboardIcon },
-    { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
   ];
 
   if (role === 'Admin') {
     return [
       ...baseMenu,
+      { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   } else if (role === 'Staff') {
     return [
       ...baseMenu,
-      { path: '/requests', label: 'Request', icon: RequestsIcon },
-      { path: '/notifications', label: 'Notification', icon: NotificationIcon },
+      // { path: '/calendar', label: 'Calendar', icon: CalendarIcon }
+      // { path: '/requests', label: 'Request', icon: RequestsIcon },
+      // { path: '/notifications', label: 'Notification', icon: NotificationIcon },
     ];
   } else if (role === 'Student') {
     return [
       ...baseMenu,
+      { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   }

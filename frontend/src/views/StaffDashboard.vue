@@ -14,7 +14,16 @@
           <!-- Header with Dropdown -->
           <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-gray-800">{{ requestType === 'facility' ? 'Facility Requests' : 'Work Order Requests' }}</h2>
+              <!-- <h2 class="text-xl font-semibold text-gray-800">{{ requestType === 'facility' ? 'Facility Requests' : 'Work Order Requests' }}</h2> -->
+               <button
+                @click="showTypeDropdown = !showTypeDropdown"
+                class="text-xl font-semibold text-gray-800 flex items-center gap-2"
+              >
+                {{ requestType === 'facility' ? 'Facility Requests' : 'Work Order Requests' }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
               <button
                 @click="requestType === 'facility' ? showFacilityModal = true : showWorkOrderModal = true"
                 class="px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2"
@@ -26,30 +35,32 @@
               </button>
             </div>
 
-            <!-- Request Type Toggle -->
-            <div class="flex gap-2 mb-4">
-              <button
-                @click="changeRequestType('facility')"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  requestType === 'facility'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                ]"
+            <!-- Request Type Dropdown -->
+            <div class="relative inline-block mb-4">
+              
+              <div
+                v-if="showTypeDropdown"
+                class="absolute left-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
               >
-                Facility Requests
-              </button>
-              <button
-                @click="changeRequestType('workorder')"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  requestType === 'workorder'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                ]"
-              >
-                Work Order Requests
-              </button>
+                <button
+                  @click="changeRequestType('facility'); showTypeDropdown = false"
+                  :class="[
+                    'w-full text-left px-4 py-2 text-sm transition-colors',
+                    requestType === 'facility' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-100'
+                  ]"
+                >
+                  Facility Requests
+                </button>
+                <button
+                  @click="changeRequestType('workorder'); showTypeDropdown = false"
+                  :class="[
+                    'w-full text-left px-4 py-2 text-sm transition-colors',
+                    requestType === 'workorder' ? 'bg-orange-50 text-orange-700 font-medium' : 'text-gray-700 hover:bg-gray-100'
+                  ]"
+                >
+                  Work Order Requests
+                </button>
+              </div>
             </div>
 
             <!-- Filter Tabs -->
@@ -165,6 +176,7 @@ const activeFilter = ref('all');
 const requestType = ref<'facility' | 'workorder'>('facility');
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
+const showTypeDropdown = ref(false);
 const showDetailsModal = ref(false);
 const selectedRequest = ref<any>(null);
 const loadingDetails = ref(false);

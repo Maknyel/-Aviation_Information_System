@@ -14,7 +14,19 @@
           <!-- Header with Dropdown -->
           <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
-              <h2 class="text-xl font-semibold text-gray-800">Facility Request</h2>
+              <div class="relative">
+                <select
+                  v-model="activeSection"
+                  class="text-xl font-semibold text-gray-800 bg-transparent border-none outline-none cursor-pointer appearance-none pr-8"
+                >
+                  <option value="facility">Facility Request</option>
+                  <option value="family">Family</option>
+                  <option value="word">Word</option>
+                </select>
+                <svg class="w-4 h-4 text-gray-500 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
               <button
                 @click="showFacilityModal = true"
                 class="px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2"
@@ -134,6 +146,7 @@ import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 
 const user = ref<any>(null);
 const activeFilter = ref('all');
+const activeSection = ref('facility');
 const showFacilityModal = ref(false);
 
 const filters = [
