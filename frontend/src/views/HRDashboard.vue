@@ -126,9 +126,15 @@
           </div>
         </div>
 
-        <!-- Calendar Widget -->
-        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar @dateUpdated="handleDateUpdated" />
+        <!-- Right Column: Calendar and Upcoming Requests -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Calendar Widget -->
+          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <SimpleCalendar @dateUpdated="handleDateUpdated" />
+          </div>
+
+          <!-- Upcoming Requests Section -->
+          <UpcomingRequests />
         </div>
       </div>
     </div>
@@ -143,6 +149,7 @@ import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
+import UpcomingRequests from '@/components/UpcomingRequests.vue';
 
 const user = ref<any>(null);
 const activeFilter = ref('all');

@@ -40,38 +40,7 @@
           </div>
 
           <!-- Upcoming Requests Section -->
-          <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-700 mb-4">Upcoming Requests</h3>
-            <div class="space-y-3">
-              <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex items-start gap-2">
-                    <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
-                    <div>
-                      <h4 class="text-sm font-semibold text-gray-800">Multi Purpose Hall</h4>
-                      <p class="text-xs text-gray-600 mt-0.5">Supreme Student Council</p>
-                      <p class="text-xs text-gray-500 mt-1">9:00am - 5:00pm January 09 2026</p>
-                    </div>
-                  </div>
-                  <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span class="capitalize font-medium">Pending</span></span>
-                </div>
-                <div class="flex gap-2">
-                  <button
-                    class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                  >
-                    Send to HR
-                  </button>
-                  <button
-                    @click="viewRequestDetails('facility', 1)"
-                    :disabled="loadingDetails"
-                    class="flex-1 px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 font-medium"
-                  >
-                    Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <UpcomingRequests />
         </div>
 
         <!-- Right Columns: Stats Cards and Charts -->
@@ -248,6 +217,7 @@ import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 import WorkOrderModal from '@/components/WorkOrderModal.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
+import UpcomingRequests from '@/components/UpcomingRequests.vue';
 import { API_URL } from '@/config/api';
 
 const user = ref<any>(null);

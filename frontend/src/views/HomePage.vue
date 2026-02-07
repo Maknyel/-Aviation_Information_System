@@ -16,24 +16,8 @@
               </div>
 
               <!-- Upcoming Requests -->
-              <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
-                <div class="space-y-4">
-                  <div class="p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <h4 class="font-semibold text-gray-800">Multi Purpose Hall</h4>
-                        <p class="text-sm text-gray-600">Leadership Seminar - January 15-16, 2026</p>
-                      </div>
-                      <span class="px-3 py-1 bg-aviation-olive text-white text-sm rounded-full">Pending</span>
-                    </div>
-                  </div>
-                  <div class="p-4 bg-gray-50 rounded-lg">
-                    <div class="text-center text-gray-500 text-sm py-8">
-                      No more upcoming requests
-                    </div>
-                  </div>
-                </div>
+              <div class="lg:col-span-2">
+                <UpcomingRequests />
               </div>
             </div>
           </div>
@@ -127,19 +111,8 @@
               </div>
 
               <!-- Upcoming Requests -->
-              <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Requests</h3>
-                <div class="space-y-4">
-                  <div class="p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <h4 class="font-semibold text-gray-800">Multi Purpose Hall</h4>
-                        <p class="text-sm text-gray-600">Leadership Seminar - January 15-16, 2026</p>
-                      </div>
-                      <span class="px-3 py-1 bg-aviation-olive text-white text-sm rounded-full">Pending</span>
-                    </div>
-                  </div>
-                </div>
+              <div class="lg:col-span-2">
+                <UpcomingRequests />
               </div>
             </div>
           </div>
@@ -152,6 +125,7 @@ import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
+import UpcomingRequests from '@/components/UpcomingRequests.vue';
 
 const user = ref<any>(null);
 
