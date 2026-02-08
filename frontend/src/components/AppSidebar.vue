@@ -185,14 +185,14 @@ const menuItems = computed(() => {
   } else if (role === 'Staff') {
     return [
       ...baseMenu,
-      { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
+      // { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
-      { path: '/reports', label: 'Reports', icon: ReportsIcon },
+      // { path: '/reports', label: 'Reports', icon: ReportsIcon },
     ];
   } else if (role === 'Student') {
     return [
       ...baseMenu,
-      { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
+      // { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   }

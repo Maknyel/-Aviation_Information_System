@@ -10,7 +10,7 @@
       <!-- Action Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Facility Request Card -->
-        <div @click="showFacilityModal = true" class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Facility<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Work Order Request Card -->
-        <div @click="showWorkOrderModal = true" class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Work<br/>Order<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -107,7 +107,7 @@
           </div>
           <div v-if="formError" class="text-red-600 text-sm">{{ formError }}</div>
           <div class="flex gap-3 justify-end pt-2">
-            <button type="button" @click="showUserModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+            <button type="button" @click="showUserModal = false" class="px-4 py-2 border border-gray-300 white rounded-lg hover:bg-gray-500 transition-colors bg-gray-400">Cancel</button>
             <button type="submit" :disabled="saving" class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
               {{ saving ? 'Saving...' : 'Save' }}
             </button>
@@ -141,7 +141,7 @@
         </div>
         <button @click="skillsForm.push({ skill: 'general', proficiency: 'intermediate' })" class="text-sm text-aviation-olive hover:underline mb-4">+ Add Skill</button>
         <div class="flex gap-3 justify-end pt-2">
-          <button @click="showSkillsModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          <button @click="showSkillsModal = false" class="px-4 py-2 border border-gray-300 white rounded-lg hover:bg-gray-500 transition-colors bg-gray-400">Cancel</button>
           <button @click="saveSkills" :disabled="saving" class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Save Skills' }}
           </button>
@@ -155,7 +155,7 @@
         <h2 class="text-xl font-bold text-gray-800 mb-2">Delete User</h2>
         <p class="text-gray-600 mb-4">Are you sure you want to delete <strong>{{ deletingUser?.name }}</strong>? This action cannot be undone.</p>
         <div class="flex gap-3 justify-end">
-          <button @click="showDeleteModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          <button @click="showDeleteModal = false" class="px-4 py-2 border border-gray-300 white rounded-lg hover:bg-gray-500 transition-colors bg-gray-400">Cancel</button>
           <button @click="deleteUser" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
             {{ saving ? 'Deleting...' : 'Delete' }}
           </button>

@@ -153,7 +153,7 @@
         <button
           type="button"
           @click="closeModal"
-          class="px-6 py-2 border border-gray-300 text-aviation-olive rounded-lg hover:bg-gray-50 transition-colors"
+          class="px-6 py-2 border border-gray-300 white rounded-lg hover:bg-gray-500 transition-colors bg-gray-400"
         >
           Cancel
         </button>
