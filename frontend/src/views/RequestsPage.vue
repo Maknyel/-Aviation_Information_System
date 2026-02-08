@@ -117,7 +117,7 @@
 
         <!-- Calendar Widget -->
         <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar @dateUpdated="handleDateUpdated" />
+          <SimpleCalendar :events="calendarEvents" @monthChange="handleMonthChange" @dateUpdated="handleDateUpdated" />
         </div>
       </div>
     </div>
@@ -158,6 +158,7 @@ const showWorkOrderDetailsModal = ref(false);
 const selectedWorkOrder = ref<any>(null);
 const requests = ref<any[]>([]);
 const loading = ref(false);
+const calendarEvents = ref<any[]>([]);
 
 const filters = [
   { label: 'All', value: 'all' },
@@ -220,15 +221,40 @@ const fetchRequests = async () => {
   }
 };
 
-const handleRequestSuccess = (request: any) => {
-  console.log('Request submitted:', request);
-  fetchRequests(); // Refresh the list
+const handleRequestSuccess = (_request: any) => {
+  fetchRequests();
+  fetchCalendarEvents();
+};
+
+const fetchCalendarEvents = async (month?: number, year?: number) => {
+  try {
+    const token = localStorage.getItem('token');
+    const now = new Date();
+    const m = month || now.getMonth() + 1;
+    const y = year || now.getFullYear();
+
+    const res = await fetch(`${API_URL}/dashboard/calendar-events?month=${m}&year=${y}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+    const data = await res.json();
+    if (data.success) {
+      calendarEvents.value = data.data;
+    }
+  } catch (e) {
+    console.error('Error fetching calendar events:', e);
+  }
+};
+
+const handleMonthChange = (payload: { month: number; year: number }) => {
+  fetchCalendarEvents(payload.month, payload.year);
 };
 
 const handleDateUpdated = () => {
-  console.log('Event date updated - refreshing dashboard');
-  // Refresh dashboard data when date is updated
-  window.location.reload();
+  fetchCalendarEvents();
+  fetchRequests();
 };
 
 const viewRequestDetails = async (type: string, id: number) => {
@@ -284,8 +310,8 @@ const viewRequestDetails = async (type: string, id: number) => {
 };
 
 const handleStatusUpdated = () => {
-  console.log('Status updated - refreshing requests');
   fetchRequests();
+  fetchCalendarEvents();
 };
 
 watch(activeFilter, () => {
@@ -298,5 +324,6 @@ onMounted(() => {
     user.value = JSON.parse(userStr);
   }
   fetchRequests();
+  fetchCalendarEvents();
 });
 </script>

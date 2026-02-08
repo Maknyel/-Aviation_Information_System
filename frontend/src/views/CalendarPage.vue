@@ -112,7 +112,7 @@
 
         <!-- Column 2 & 3: Main Calendar (10 columns wide) -->
         <div class="lg:col-span-9">
-          <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 relative">
             <!-- Calendar Header -->
             <div class="flex items-center gap-3 mb-6">
               <!-- Main Month Dropdown -->
@@ -171,6 +171,11 @@
                   </button>
                 </div>
               </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div v-if="loading" class="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10 rounded-xl">
+              <div class="text-gray-500 font-medium">Loading events...</div>
             </div>
 
             <!-- Calendar Grid -->
@@ -242,7 +247,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
@@ -252,6 +257,7 @@ const miniCurrentDate = ref(new Date());
 const mainCurrentDate = ref(new Date());
 const selectedDate = ref<Date | null>(null);
 const events = ref<any[]>([]);
+const loading = ref(false);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
 const selectedFacilityRequest = ref<any>(null);
@@ -277,18 +283,22 @@ const yearOptions = computed(() => {
 
 function setMiniMonth(index: number) {
   miniCurrentDate.value = new Date(miniCurrentDate.value.getFullYear(), index, 1);
+  mainCurrentDate.value = new Date(miniCurrentDate.value);
 }
 
 function setMiniYear(year: number) {
   miniCurrentDate.value = new Date(year, miniCurrentDate.value.getMonth(), 1);
+  mainCurrentDate.value = new Date(miniCurrentDate.value);
 }
 
 function setMainMonth(index: number) {
   mainCurrentDate.value = new Date(mainCurrentDate.value.getFullYear(), index, 1);
+  miniCurrentDate.value = new Date(mainCurrentDate.value);
 }
 
 function setMainYear(year: number) {
   mainCurrentDate.value = new Date(year, mainCurrentDate.value.getMonth(), 1);
+  miniCurrentDate.value = new Date(mainCurrentDate.value);
 }
 
 
@@ -383,56 +393,71 @@ function selectDate(dateInfo: any) {
 }
 
 async function fetchEvents() {
+  loading.value = true;
   try {
     const token = localStorage.getItem('token');
+    const month = mainCurrentDate.value.getMonth() + 1;
+    const year = mainCurrentDate.value.getFullYear();
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    };
 
-    // Fetch facility requests
-    const facilityResponse = await fetch(`${API_URL}/facility-requests`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
+    // Fetch calendar events and full request details in parallel
+    const [calendarRes, facilityRes, workOrderRes] = await Promise.all([
+      fetch(`${API_URL}/dashboard/calendar-events?month=${month}&year=${year}`, { headers }),
+      fetch(`${API_URL}/facility-requests`, { headers }),
+      fetch(`${API_URL}/work-orders`, { headers }),
+    ]);
+
+    const [calendarData, facilityData, workOrderData] = await Promise.all([
+      calendarRes.json(),
+      facilityRes.json(),
+      workOrderRes.json(),
+    ]);
+
+    // Build lookup maps for full request data (needed for detail modals)
+    const facilityMap = new Map<number, any>();
+    (facilityData.data || []).forEach((r: any) => facilityMap.set(r.id, r));
+
+    const workOrderMap = new Map<number, any>();
+    (workOrderData.data || []).forEach((o: any) => workOrderMap.set(o.id, o));
+
+    // Transform calendar events with full data attached
+    events.value = (calendarData.data || []).map((event: any) => {
+      if (event.type === 'facility') {
+        const request = facilityMap.get(event.id);
+        return {
+          id: `facility-${event.id}`,
+          type: 'facility',
+          organization: request?.user?.name || 'Organization',
+          title: event.title || 'Facility Request',
+          subtitle: request?.title_of_event || '',
+          date: event.date,
+          time: request?.time_of_event || '',
+          status: event.status,
+          data: request || event
+        };
+      } else {
+        const order = workOrderMap.get(event.id);
+        return {
+          id: `workorder-${event.id}`,
+          type: 'workorder',
+          organization: order?.user?.name || order?.requisitioner || 'Organization',
+          title: event.title || 'Work Order',
+          subtitle: order?.description_of_problem?.substring(0, 30) || '',
+          date: event.date,
+          time: order?.time || '',
+          status: event.status,
+          priority: event.priority,
+          data: order || event
+        };
       }
     });
-    const facilityData = await facilityResponse.json();
-
-    // Fetch work orders
-    const workOrderResponse = await fetch(`${API_URL}/work-orders`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-    const workOrderData = await workOrderResponse.json();
-
-    // Transform facility requests to events
-    const facilityEvents = (facilityData.data || []).map((request: any) => ({
-      id: `facility-${request.id}`,
-      type: 'facility',
-      organization: request.user?.name || 'Organization',
-      title: request.venue_requested || 'Facility Request',
-      subtitle: request.title_of_event || '',
-      date: request.date_of_event,
-      time: request.time_of_event || '',
-      status: request.status,
-      data: request
-    }));
-
-    // Transform work orders to events
-    const workOrderEvents = (workOrderData.data || []).map((order: any) => ({
-      id: `workorder-${order.id}`,
-      type: 'workorder',
-      organization: order.user?.name || order.requisitioner || 'Organization',
-      title: order.location || 'Work Order',
-      subtitle: order.description_of_problem?.substring(0, 30) || '',
-      date: order.date,
-      time: order.time || '',
-      status: order.status,
-      data: order
-    }));
-
-    events.value = [...facilityEvents, ...workOrderEvents];
   } catch (error) {
     console.error('Error fetching events:', error);
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -449,6 +474,11 @@ function viewEventDetails(event: any) {
 function handleStatusUpdated() {
   fetchEvents();
 }
+
+// Re-fetch events when main calendar month/year changes
+watch(mainCurrentDate, () => {
+  fetchEvents();
+});
 
 onMounted(() => {
   fetchEvents();
