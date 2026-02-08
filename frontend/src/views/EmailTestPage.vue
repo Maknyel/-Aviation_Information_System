@@ -180,7 +180,7 @@ const sendTestEmail = async () => {
   } finally { sending.value = false; }
 };
 
-const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1');
+const formatKey = (key: string | number) => String(key).replace(/_/g, ' ').replace(/([A-Z])/g, ' $1');
 
 onMounted(() => {
   fetchTemplates();
