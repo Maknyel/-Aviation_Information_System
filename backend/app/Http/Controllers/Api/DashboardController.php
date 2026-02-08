@@ -204,6 +204,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $isAdmin = $user->role->name === 'Admin';
+        $isStaff = $user->role->name === 'Staff';
         $month = $request->input('month', Carbon::now()->month);
         $year = $request->input('year', Carbon::now()->year);
 
@@ -213,7 +214,7 @@ class DashboardController extends Controller
             ->whereMonth('date_of_event', $month)
             ->where('status', '!=', 'canceled');
 
-        if (!$isAdmin) {
+        if (!$isAdmin && !$isStaff) {
             $facilityQuery->where('user_id', $user->id);
         }
 
@@ -233,7 +234,7 @@ class DashboardController extends Controller
             ->whereMonth('date', $month)
             ->where('status', '!=', 'canceled');
 
-        if (!$isAdmin) {
+        if (!$isAdmin && !$isStaff) {
             $workOrderQuery->where('user_id', $user->id);
         }
 

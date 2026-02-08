@@ -36,7 +36,7 @@
         <div class="lg:col-span-1 space-y-6">
           <!-- Calendar Widget -->
           <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <SimpleCalendar @dateUpdated="handleDateUpdated" />
+            <SimpleCalendar :events="calendarEvents" @dateUpdated="handleDateUpdated" @monthChange="handleMonthChange" />
           </div>
 
           <!-- Upcoming Requests Section -->
@@ -50,8 +50,7 @@
             <!-- Facility Requests Today -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.facility_requests_today }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Facility Requests Today</p>
             </div>
@@ -59,8 +58,7 @@
             <!-- Facility Pending Requests -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.facility_pending_requests }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Facility Pending Requests</p>
             </div>
@@ -68,8 +66,7 @@
             <!-- Pending Maintenance -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.pending_maintenance }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Pending Maintenance</p>
             </div>
@@ -77,8 +74,7 @@
             <!-- Work Orders Today -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.work_orders_today }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Work Orders Today</p>
             </div>
@@ -86,8 +82,7 @@
             <!-- Facility Approved Requests -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.facility_approved_requests }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Facility Approved Requests</p>
             </div>
@@ -95,8 +90,7 @@
             <!-- Urgent Repairs -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow flex items-center justify-center gap-2 flex-col">
               <div class="w-24 h-24 rounded-full border-4 border-gray-300 flex items-center justify-center bg-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="text-4xl font-bold text-aviation-olive mb-2">0</div>
-                
+                <div class="text-4xl font-bold text-aviation-olive mb-2">{{ statistics.urgent_repairs }}</div>
               </div>
               <p class="text-xs text-gray-600 font-medium">Urgent Repairs</p>
             </div>
@@ -109,40 +103,24 @@
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-semibold text-gray-800">Venue Usage</h3>
                 <div class="flex items-center gap-1 text-xs text-gray-600">
-                  <span>December 2025</span>
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
+                  <span>{{ currentMonthLabel }}</span>
                 </div>
               </div>
               <div class="h-48 flex items-center justify-center">
-                <StatsChart
-                  type="doughnut"
-                  :labels="['Building A', 'Covered Court', 'Building B', 'Hangar', 'Others']"
-                  :data="[15, 15, 20, 10, 20]"
-                  :backgroundColor="['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E']"
-                />
+                <template v-if="venueUsageData.labels.length > 0">
+                  <StatsChart
+                    type="doughnut"
+                    :labels="venueUsageData.labels"
+                    :data="venueUsageData.values"
+                    :backgroundColor="chartColors.slice(0, venueUsageData.labels.length)"
+                  />
+                </template>
+                <p v-else class="text-sm text-gray-400">No venue usage data</p>
               </div>
               <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#4A7C59] rounded-full"></div>
-                  <span class="text-gray-600">Building A</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#5A8C69] rounded-full"></div>
-                  <span class="text-gray-600">Covered Court</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#6C9A6C] rounded-full"></div>
-                  <span class="text-gray-600">Building B</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#7DAA7D] rounded-full"></div>
-                  <span class="text-gray-600">Hangar</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#8EBA8E] rounded-full"></div>
-                  <span class="text-gray-600">Others <span class="font-semibold">20%</span></span>
+                <div v-for="(label, index) in venueUsageData.labels" :key="label" class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: chartColors[index % chartColors.length] }"></div>
+                  <span class="text-gray-600">{{ label }}</span>
                 </div>
               </div>
             </div>
@@ -152,40 +130,24 @@
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-semibold text-gray-800">Maintenance</h3>
                 <div class="flex items-center gap-1 text-xs text-gray-600">
-                  <span>December 2025</span>
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
+                  <span>{{ currentMonthLabel }}</span>
                 </div>
               </div>
               <div class="h-48 flex items-center justify-center">
-                <StatsChart
-                  type="doughnut"
-                  :labels="['Building A', 'Covered Court', 'Building B', 'Hangar', 'Others']"
-                  :data="[15, 15, 10, 10, 33]"
-                  :backgroundColor="['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E']"
-                />
+                <template v-if="maintenanceData.labels.length > 0">
+                  <StatsChart
+                    type="doughnut"
+                    :labels="maintenanceData.labels"
+                    :data="maintenanceData.values"
+                    :backgroundColor="chartColors.slice(0, maintenanceData.labels.length)"
+                  />
+                </template>
+                <p v-else class="text-sm text-gray-400">No maintenance data</p>
               </div>
               <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#4A7C59] rounded-full"></div>
-                  <span class="text-gray-600">Building A</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#5A8C69] rounded-full"></div>
-                  <span class="text-gray-600">Covered Court</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#6C9A6C] rounded-full"></div>
-                  <span class="text-gray-600">Building B</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#7DAA7D] rounded-full"></div>
-                  <span class="text-gray-600">Hangar</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <div class="w-2 h-2 bg-[#8EBA8E] rounded-full"></div>
-                  <span class="text-gray-600">Others <span class="font-semibold">33%</span></span>
+                <div v-for="(label, index) in maintenanceData.labels" :key="label" class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: chartColors[index % chartColors.length] }"></div>
+                  <span class="text-gray-600">{{ label }}</span>
                 </div>
               </div>
             </div>
@@ -209,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
 import StatsChart from '@/components/StatsChart.vue';
@@ -219,6 +181,19 @@ import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModa
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import UpcomingRequests from '@/components/UpcomingRequests.vue';
 import { API_URL } from '@/config/api';
+import { useDashboard } from '@/composables/useDashboard';
+
+const {
+  statistics,
+  venueUsageData,
+  maintenanceData,
+  calendarEvents,
+  loading,
+  loadAllDashboardData,
+  fetchVenueUsage,
+  fetchMaintenanceData,
+  fetchCalendarEvents,
+} = useDashboard();
 
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
@@ -228,21 +203,37 @@ const selectedRequest = ref<any>(null);
 const loadingDetails = ref(false);
 const showWorkOrderDetailsModal = ref(false);
 const selectedWorkOrder = ref<any>(null);
+const currentMonth = ref(new Date().getMonth() + 1);
+const currentYear = ref(new Date().getFullYear());
+
+const currentMonthLabel = computed(() => {
+  const date = new Date(currentYear.value, currentMonth.value - 1);
+  return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+});
+
+const chartColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E', '#A0CCA0', '#B2DDB2'];
 
 const handleFacilityRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);
-  // You can add logic here to refresh the dashboard or show a notification
+  loadAllDashboardData();
 };
 
 const handleWorkOrderSuccess = (workOrder: any) => {
   console.log('Work order submitted:', workOrder);
-  // You can add logic here to refresh the dashboard or show a notification
+  loadAllDashboardData();
 };
 
 const handleDateUpdated = () => {
   console.log('Event date updated - refreshing dashboard');
-  // Refresh dashboard data when date is updated
-  window.location.reload();
+  loadAllDashboardData();
+};
+
+const handleMonthChange = ({ month, year }: { month: number; year: number }) => {
+  currentMonth.value = month;
+  currentYear.value = year;
+  fetchCalendarEvents(month, year);
+  fetchVenueUsage(month, year);
+  fetchMaintenanceData(month, year);
 };
 
 const viewRequestDetails = async (type: string, id: number) => {
@@ -299,7 +290,7 @@ const viewRequestDetails = async (type: string, id: number) => {
 
 const handleStatusUpdated = () => {
   console.log('Status updated - refreshing dashboard');
-  window.location.reload();
+  loadAllDashboardData();
 };
 
 onMounted(() => {
@@ -307,5 +298,6 @@ onMounted(() => {
   if (userStr) {
     user.value = JSON.parse(userStr);
   }
+  loadAllDashboardData();
 });
 </script>

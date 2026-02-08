@@ -142,7 +142,7 @@
 
         <!-- Calendar Widget -->
         <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <SimpleCalendar @dateUpdated="handleDateUpdated" />
+          <SimpleCalendar :events="calendarEvents" @dateUpdated="handleDateUpdated" @monthChange="handleMonthChange" />
         </div>
       </div>
     </div>
@@ -170,6 +170,12 @@ import WorkOrderModal from '@/components/WorkOrderModal.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
+import { useDashboard } from '@/composables/useDashboard';
+
+const {
+  calendarEvents,
+  fetchCalendarEvents,
+} = useDashboard();
 
 const user = ref<any>(null);
 const activeFilter = ref('all');
@@ -241,8 +247,12 @@ const changeRequestType = (type: 'facility' | 'workorder') => {
 
 const handleDateUpdated = () => {
   console.log('Event date updated - refreshing dashboard');
-  // Refresh dashboard data when date is updated
-  window.location.reload();
+  fetchRequests();
+  fetchCalendarEvents();
+};
+
+const handleMonthChange = ({ month, year }: { month: number; year: number }) => {
+  fetchCalendarEvents(month, year);
 };
 
 const viewRequestDetails = async (type: string, id: number) => {
@@ -299,7 +309,8 @@ const viewRequestDetails = async (type: string, id: number) => {
 
 const handleStatusUpdated = () => {
   console.log('Status updated - refreshing dashboard');
-  window.location.reload();
+  fetchRequests();
+  fetchCalendarEvents();
 };
 
 watch(activeFilter, () => {
@@ -312,5 +323,6 @@ onMounted(() => {
     user.value = JSON.parse(userStr);
   }
   fetchRequests();
+  fetchCalendarEvents();
 });
 </script>

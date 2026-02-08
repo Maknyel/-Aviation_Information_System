@@ -4,7 +4,7 @@
       <!-- Venue Requested and Location/Room Number -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Venue Requested</label>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">Venue Requested</label>
           <select
             v-model="formData.venue_requested"
             required
@@ -21,7 +21,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Location/Room Number</label>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">Location/Room Number</label>
           <input
             v-model="formData.location_room_number"
             type="text"
@@ -33,7 +33,7 @@
 
       <!-- Title of Event -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Title of Event</label>
+        <label class="block text-sm font-medium text-aviation-olive mb-2">Title of Event</label>
         <input
           v-model="formData.title_of_event"
           type="text"
@@ -45,7 +45,7 @@
       <!-- Time and Date of Event -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Time of Event</label>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">Time of Event</label>
           <input
             v-model="formData.time_of_event"
             type="time"
@@ -55,7 +55,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Date of Event</label>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">Date of Event</label>
           <input
             v-model="formData.date_of_event"
             type="date"
@@ -67,62 +67,62 @@
 
       <!-- Details of Request -->
       <div>
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Details of Request</h3>
+        <h3 class="text-sm font-semibold text-aviation-olive mb-2">Details of Request</h3>
         <div class="grid grid-cols-2 gap-3">
           <!-- Row 1 -->
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.chair" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Chair</span>
+            <input v-model="formData.chair" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Chair</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.podium" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Podium</span>
+            <input v-model="formData.podium" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Podium</span>
           </label>
 
           <!-- Row 2 -->
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.tent" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Tent</span>
+            <input v-model="formData.tent" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Tent</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.tables" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Tables</span>
+            <input v-model="formData.tables" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Tables</span>
           </label>
 
           <!-- Row 3 -->
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.booths" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Booths</span>
+            <input v-model="formData.booths" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Booths</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.sound_system" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Sound System</span>
+            <input v-model="formData.sound_system" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Sound System</span>
           </label>
 
           <!-- Row 4 -->
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.extension" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Extension</span>
+            <input v-model="formData.extension" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Extension</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.microphones" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Microphones</span>
+            <input v-model="formData.microphones" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Microphones</span>
           </label>
 
           <!-- Row 5 -->
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.skirting" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Skirting</span>
+            <input v-model="formData.skirting" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Skirting</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="formData.flags" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Flags</span>
+            <input v-model="formData.flags" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Flags</span>
           </label>
 
           <!-- Row 6 -->
           <label class="flex items-center gap-2 cursor-pointer col-span-2">
-            <input v-model="formData.others" type="checkbox" class="w-4 h-4 text-aviation-olive border-gray-300 rounded focus:ring-aviation-olive">
-            <span class="text-sm text-gray-700">Others</span>
+            <input v-model="formData.others" type="checkbox" class="w-4 h-4 bg-white border-gray-300 rounded focus:ring-aviation-olive">
+            <span class="text-sm text-aviation-olive">Others</span>
           </label>
         </div>
 
@@ -153,7 +153,7 @@
         <button
           type="button"
           @click="closeModal"
-          class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          class="px-6 py-2 border border-gray-300 text-aviation-olive rounded-lg hover:bg-gray-50 transition-colors"
         >
           Cancel
         </button>
