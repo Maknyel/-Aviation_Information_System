@@ -8,8 +8,8 @@
       >
         <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden">
           <!-- Header -->
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800">{{ title }}</h2>
+          <div class="flex items-center justify-between px-6 py-4">
+            <h2 class="text-xl font-bold text-aviation-olive">{{ title }}</h2>
             <button
               @click="close"
               class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -26,7 +26,7 @@
           </div>
 
           <!-- Footer (optional) -->
-          <div v-if="$slots.footer" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div v-if="$slots.footer" class="px-6 py-4 bg-gray-50">
             <slot name="footer" />
           </div>
         </div>

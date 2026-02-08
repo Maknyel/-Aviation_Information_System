@@ -11,6 +11,7 @@ class FacilityRequest extends Model
 
     protected $fillable = [
         'user_id',
+        'department_id',
         'venue_requested',
         'location_room_number',
         'title_of_event',
@@ -49,5 +50,20 @@ class FacilityRequest extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'request_id')->where('request_type', 'facility_request');
+    }
+
+    public function approvalSteps()
+    {
+        return $this->hasMany(ApprovalStep::class, 'request_id')->where('request_type', 'facility_request')->orderBy('step_order');
     }
 }

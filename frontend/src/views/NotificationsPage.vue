@@ -16,7 +16,7 @@
             <select
               v-model="selectedUserId"
               @change="handleUserFilter"
-              class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-aviation-olive focus:border-transparent"
+              class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
             >
               <option value="all">All Users</option>
               <option v-for="userId in uniqueUserIds" :key="userId" :value="userId">

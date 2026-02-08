@@ -51,6 +51,11 @@
               {{ error }}
             </div>
 
+            <!-- Forgot Password -->
+            <div class="text-right">
+              <router-link to="/forgot-password" class="text-sm text-aviation-olive hover:underline">Forgot Password?</router-link>
+            </div>
+
             <!-- Login Button -->
             <button
               type="submit"

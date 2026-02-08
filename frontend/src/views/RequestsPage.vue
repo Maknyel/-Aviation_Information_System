@@ -18,7 +18,7 @@
                 <select
                   v-model="requestType"
                   @change="fetchRequests()"
-                  class="text-xl font-semibold text-gray-800 bg-transparent border-none outline-none cursor-pointer appearance-none pr-8"
+                  class="text-xl font-semibold text-black bg-white border-none outline-none cursor-pointer appearance-none pr-8"
                 >
                   <option value="facility">Facility Requests</option>
                   <option value="workorder">Work Order Requests</option>

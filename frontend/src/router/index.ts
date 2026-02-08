@@ -8,6 +8,10 @@ import ProfilePage from '../views/ProfilePage.vue'
 import StudentDashboard from '../views/StudentDashboard.vue'
 import StaffDashboard from '../views/StaffDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import UserManagementPage from '../views/UserManagementPage.vue'
+import ReportsPage from '../views/ReportsPage.vue'
+import ActivityLogsPage from '../views/ActivityLogsPage.vue'
+import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: LoginPage
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPasswordPage
   },
   {
     path: '/home',
@@ -70,6 +79,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/notifications',
     name: 'Notifications',
     component: NotificationsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/users',
+    name: 'UserManagement',
+    component: UserManagementPage,
+    meta: { requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/reports',
+    name: 'Reports',
+    component: ReportsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/activity-logs',
+    name: 'ActivityLogs',
+    component: ActivityLogsPage,
     meta: { requiresAuth: true }
   },
   {

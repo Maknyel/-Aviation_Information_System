@@ -100,7 +100,7 @@
               </div>
 
               <!-- Submit Button -->
-              <div class="flex justify-end gap-3 pt-4">
+              <div class="flex justify-center gap-8 pt-4">
                 <button
                   type="button"
                   @click="resetForm"

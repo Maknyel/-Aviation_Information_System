@@ -17,7 +17,7 @@
               <div class="relative">
                 <select
                   v-model="activeSection"
-                  class="text-xl font-semibold text-gray-800 bg-transparent border-none outline-none cursor-pointer appearance-none pr-8"
+                  class="text-xl font-semibold text-black bg-white border-none outline-none cursor-pointer appearance-none pr-8"
                 >
                   <option value="facility">Facility Request</option>
                   <option value="family">Family</option>
