@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\EmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,4 +90,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Activity Log routes
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    // Email routes (Admin only)
+    Route::get('/email/templates', [EmailController::class, 'templates']);
+    Route::post('/email/preview', [EmailController::class, 'preview']);
+    Route::post('/email/send-test', [EmailController::class, 'sendTest']);
+    Route::get('/email/smtp-status', [EmailController::class, 'smtpStatus']);
 });
