@@ -17,5 +17,5 @@
 
     <p>Please review and take action on this assignment as soon as possible.</p>
 
-    <a href="{{ config('app.url') }}" class="btn">View Assignment</a>
+    <a href="{{ env('FRONTEND_URL', 'https://aviation.dl-hosting.net') }}/requests" class="btn">View Assignment</a>
 @endsection

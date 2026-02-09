@@ -17,5 +17,5 @@
 
     <p>Please review and approve or reject this request at your earliest convenience.</p>
 
-    <a href="{{ config('app.url') }}" class="btn">Review Request</a>
+    <a href="{{ env('FRONTEND_URL', 'https://aviation.dl-hosting.net') }}/requests" class="btn">Review Request</a>
 @endsection

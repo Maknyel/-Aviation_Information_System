@@ -19,5 +19,5 @@
 
     <p>You can view the full details of your request by logging into the system.</p>
 
-    <a href="{{ config('app.url') }}" class="btn">View Request</a>
+    <a href="{{ env('FRONTEND_URL', 'https://aviation.dl-hosting.net') }}/requests" class="btn">View Request</a>
 @endsection

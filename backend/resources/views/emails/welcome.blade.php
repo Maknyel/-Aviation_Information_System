@@ -12,7 +12,7 @@
 
     <p>You can now log in to the system to access your dashboard, submit requests, and manage your profile.</p>
 
-    <a href="{{ config('app.url') }}" class="btn">Log In Now</a>
+    <a href="{{ env('FRONTEND_URL', 'https://aviation.dl-hosting.net') }}/login" class="btn">Log In Now</a>
 
     <p style="margin-top: 25px; font-size: 13px; color: #6b7280;">If you did not create this account, please contact the system administrator immediately.</p>
 @endsection

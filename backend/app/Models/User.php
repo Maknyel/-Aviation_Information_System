@@ -53,7 +53,7 @@ class User extends Authenticatable
 
     public function sendPasswordResetNotification($token)
     {
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+        $frontendUrl = env('FRONTEND_URL', 'https://aviation.dl-hosting.net');
         $url = $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($this->email);
 
         EmailHelper::send(
