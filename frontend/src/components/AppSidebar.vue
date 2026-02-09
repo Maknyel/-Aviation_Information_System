@@ -219,7 +219,7 @@ const menuItems = computed(() => {
       { path: '/requests', label: 'Request', icon: RequestsIcon },
       // { path: '/reports', label: 'Reports', icon: ReportsIcon },
     ];
-  } else if (role === 'Student') {
+  } else if (role === 'Requester') {
     return [
       ...baseMenu,
       // { path: '/calendar', label: 'Calendar', icon: CalendarIcon },

@@ -7,8 +7,8 @@
         <p class="text-gray-600">Welcome back, {{ user?.name }}!</p>
       </div>
 
-          <!-- STUDENT DASHBOARD -->
-          <div v-if="user?.role?.name === 'Student'">
+          <!-- REQUESTER DASHBOARD -->
+          <div v-if="user?.role?.name === 'Requester'">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Calendar Widget -->
               <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">

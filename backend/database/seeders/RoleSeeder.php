@@ -25,8 +25,8 @@ class RoleSeeder extends Seeder
                 'description' => 'Staff member with limited access',
             ],
             [
-                'name' => 'Student',
-                'description' => 'Student with basic access',
+                'name' => 'Requester',
+                'description' => 'Requester with basic access',
             ],
         ];
 

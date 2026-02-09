@@ -199,7 +199,7 @@ const getRoleBadgeClass = (role: string) => {
   const map: Record<string, string> = {
     Admin: 'bg-purple-100 text-purple-700',
     Staff: 'bg-blue-100 text-blue-700',
-    Student: 'bg-green-100 text-green-700',
+    Requester: 'bg-green-100 text-green-700',
     HR: 'bg-orange-100 text-orange-700',
   };
   return map[role] || 'bg-gray-100 text-gray-700';

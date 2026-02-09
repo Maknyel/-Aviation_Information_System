@@ -108,8 +108,8 @@ class EmailHelper
                 'requesterName' => 'Pedro Garcia',
             ],
             'welcome' => [
-                'userName' => 'New Student',
-                'role' => 'Student',
+                'userName' => 'New Requester',
+                'role' => 'Requester',
             ],
         ];
 

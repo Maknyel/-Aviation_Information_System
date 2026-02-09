@@ -133,14 +133,14 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Default role is Student (id=4 typically, but let's look it up)
-        $studentRole = \App\Models\Role::where('name', 'Student')->first();
+        // Default role is Requester
+        $requesterRole = \App\Models\Role::where('name', 'Requester')->first();
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role_id' => $studentRole ? $studentRole->id : 1,
+            'role_id' => $requesterRole ? $requesterRole->id : 1,
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
