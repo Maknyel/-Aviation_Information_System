@@ -10,6 +10,7 @@ use App\Models\ActivityLog;
 use App\Models\ApprovalStep;
 use App\Services\PriorityClassifier;
 use App\Services\SmartAssigner;
+use App\Helpers\EmailHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -258,6 +259,12 @@ class WorkOrderController extends Controller
             'is_deleted' => false,
         ]);
 
+        // Send status update email to requester
+        $requester = User::find($workOrder->user_id);
+        if ($requester) {
+            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Work Order', $workOrder->id, $validated['status']);
+        }
+
         ActivityLog::log('status_changed', "Changed work order #{$id} status from {$oldStatus} to {$validated['status']}", $workOrder);
 
         return response()->json([
@@ -299,6 +306,9 @@ class WorkOrderController extends Controller
             'is_read' => false,
             'is_deleted' => false,
         ]);
+
+        // Send assignment email to staff
+        EmailHelper::sendAssignment($assignee->email, $assignee->name, 'Work Order', $workOrder->id, $workOrder->description_of_problem);
 
         ActivityLog::log('assigned', "Assigned work order #{$id} to {$assignee->name}", $workOrder);
 

@@ -87,6 +87,9 @@
                     <p class="text-xs text-gray-500 mt-1">
                       {{ requestType === 'facility' ? `${formatTime(request.time_of_event)}, ${formatDate(request.date_of_event)}` : `${formatTime(request.time)}, ${formatDate(request.date)}` }}
                     </p>
+                    <p v-if="requestType === 'workorder' && request.assignee" class="text-xs text-blue-600 mt-1">
+                      Assigned to: {{ request.assignee.name }}
+                    </p>
                   </div>
                 </div>
                 <span

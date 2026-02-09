@@ -14,6 +14,7 @@ import ActivityLogsPage from '../views/ActivityLogsPage.vue'
 import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import EmailTestPage from '../views/EmailTestPage.vue'
 import DepartmentsPage from '../views/DepartmentsPage.vue'
+import ResetPasswordPage from '../views/ResetPasswordPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -29,6 +30,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/forgot-password',
     name: 'ForgotPassword',
     component: ForgotPasswordPage
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPasswordPage
   },
   {
     path: '/home',

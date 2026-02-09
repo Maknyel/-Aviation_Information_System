@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use App\Models\ApprovalStep;
 use App\Services\ConflictDetector;
+use App\Helpers\EmailHelper;
 use Illuminate\Http\Request;
 
 class FacilityRequestController extends Controller
@@ -261,6 +262,12 @@ class FacilityRequestController extends Controller
             'is_read' => false,
             'is_deleted' => false,
         ]);
+
+        // Send status update email to requester
+        $requester = User::find($facilityRequest->user_id);
+        if ($requester) {
+            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Facility Request', $facilityRequest->id, $validated['status']);
+        }
 
         ActivityLog::log('status_changed', "Changed facility request #{$id} status from {$oldStatus} to {$validated['status']}", $facilityRequest);
 

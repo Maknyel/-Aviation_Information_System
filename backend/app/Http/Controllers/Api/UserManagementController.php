@@ -9,6 +9,7 @@ use App\Models\StaffSkill;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\EmailHelper;
 
 class UserManagementController extends Controller
 {
@@ -61,6 +62,10 @@ class UserManagementController extends Controller
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
+
+        // Send welcome email
+        $roleName = Role::find($validated['role_id'])->name ?? 'User';
+        EmailHelper::sendWelcome($user->email, $user->name, $roleName);
 
         ActivityLog::log('created', "Created user: {$user->name} ({$user->email})", $user);
 
