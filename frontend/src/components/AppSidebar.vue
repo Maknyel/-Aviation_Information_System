@@ -165,6 +165,20 @@ const EmailIcon = () => h('svg', {
   })
 ]);
 
+const DepartmentsIcon = () => h('svg', {
+  fill: 'none',
+  stroke: 'currentColor',
+  viewBox: '0 0 24 24',
+  class: 'w-5 h-5'
+}, [
+  h('path', {
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'stroke-width': '2',
+    d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+  })
+]);
+
 const AuditIcon = () => h('svg', {
   fill: 'none',
   stroke: 'currentColor',
@@ -193,6 +207,7 @@ const menuItems = computed(() => {
       { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
       { path: '/users', label: 'User Management', icon: UsersIcon },
+      { path: '/departments', label: 'Departments', icon: DepartmentsIcon },
       { path: '/reports', label: 'Reports', icon: ReportsIcon },
       { path: '/activity-logs', label: 'Audit Logs', icon: AuditIcon },
       // { path: '/email-templates', label: 'Email Templates', icon: EmailIcon },

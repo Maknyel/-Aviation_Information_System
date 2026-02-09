@@ -13,6 +13,7 @@ import ReportsPage from '../views/ReportsPage.vue'
 import ActivityLogsPage from '../views/ActivityLogsPage.vue'
 import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import EmailTestPage from '../views/EmailTestPage.vue'
+import DepartmentsPage from '../views/DepartmentsPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -99,6 +100,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'ActivityLogs',
     component: ActivityLogsPage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/departments',
+    name: 'Departments',
+    component: DepartmentsPage,
+    meta: { requiresAuth: true, role: 'Admin' }
   },
   {
     path: '/email-templates',
