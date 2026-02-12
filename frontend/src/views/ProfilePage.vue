@@ -146,7 +146,8 @@ const formData = ref({
 
 const getProfilePictureUrl = (path: string) => {
   if (!path) return '';
-  return `http://localhost:8000/storage/${path}`;
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+  return `${baseUrl.replace('/api', '')}/storage/${path}`;
 };
 
 const handleFileChange = (event: Event) => {
