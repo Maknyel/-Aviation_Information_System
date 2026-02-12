@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="bg-aviation-olive shadow-md">
       <div class="max-w-7xl mx-auto px-4 py-4">
-        <h1 class="text-white text-xl font-semibold text-center">Aviation Information System</h1>
+        <h1 class="text-white text-xl font-semibold text-center">Philippine State College of Aeronotics</h1>
       </div>
     </header>
 
@@ -15,7 +15,7 @@
           <div class="flex justify-center mb-4">
             <img src="/logo.png" alt="Philippine State College of Aeronautics" class="h-24 w-24 object-contain" />
           </div>
-          <h1 class="text-3xl font-bold text-aviation-olive mb-2">Aviation Information System</h1>
+          <h1 class="text-3xl font-bold text-aviation-olive mb-2">General Service Department</h1>
           <p class="text-gray-600">Please login to continue</p>
         </div>
 

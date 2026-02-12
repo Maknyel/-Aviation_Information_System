@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $subject ?? 'Aviation Information System' }}</title>
+    <title>{{ $subject ?? 'General Service Department' }}</title>
     <style>
         body { margin: 0; padding: 0; background-color: #f4f5f7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .email-wrapper { width: 100%; background-color: #f4f5f7; padding: 40px 0; }
@@ -34,14 +34,14 @@
     <div class="email-wrapper">
         <div class="email-container">
             <div class="email-header">
-                <h1>Aviation Information System</h1>
+                <h1>General Service Department</h1>
                 <p>National Aviation Academy of the Philippines</p>
             </div>
             <div class="email-body">
                 @yield('content')
             </div>
             <div class="email-footer">
-                <p>This is an automated message from the Aviation Information System.</p>
+                <p>This is an automated message from the General Service Department.</p>
                 <p style="margin-top: 8px;">&copy; {{ date('Y') }} National Aviation Academy of the Philippines</p>
             </div>
         </div>

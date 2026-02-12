@@ -1,7 +1,7 @@
 @extends('emails.layout')
 
 @section('content')
-    <h2>Welcome to Aviation Information System</h2>
+    <h2>Welcome to General Service Department</h2>
     <p>Hello {{ $userName }},</p>
     <p>Your account has been created successfully. You have been assigned the role of <strong>{{ $role }}</strong>.</p>
 

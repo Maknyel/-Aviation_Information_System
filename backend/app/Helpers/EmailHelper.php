@@ -67,7 +67,7 @@ class EmailHelper
      */
     public static function sendWelcome(string $to, string $userName, string $role): bool
     {
-        return self::send($to, 'Welcome to Aviation Information System', 'emails.welcome', [
+        return self::send($to, 'Welcome to General Service Department', 'emails.welcome', [
             'userName' => $userName,
             'role' => $role,
         ]);

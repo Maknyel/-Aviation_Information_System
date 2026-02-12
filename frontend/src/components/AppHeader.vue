@@ -12,7 +12,7 @@
           </svg>
         </button>
 
-        <h1 class="text-white text-xl font-semibold">Aviation Information System</h1>
+        <h1 class="text-white text-xl font-semibold">General Service Department</h1>
       </div>
 
       <!-- User Dropdown -->
