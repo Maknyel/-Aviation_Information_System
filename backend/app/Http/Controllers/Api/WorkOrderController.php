@@ -78,11 +78,11 @@ class WorkOrderController extends Controller
             $validated['department_id'] = $request->user()->department_id;
         }
 
-        // Handle image upload
+        // Handle image upload (direct to public, no symlink needed)
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/work_orders', $imageName);
+            $image->move(public_path('storage/work_orders'), $imageName);
             $validated['image'] = 'work_orders/' . $imageName;
         }
 
@@ -161,11 +161,14 @@ class WorkOrderController extends Controller
 
         if ($request->hasFile('image')) {
             if ($workOrder->image) {
-                Storage::delete('public/' . $workOrder->image);
+                $oldPath = public_path('storage/' . $workOrder->image);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/work_orders', $imageName);
+            $image->move(public_path('storage/work_orders'), $imageName);
             $validated['image'] = 'work_orders/' . $imageName;
         }
 
