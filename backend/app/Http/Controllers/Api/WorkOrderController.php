@@ -36,7 +36,7 @@ class WorkOrderController extends Controller
             $query->where('assigned_to', $request->assigned_to);
         }
 
-        if ($request->user()->role->name !== 'Admin' && $request->user()->role->name !== 'Staff') {
+        if (!in_array($request->user()->role->name, ['Admin', 'Staff'])) {
             $query->where('user_id', $request->user()->id);
         }
 
@@ -61,6 +61,11 @@ class WorkOrderController extends Controller
             'priority' => 'nullable|in:urgent,high,medium,low',
             'department_id' => 'nullable|exists:departments,id',
         ]);
+
+        $userRole = $request->user()->role->name;
+        if (!in_array($userRole, ['Admin', 'Staff', 'Employee'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized to submit work orders'], 403);
+        }
 
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = 'pending';

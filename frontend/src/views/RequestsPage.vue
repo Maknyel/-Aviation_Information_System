@@ -21,14 +21,14 @@
                   class="text-xl font-semibold text-black bg-white border-none outline-none cursor-pointer appearance-none pr-8"
                 >
                   <option value="facility">Facility Requests</option>
-                  <option value="workorder">Work Order Requests</option>
+                  <option v-if="canAccessWorkOrders" value="workorder">Work Order Requests</option>
                 </select>
                 <svg class="w-4 h-4 text-gray-500 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </div>
               <button
-                @click="requestType === 'facility' ? showFacilityModal = true : showWorkOrderModal = true"
+                @click="requestType === 'facility' ? showFacilityModal = true : (canAccessWorkOrders ? showWorkOrderModal = true : null)"
                 class="px-4 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@
     <FacilityRequestModal v-model="showFacilityModal" @success="handleRequestSuccess" />
 
     <!-- Work Order Modal -->
-    <WorkOrderModal v-model="showWorkOrderModal" @success="handleRequestSuccess" />
+    <WorkOrderModal v-if="canAccessWorkOrders" v-model="showWorkOrderModal" @success="handleRequestSuccess" />
 
     <!-- Facility Request Details Modal -->
     <FacilityRequestDetailsModal v-model="showDetailsModal" :request="selectedRequest" @statusUpdated="handleStatusUpdated" />
@@ -152,6 +152,10 @@ import { API_URL } from '@/config/api';
 const user = ref<any>(null);
 const activeFilter = ref('all');
 const requestType = ref<'facility' | 'workorder'>('facility');
+
+const canAccessWorkOrders = computed(() =>
+  ['Admin', 'Staff', 'Employee'].includes(user.value?.role?.name)
+);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
 const showDetailsModal = ref(false);
@@ -325,6 +329,9 @@ onMounted(() => {
   const userStr = localStorage.getItem('user');
   if (userStr) {
     user.value = JSON.parse(userStr);
+  }
+  if (!canAccessWorkOrders.value && requestType.value === 'workorder') {
+    requestType.value = 'facility';
   }
   fetchRequests();
   fetchCalendarEvents();

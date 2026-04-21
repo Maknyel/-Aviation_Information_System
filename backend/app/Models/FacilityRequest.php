@@ -17,34 +17,12 @@ class FacilityRequest extends Model
         'title_of_event',
         'time_of_event',
         'date_of_event',
-        'chair',
-        'podium',
-        'tent',
-        'tables',
-        'booths',
-        'sound_system',
-        'extension',
-        'microphones',
-        'skirting',
-        'flags',
-        'others',
-        'others_description',
         'status',
+        'attachment_path',
     ];
 
     protected $casts = [
         'date_of_event' => 'date',
-        'chair' => 'boolean',
-        'podium' => 'boolean',
-        'tent' => 'boolean',
-        'tables' => 'boolean',
-        'booths' => 'boolean',
-        'sound_system' => 'boolean',
-        'extension' => 'boolean',
-        'microphones' => 'boolean',
-        'skirting' => 'boolean',
-        'flags' => 'boolean',
-        'others' => 'boolean',
     ];
 
     public function user()
@@ -55,6 +33,11 @@ class FacilityRequest extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function requestItems()
+    {
+        return $this->hasMany(FacilityRequestInventory::class);
     }
 
     public function feedbacks()

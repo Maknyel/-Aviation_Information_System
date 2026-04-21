@@ -10,13 +10,16 @@ use App\Models\ActivityLog;
 use App\Models\ApprovalStep;
 use App\Services\ConflictDetector;
 use App\Helpers\EmailHelper;
+use App\Models\FacilityRequestInventory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class FacilityRequestController extends Controller
 {
     public function index(Request $request)
     {
-        $query = FacilityRequest::with(['user.role', 'department']);
+        $query = FacilityRequest::with(['user.role', 'department', 'requestItems.inventoryItem']);
 
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -41,24 +44,16 @@ class FacilityRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'venue_requested' => 'required|string|max:255',
+            'venue_requested'      => 'required|string|max:255',
             'location_room_number' => 'nullable|string|max:255',
-            'title_of_event' => 'required|string|max:255',
-            'time_of_event' => 'required|string',
-            'date_of_event' => 'required|date',
-            'department_id' => 'nullable|exists:departments,id',
-            'chair' => 'boolean',
-            'podium' => 'boolean',
-            'tent' => 'boolean',
-            'tables' => 'boolean',
-            'booths' => 'boolean',
-            'sound_system' => 'boolean',
-            'extension' => 'boolean',
-            'microphones' => 'boolean',
-            'skirting' => 'boolean',
-            'flags' => 'boolean',
-            'others' => 'boolean',
-            'others_description' => 'nullable|string',
+            'title_of_event'       => 'required|string|max:255',
+            'time_of_event'        => 'required|string',
+            'date_of_event'        => 'required|date',
+            'department_id'        => 'nullable|exists:departments,id',
+            'items'                => 'nullable|array',
+            'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
+            'items.*.quantity'     => 'required|integer|min:1',
+            'attachment'           => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
         // Conflict detection
@@ -76,28 +71,36 @@ class FacilityRequestController extends Controller
             ], 409);
         }
 
-        $validated['user_id'] = $request->user()->id;
-        $validated['status'] = 'pending';
+        $items = $validated['items'] ?? [];
+        unset($validated['items']);
+        unset($validated['attachment']);
 
-        // Auto-assign department from user if not specified
+        if ($request->hasFile('attachment')) {
+            $validated['attachment_path'] = $request->file('attachment')->store('facility-attachments', 'public');
+        }
+
+        $validated['user_id'] = $request->user()->id;
+        $validated['status']  = 'pending';
+
         if (empty($validated['department_id']) && $request->user()->department_id) {
             $validated['department_id'] = $request->user()->department_id;
         }
 
         $facilityRequest = FacilityRequest::create($validated);
 
-        // Create approval workflow steps
+        foreach ($items as $item) {
+            FacilityRequestInventory::create([
+                'facility_request_id' => $facilityRequest->id,
+                'inventory_item_id'   => $item['inventory_item_id'],
+                'quantity'            => $item['quantity'],
+            ]);
+        }
+
+        // Create approval workflow step
         ApprovalStep::create([
             'request_type' => 'facility_request',
             'request_id' => $facilityRequest->id,
             'step_order' => 1,
-            'approver_role' => 'Staff',
-            'status' => 'pending',
-        ]);
-        ApprovalStep::create([
-            'request_type' => 'facility_request',
-            'request_id' => $facilityRequest->id,
-            'step_order' => 2,
             'approver_role' => 'Admin',
             'status' => 'pending',
         ]);
@@ -127,7 +130,7 @@ class FacilityRequestController extends Controller
 
     public function show($id)
     {
-        $facilityRequest = FacilityRequest::with(['user.role', 'department', 'approvalSteps.approver', 'feedbacks.user'])->findOrFail($id);
+        $facilityRequest = FacilityRequest::with(['user.role', 'department', 'approvalSteps.approver', 'feedbacks.user', 'requestItems.inventoryItem'])->findOrFail($id);
 
         return response()->json([
             'success' => true,
@@ -144,28 +147,19 @@ class FacilityRequestController extends Controller
         }
 
         $validated = $request->validate([
-            'venue_requested' => 'sometimes|string|max:255',
+            'venue_requested'      => 'sometimes|string|max:255',
             'location_room_number' => 'nullable|string|max:255',
-            'title_of_event' => 'sometimes|string|max:255',
-            'time_of_event' => 'sometimes|string',
-            'date_of_event' => 'sometimes|date',
-            'department_id' => 'nullable|exists:departments,id',
-            'chair' => 'boolean',
-            'podium' => 'boolean',
-            'tent' => 'boolean',
-            'tables' => 'boolean',
-            'booths' => 'boolean',
-            'sound_system' => 'boolean',
-            'extension' => 'boolean',
-            'microphones' => 'boolean',
-            'skirting' => 'boolean',
-            'flags' => 'boolean',
-            'others' => 'boolean',
-            'others_description' => 'nullable|string',
-            'status' => 'sometimes|in:pending,approved,rejected,canceled',
+            'title_of_event'       => 'sometimes|string|max:255',
+            'time_of_event'        => 'sometimes|string',
+            'date_of_event'        => 'sometimes|date',
+            'department_id'        => 'nullable|exists:departments,id',
+            'status'               => 'sometimes|in:pending,approved,rejected,canceled',
+            'items'                => 'sometimes|array',
+            'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
+            'items.*.quantity'     => 'required|integer|min:1',
+            'attachment'           => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
-        // Conflict check if venue/date/time changed
         if (isset($validated['venue_requested']) || isset($validated['date_of_event']) || isset($validated['time_of_event'])) {
             $conflict = ConflictDetector::check(
                 $validated['venue_requested'] ?? $facilityRequest->venue_requested,
@@ -183,15 +177,37 @@ class FacilityRequestController extends Controller
             }
         }
 
+        $items = $validated['items'] ?? null;
+        unset($validated['items']);
+        unset($validated['attachment']);
+
+        if ($request->hasFile('attachment')) {
+            if ($facilityRequest->attachment_path) {
+                Storage::disk('public')->delete($facilityRequest->attachment_path);
+            }
+            $validated['attachment_path'] = $request->file('attachment')->store('facility-attachments', 'public');
+        }
+
         $old = $facilityRequest->toArray();
         $facilityRequest->update($validated);
+
+        if ($items !== null) {
+            $facilityRequest->requestItems()->delete();
+            foreach ($items as $item) {
+                FacilityRequestInventory::create([
+                    'facility_request_id' => $facilityRequest->id,
+                    'inventory_item_id'   => $item['inventory_item_id'],
+                    'quantity'            => $item['quantity'],
+                ]);
+            }
+        }
 
         ActivityLog::log('updated', "Updated facility request #{$id}", $facilityRequest, $old, $facilityRequest->fresh()->toArray());
 
         return response()->json([
             'success' => true,
             'message' => 'Facility request updated successfully',
-            'data' => $facilityRequest->fresh()->load(['user.role', 'department'])
+            'data' => $facilityRequest->fresh()->load(['user.role', 'department', 'requestItems.inventoryItem'])
         ]);
     }
 
@@ -275,6 +291,72 @@ class FacilityRequestController extends Controller
             'success' => true,
             'message' => 'Status updated successfully',
             'data' => $facilityRequest->fresh()->load(['user.role', 'department', 'approvalSteps.approver'])
+        ]);
+    }
+
+    /**
+     * Inventory availability check for a specific facility request.
+     */
+    public function inventoryCheck(Request $request, $id)
+    {
+        $facilityRequest = FacilityRequest::with('requestItems.inventoryItem')->findOrFail($id);
+
+        $inventoryStatus = [];
+        foreach ($facilityRequest->requestItems as $requestItem) {
+            $item = $requestItem->inventoryItem;
+
+            // Sum qty from other pending/approved requests on same date for this item
+            $inUse = (int) FacilityRequestInventory::where('inventory_item_id', $item->id)
+                ->whereHas('facilityRequest', fn($q) => $q
+                    ->where('date_of_event', $facilityRequest->date_of_event)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->where('id', '!=', $facilityRequest->id)
+                )
+                ->sum('quantity');
+
+            $total     = $item->total_quantity;
+            $available = max(0, $total - $inUse);
+
+            // Events using this item on the same date
+            $otherEvents = FacilityRequestInventory::where('inventory_item_id', $item->id)
+                ->whereHas('facilityRequest', fn($q) => $q
+                    ->where('date_of_event', $facilityRequest->date_of_event)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->where('id', '!=', $facilityRequest->id)
+                )
+                ->with('facilityRequest.user')
+                ->get()
+                ->map(fn($ri) => [
+                    'title' => $ri->facilityRequest->title_of_event,
+                    'venue' => $ri->facilityRequest->venue_requested,
+                    'time'  => $ri->facilityRequest->time_of_event,
+                    'user'  => $ri->facilityRequest->user?->name,
+                    'qty'   => $ri->quantity,
+                ]);
+
+            $inventoryStatus[] = [
+                'item_id'      => $item->id,
+                'label'        => $item->name,
+                'total'        => $total,
+                'in_use'       => $inUse,
+                'available'    => $available,
+                'other_events' => $otherEvents,
+            ];
+        }
+
+        $otherBookings = FacilityRequest::where('venue_requested', $facilityRequest->venue_requested)
+            ->where('date_of_event', $facilityRequest->date_of_event)
+            ->where('id', '!=', $facilityRequest->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->with('user')
+            ->get(['id', 'title_of_event', 'time_of_event', 'status', 'user_id']);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'inventory'               => $inventoryStatus,
+                'other_bookings_same_day' => $otherBookings,
+            ]
         ]);
     }
 

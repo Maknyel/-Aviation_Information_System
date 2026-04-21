@@ -20,7 +20,7 @@
         </div>
 
         <!-- Work Order Request Card -->
-        <div @click="showWorkOrderModal = true" class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
+        <div v-if="canSubmitWorkOrders" @click="showWorkOrderModal = true" class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white cursor-pointer hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Work<br/>Order<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@
     <FacilityRequestModal v-model="showFacilityModal" @success="handleFacilityRequestSuccess" />
 
     <!-- Work Order Modal -->
-    <WorkOrderModal v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
+    <WorkOrderModal v-if="canSubmitWorkOrders" v-model="showWorkOrderModal" @success="handleWorkOrderSuccess" />
 
   </AppLayout>
 </template>
@@ -198,6 +198,10 @@ import { useDashboard } from '@/composables/useDashboard';
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
+
+const canSubmitWorkOrders = computed(() =>
+  ['Admin', 'Staff', 'Employee'].includes(user.value?.role?.name)
+);
 const {
   statistics,
   venueUsageData,

@@ -10,24 +10,24 @@
       <!-- Action Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Facility Request Card -->
-        <div class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
+        <!-- <div class="bg-gradient-to-br from-aviation-olive to-green-700 rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Facility<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
           </div>
-        </div>
+        </div> -->
 
         <!-- Work Order Request Card -->
-        <div class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
+        <!-- <div class="bg-gradient-to-br from-green-600 to-aviation-olive rounded-xl shadow-lg p-8 text-white hover:shadow-xl transition-all">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-2xl font-bold">Work<br/>Order<br/>Request</h3>
             <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Layout Grid: Calendar, Stats, Charts -->

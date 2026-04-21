@@ -15,6 +15,8 @@ import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import EmailTestPage from '../views/EmailTestPage.vue'
 import DepartmentsPage from '../views/DepartmentsPage.vue'
 import ResetPasswordPage from '../views/ResetPasswordPage.vue'
+import InventoryPage from '../views/InventoryPage.vue'
+import FormManagementPage from '../views/FormManagementPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -46,6 +48,7 @@ const routes: Array<RouteRecordRaw> = [
         const role = user?.role?.name;
 
         if (role === 'Requester') return '/requester-dashboard';
+        if (role === 'Employee') return '/requester-dashboard';
         if (role === 'Staff') return '/staff-dashboard';
         if (role === 'Admin') return '/admin-dashboard';
       }
@@ -117,6 +120,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/email-templates',
     name: 'EmailTemplates',
     component: EmailTestPage,
+    meta: { requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/inventory',
+    name: 'Inventory',
+    component: InventoryPage,
+    meta: { requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/form-management',
+    name: 'FormManagement',
+    component: FormManagementPage,
     meta: { requiresAuth: true, role: 'Admin' }
   },
   {

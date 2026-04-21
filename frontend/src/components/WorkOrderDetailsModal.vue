@@ -71,7 +71,25 @@
     <FeedbackForm v-if="order?.id" :request-type="'work_order'" :request-id="order.id" :request-status="order?.status" />
 
     <template #footer>
-      <div class="flex justify-center gap-8">
+      <div class="flex flex-wrap justify-center gap-3">
+        <button
+          v-if="canApprove"
+          type="button"
+          @click="saveRequest"
+          :disabled="saving"
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+        >
+          {{ saving ? 'Saving...' : (saved ? 'Saved' : 'Save') }}
+        </button>
+        <button
+          v-if="canApprove"
+          type="button"
+          @click="printRequest"
+          :disabled="printing"
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+        >
+          {{ printing ? '...' : 'Print' }}
+        </button>
         <button
           v-if="canApprove && order?.status === 'pending'"
           type="button"
@@ -122,6 +140,57 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['update:modelValue', 'statusUpdated']);
 
 const updating = ref(false);
+const saving = ref(false);
+const saved = ref(false);
+const printing = ref(false);
+
+const saveRequest = async () => {
+  if (!props.order) return;
+  saving.value = true;
+  try {
+    const res = await fetch(`${API_URL}/form-templates/save-request`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ request_type: 'work_order', request_id: props.order.id }),
+    });
+    const data = await res.json();
+    if (data.success) saved.value = true;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    saving.value = false;
+  }
+};
+
+const printRequest = async () => {
+  if (!props.order) return;
+  printing.value = true;
+  try {
+    const res = await fetch(`${API_URL}/form-templates/print/work_order/${props.order.id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, Accept: 'application/json' },
+    });
+    const data = await res.json();
+    if (data.success) {
+      const w = window.open('', '_blank');
+      if (!w) return;
+      const rows = Object.entries(data.data)
+        .filter(([k]) => k !== 'type' && k !== 'id')
+        .map(([k, v]) => `<tr><td style="font-weight:600;padding:6px 12px;color:#555;min-width:140px;text-transform:capitalize">${k.replace(/_/g,' ')}</td><td style="padding:6px 12px">${Array.isArray(v) ? (v as string[]).join(', ') : v}</td></tr>`)
+        .join('');
+      w.document.write(`<html><head><title>${data.data.type} #${data.data.id}</title><style>body{font-family:sans-serif;padding:24px}h2{margin-bottom:16px}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid #eee;font-size:13px}</style></head><body><h2>${data.data.type} #${data.data.id}</h2><table>${rows}</table></body></html>`);
+      w.document.close();
+      w.print();
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    printing.value = false;
+  }
+};
 
 const isOpen = computed({
   get: () => props.modelValue,

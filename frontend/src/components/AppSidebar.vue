@@ -193,6 +193,34 @@ const AuditIcon = () => h('svg', {
   })
 ]);
 
+const InventoryIcon = () => h('svg', {
+  fill: 'none',
+  stroke: 'currentColor',
+  viewBox: '0 0 24 24',
+  class: 'w-5 h-5'
+}, [
+  h('path', {
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'stroke-width': '2',
+    d: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+  })
+]);
+
+const FormIcon = () => h('svg', {
+  fill: 'none',
+  stroke: 'currentColor',
+  viewBox: '0 0 24 24',
+  class: 'w-5 h-5'
+}, [
+  h('path', {
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'stroke-width': '2',
+    d: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z'
+  })
+]);
+
 // Menu items based on role
 const menuItems = computed(() => {
   const role = props.user?.role?.name;
@@ -206,23 +234,26 @@ const menuItems = computed(() => {
       ...baseMenu,
       { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
+      { path: '/inventory', label: 'Inventory', icon: InventoryIcon },
+      { path: '/form-management', label: 'Form Management', icon: FormIcon },
       { path: '/users', label: 'User Management', icon: UsersIcon },
       { path: '/departments', label: 'Departments', icon: DepartmentsIcon },
       { path: '/reports', label: 'Reports', icon: ReportsIcon },
       { path: '/activity-logs', label: 'Audit Logs', icon: AuditIcon },
-      // { path: '/email-templates', label: 'Email Templates', icon: EmailIcon },
     ];
   } else if (role === 'Staff') {
     return [
       ...baseMenu,
-      // { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
-      // { path: '/reports', label: 'Reports', icon: ReportsIcon },
+    ];
+  } else if (role === 'Employee') {
+    return [
+      ...baseMenu,
+      { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   } else if (role === 'Requester') {
     return [
       ...baseMenu,
-      // { path: '/calendar', label: 'Calendar', icon: CalendarIcon },
       { path: '/requests', label: 'Request', icon: RequestsIcon },
     ];
   }

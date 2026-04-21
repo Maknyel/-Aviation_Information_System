@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\EmailController;
+use App\Http\Controllers\Api\InventoryController;
+use App\Http\Controllers\Api\FormTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Facility Request routes
     Route::apiResource('facility-requests', FacilityRequestController::class);
     Route::patch('/facility-requests/{id}/status', [FacilityRequestController::class, 'updateStatus']);
+    Route::get('/facility-requests/{id}/inventory-check', [FacilityRequestController::class, 'inventoryCheck']);
     Route::post('/facility-requests/check-conflict', [FacilityRequestController::class, 'checkConflict']);
 
     // Work Order routes
@@ -90,6 +93,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Activity Log routes
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    // Inventory routes
+    Route::get('/inventory/facility-availability', [InventoryController::class, 'facilityAvailability']);
+    Route::get('/inventory/overview', [InventoryController::class, 'overview']);
+    Route::get('/inventory/{id}/assignments', [InventoryController::class, 'assignments']);
+    Route::post('/inventory/{id}/assign', [InventoryController::class, 'assign']);
+    Route::patch('/inventory/assignments/{assignmentId}/return', [InventoryController::class, 'returnAssignment']);
+    Route::apiResource('inventory', InventoryController::class);
+
+    // Form Template routes
+    Route::get('/form-templates/saved', [FormTemplateController::class, 'savedForms']);
+    Route::post('/form-templates/save-request', [FormTemplateController::class, 'saveRequest']);
+    Route::get('/form-templates/print/{type}/{id}', [FormTemplateController::class, 'printRequest']);
+    Route::get('/form-templates/{id}/download', [FormTemplateController::class, 'download']);
+    Route::apiResource('form-templates', FormTemplateController::class)->except(['show']);
 
     // Email routes (Admin only)
     Route::get('/email/templates', [EmailController::class, 'templates']);
