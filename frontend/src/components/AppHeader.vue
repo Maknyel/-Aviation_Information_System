@@ -84,7 +84,10 @@ const closeDropdown = () => {
 
 const getProfilePictureUrl = (path: string) => {
   if (!path) return '';
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const baseUrl = isLocal
+    ? (import.meta.env.VITE_API_URL_LOCAL || 'http://localhost:8000/api')
+    : (import.meta.env.VITE_API_URL || 'http://localhost:8000/api');
   return `${baseUrl.replace('/api', '')}/storage/${path}`;
 };
 
