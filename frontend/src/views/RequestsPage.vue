@@ -324,7 +324,6 @@ const viewRequestDetails = async (type: string, id: number) => {
 };
 
 const handleStatusUpdated = () => {
-  toast.success('Status updated successfully');
   fetchRequests();
   fetchCalendarEvents();
 };

@@ -241,6 +241,7 @@ const handleStatusUpdate = async (status: 'approved' | 'rejected') => {
       throw new Error(data.message || 'Failed to update status');
     }
 
+    toast.success(status === 'approved' ? 'Work order approved successfully' : 'Work order disapproved');
     emit('statusUpdated', data.data);
     close();
   } catch (error) {

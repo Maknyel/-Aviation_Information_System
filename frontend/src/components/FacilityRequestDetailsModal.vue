@@ -344,6 +344,7 @@ const updateStatus = async (status: 'approved' | 'rejected') => {
       throw new Error(data.message || 'Failed to update status');
     }
 
+    toast.success(status === 'approved' ? 'Request approved successfully' : 'Request disapproved');
     emit('statusUpdated', data.data);
     close();
   } catch (error) {
