@@ -20,6 +20,7 @@ class User extends Authenticatable
         'role_id',
         'department_id',
         'profile_picture',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'must_change_password' => 'boolean',
     ];
 
     public function role()

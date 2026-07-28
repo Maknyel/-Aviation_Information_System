@@ -12,8 +12,12 @@ class EmailController extends Controller
     /**
      * Get available email templates.
      */
-    public function templates()
+    public function templates(Request $request)
     {
+        if ($request->user()->role->name !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         return response()->json([
             'success' => true,
             'data' => EmailHelper::getAvailableTemplates(),
@@ -25,6 +29,10 @@ class EmailController extends Controller
      */
     public function preview(Request $request)
     {
+        if ($request->user()->role->name !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'template' => 'required|string|in:status-update,assignment,approval-required,welcome',
         ]);
@@ -55,6 +63,10 @@ class EmailController extends Controller
      */
     public function sendTest(Request $request)
     {
+        if ($request->user()->role->name !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'template' => 'required|string|in:status-update,assignment,approval-required,welcome',
@@ -78,8 +90,12 @@ class EmailController extends Controller
     /**
      * Get current SMTP configuration status (no secrets exposed).
      */
-    public function smtpStatus()
+    public function smtpStatus(Request $request)
     {
+        if ($request->user()->role->name !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $configured = config('mail.mailers.smtp.host') !== 'mailpit'
             && config('mail.mailers.smtp.username') !== null
             && config('mail.mailers.smtp.username') !== 'null';

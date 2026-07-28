@@ -179,6 +179,9 @@ import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FormTemplateUploadModal from '@/components/FormTemplateUploadModal.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 const activeTab = ref('templates');
 const tabs = [
@@ -255,12 +258,15 @@ const fetchSavedForms = async () => {
 
 const downloadTemplate = (template: any) => {
   const a = document.createElement('a');
-  a.href = `${API_URL}/form-templates/${template.id}/download`;
+  const downloadUrl = `${API_URL}/form-templates/${template.id}/download`;
   a.setAttribute('download', template.file_name);
 
   const token = localStorage.getItem('token');
-  fetch(a.href, { headers: { Authorization: `Bearer ${token}` } })
-    .then(res => res.blob())
+  fetch(downloadUrl, { headers: { Authorization: `Bearer ${token}` } })
+    .then(res => {
+      if (!res.ok) throw new Error('Download failed');
+      return res.blob();
+    })
     .then(blob => {
       const url = URL.createObjectURL(blob);
       a.href = url;
@@ -268,10 +274,15 @@ const downloadTemplate = (template: any) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    })
+    .catch((e) => {
+      console.error(e);
+      toast.error('Failed to download template');
     });
 };
 
 const handleUploaded = () => {
+  toast.success('Template uploaded successfully');
   fetchTemplates();
 };
 
@@ -291,10 +302,14 @@ const deleteTemplate = async () => {
     const data = await res.json();
     if (data.success) {
       showDeleteConfirm.value = false;
+      toast.success('Template deleted successfully');
       fetchTemplates();
+    } else {
+      toast.error(data.message || 'Failed to delete template');
     }
   } catch (e) {
     console.error(e);
+    toast.error('Failed to delete template');
   } finally {
     deleting.value = false;
   }
@@ -309,9 +324,12 @@ const printSavedRequest = async (saved: any) => {
     if (data.success) {
       printData.value = data.data;
       showPrintModal.value = true;
+    } else {
+      toast.error(data.message || 'Failed to load print preview');
     }
   } catch (e) {
     console.error(e);
+    toast.error('Failed to load print preview');
   }
 };
 

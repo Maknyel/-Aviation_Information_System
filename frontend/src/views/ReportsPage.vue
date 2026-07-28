@@ -8,6 +8,13 @@
         </select>
       </div>
 
+      <div v-if="loading" class="p-8 text-center text-gray-500">Loading reports...</div>
+      <div v-else-if="loadError" class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <span>{{ loadError }}</span>
+        <button @click="loadReports" class="px-3 py-1 text-sm bg-red-100 rounded-lg hover:bg-red-200">Retry</button>
+      </div>
+      <template v-else>
+
       <!-- Summary Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
@@ -29,11 +36,11 @@
       </div>
 
       <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
         <!-- Monthly Volume Chart -->
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Request Volume ({{ selectedYear }})</h3>
-          <div class="h-64">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Monthly Request Volume ({{ selectedYear }})</h3>
+          <div class="h-96">
             <StatsChart
               v-if="monthlyVolume.labels.length"
               type="bar"
@@ -42,14 +49,14 @@
               title="Facility Requests"
               :backgroundColor="'#4A7C59'"
             />
-            <p v-else class="text-gray-400 text-sm text-center mt-20">No data available</p>
+            <p v-else class="text-gray-400 text-sm text-center mt-32">No data available</p>
           </div>
         </div>
 
         <!-- Completion Time Chart -->
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
-          <div class="h-64">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
+          <div class="h-96">
             <StatsChart
               v-if="completionTime.labels.length"
               type="line"
@@ -59,7 +66,7 @@
               :backgroundColor="'#5A8C69'"
               :borderColor="'#4A7C59'"
             />
-            <p v-else class="text-gray-400 text-sm text-center mt-20">No data available</p>
+            <p v-else class="text-gray-400 text-sm text-center mt-32">No data available</p>
           </div>
         </div>
       </div>
@@ -127,6 +134,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
   </AppLayout>
 </template>
@@ -146,6 +154,8 @@ const monthlyVolume = ref<any>({ labels: [], facility_requests: [], work_orders:
 const completionTime = ref<any>({ labels: [], values: [] });
 const staffPerformance = ref<any[]>([]);
 const hotspots = ref<any[]>([]);
+const loading = ref(false);
+const loadError = ref('');
 
 const maxHotspot = computed(() => Math.max(...hotspots.value.map((h: any) => h.total_orders), 1));
 
@@ -155,26 +165,35 @@ const getAuthHeaders = () => ({
 });
 
 const loadReports = async () => {
-  const year = selectedYear.value;
-  const headers = getAuthHeaders();
+  loading.value = true;
+  loadError.value = '';
+  try {
+    const year = selectedYear.value;
+    const headers = getAuthHeaders();
 
-  const [summaryRes, volumeRes, completionRes, perfRes, hotspotsRes] = await Promise.all([
-    fetch(`${API_URL}/reports/summary`, { headers }),
-    fetch(`${API_URL}/reports/monthly-volume?year=${year}`, { headers }),
-    fetch(`${API_URL}/reports/completion-time?year=${year}`, { headers }),
-    fetch(`${API_URL}/reports/staff-performance?year=${year}`, { headers }),
-    fetch(`${API_URL}/reports/hotspots`, { headers }),
-  ]);
+    const [summaryRes, volumeRes, completionRes, perfRes, hotspotsRes] = await Promise.all([
+      fetch(`${API_URL}/reports/summary`, { headers }),
+      fetch(`${API_URL}/reports/monthly-volume?year=${year}`, { headers }),
+      fetch(`${API_URL}/reports/completion-time?year=${year}`, { headers }),
+      fetch(`${API_URL}/reports/staff-performance?year=${year}`, { headers }),
+      fetch(`${API_URL}/reports/hotspots`, { headers }),
+    ]);
 
-  const [summaryData, volumeData, completionData, perfData, hotspotsData] = await Promise.all([
-    summaryRes.json(), volumeRes.json(), completionRes.json(), perfRes.json(), hotspotsRes.json(),
-  ]);
+    const [summaryData, volumeData, completionData, perfData, hotspotsData] = await Promise.all([
+      summaryRes.json(), volumeRes.json(), completionRes.json(), perfRes.json(), hotspotsRes.json(),
+    ]);
 
-  if (summaryData.success) summary.value = summaryData.data;
-  if (volumeData.success) monthlyVolume.value = volumeData.data;
-  if (completionData.success) completionTime.value = completionData.data;
-  if (perfData.success) staffPerformance.value = perfData.data;
-  if (hotspotsData.success) hotspots.value = hotspotsData.data;
+    if (summaryData.success) summary.value = summaryData.data;
+    if (volumeData.success) monthlyVolume.value = volumeData.data;
+    if (completionData.success) completionTime.value = completionData.data;
+    if (perfData.success) staffPerformance.value = perfData.data;
+    if (hotspotsData.success) hotspots.value = hotspotsData.data;
+  } catch (e) {
+    console.error(e);
+    loadError.value = 'Failed to load reports. Please try again.';
+  } finally {
+    loading.value = false;
+  }
 };
 
 onMounted(() => loadReports());

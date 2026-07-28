@@ -37,6 +37,7 @@ class ProfileController extends Controller
                 ]);
             }
             $user->password = Hash::make($request->password);
+            $user->must_change_password = false;
         }
 
         if ($request->hasFile('profile_picture')) {

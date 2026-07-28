@@ -154,12 +154,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Modal from './Modal.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 interface Props {
   modelValue: boolean;
+  presetDate?: string;
 }
 
 const props = defineProps<Props>();
@@ -178,6 +182,12 @@ const formData = ref({
   description_of_problem: '',
   requisitioner: '',
   priority: 'medium'
+});
+
+watch(() => props.modelValue, (open) => {
+  if (open && props.presetDate) {
+    formData.value.date = props.presetDate;
+  }
 });
 
 const imageFile = ref<File | null>(null);
@@ -283,6 +293,7 @@ const submitForm = async () => {
     }, 1500);
   } catch (err: any) {
     error.value = err.message || 'An error occurred while submitting the work order';
+    toast.error(error.value);
   } finally {
     loading.value = false;
   }

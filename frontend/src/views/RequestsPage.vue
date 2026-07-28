@@ -148,6 +148,10 @@ import WorkOrderModal from '@/components/WorkOrderModal.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 const user = ref<any>(null);
 const activeFilter = ref('all');
@@ -229,6 +233,7 @@ const fetchRequests = async () => {
 };
 
 const handleRequestSuccess = (_request: any) => {
+  toast.success('Request submitted successfully');
   fetchRequests();
   fetchCalendarEvents();
 };
@@ -286,6 +291,7 @@ const viewRequestDetails = async (type: string, id: number) => {
       showDetailsModal.value = true;
     } catch (error) {
       console.error('Error fetching request details:', error);
+      toast.error('Failed to load request details');
     } finally {
       loadingDetails.value = false;
     }
@@ -310,6 +316,7 @@ const viewRequestDetails = async (type: string, id: number) => {
       showWorkOrderDetailsModal.value = true;
     } catch (error) {
       console.error('Error fetching work order details:', error);
+      toast.error('Failed to load work order details');
     } finally {
       loadingDetails.value = false;
     }
@@ -317,6 +324,7 @@ const viewRequestDetails = async (type: string, id: number) => {
 };
 
 const handleStatusUpdated = () => {
+  toast.success('Status updated successfully');
   fetchRequests();
   fetchCalendarEvents();
 };
@@ -326,10 +334,7 @@ watch(activeFilter, () => {
 });
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
   if (!canAccessWorkOrders.value && requestType.value === 'workorder') {
     requestType.value = 'facility';
   }

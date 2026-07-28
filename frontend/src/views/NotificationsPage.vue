@@ -107,6 +107,7 @@ import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
 
 const user = ref<any>(null);
 const showDetailsModal = ref(false);
@@ -250,10 +251,7 @@ const handleStatusUpdated = () => {
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
   fetchAllRequests();
 });
 </script>

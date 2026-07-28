@@ -171,6 +171,7 @@ import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModa
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
 import { useDashboard } from '@/composables/useDashboard';
+import { getStoredUser } from '@/utils/auth';
 
 const {
   calendarEvents,
@@ -318,10 +319,7 @@ watch(activeFilter, () => {
 });
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
   fetchRequests();
   fetchCalendarEvents();
 });

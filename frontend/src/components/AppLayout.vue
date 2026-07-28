@@ -22,6 +22,7 @@
 import { ref, onMounted } from 'vue';
 import AppHeader from './AppHeader.vue';
 import AppSidebar from './AppSidebar.vue';
+import { getStoredUser } from '@/utils/auth';
 
 const user = ref<any>(null);
 const sidebarOpen = ref(false);
@@ -31,9 +32,6 @@ const toggleSidebar = () => {
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
 });
 </script>

@@ -126,6 +126,10 @@ import { computed, ref } from 'vue';
 import Modal from './Modal.vue';
 import FeedbackForm from './FeedbackForm.vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser, escapeHtml } from '@/utils/auth';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 interface Props {
   modelValue: boolean;
@@ -179,9 +183,9 @@ const printRequest = async () => {
       if (!w) return;
       const rows = Object.entries(data.data)
         .filter(([k]) => k !== 'type' && k !== 'id')
-        .map(([k, v]) => `<tr><td style="font-weight:600;padding:6px 12px;color:#555;min-width:140px;text-transform:capitalize">${k.replace(/_/g,' ')}</td><td style="padding:6px 12px">${Array.isArray(v) ? (v as string[]).join(', ') : v}</td></tr>`)
+        .map(([k, v]) => `<tr><td style="font-weight:600;padding:6px 12px;color:#555;min-width:140px;text-transform:capitalize">${escapeHtml(k.replace(/_/g,' '))}</td><td style="padding:6px 12px">${escapeHtml(Array.isArray(v) ? (v as string[]).join(', ') : v)}</td></tr>`)
         .join('');
-      w.document.write(`<html><head><title>${data.data.type} #${data.data.id}</title><style>body{font-family:sans-serif;padding:24px}h2{margin-bottom:16px}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid #eee;font-size:13px}</style></head><body><h2>${data.data.type} #${data.data.id}</h2><table>${rows}</table></body></html>`);
+      w.document.write(`<html><head><title>${escapeHtml(data.data.type)} #${escapeHtml(data.data.id)}</title><style>body{font-family:sans-serif;padding:24px}h2{margin-bottom:16px}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid #eee;font-size:13px}</style></head><body><h2>${escapeHtml(data.data.type)} #${escapeHtml(data.data.id)}</h2><table>${rows}</table></body></html>`);
       w.document.close();
       w.print();
     }
@@ -198,9 +202,7 @@ const isOpen = computed({
 });
 
 const canApprove = computed(() => {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return false;
-  const user = JSON.parse(userStr);
+  const user = getStoredUser();
   return user?.role?.name === 'Staff' || user?.role?.name === 'Admin';
 });
 
@@ -243,6 +245,7 @@ const handleStatusUpdate = async (status: 'approved' | 'rejected') => {
     close();
   } catch (error) {
     console.error('Error updating status:', error);
+    toast.error('Failed to update status. Please try again.');
   } finally {
     updating.value = false;
   }

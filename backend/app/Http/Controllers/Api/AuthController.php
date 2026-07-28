@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Rules\AllowedEmailDomain;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -129,7 +130,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => ['required', 'email', 'unique:users', new AllowedEmailDomain],
             'password' => 'required|string|min:8|confirmed',
         ]);
 

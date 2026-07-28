@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import CalendarPage from '../views/CalendarPage.vue'
 import RequestsPage from '../views/RequestsPage.vue'
@@ -17,6 +16,8 @@ import DepartmentsPage from '../views/DepartmentsPage.vue'
 import ResetPasswordPage from '../views/ResetPasswordPage.vue'
 import InventoryPage from '../views/InventoryPage.vue'
 import FormManagementPage from '../views/FormManagementPage.vue'
+import NotFoundPage from '../views/NotFoundPage.vue'
+import { getStoredUser } from '../utils/auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -41,17 +42,14 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/home',
     name: 'Home',
-    redirect: (to) => {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        const role = user?.role?.name;
+    redirect: () => {
+      const role = getStoredUser()?.role?.name;
 
-        if (role === 'Requester') return '/requester-dashboard';
-        if (role === 'Employee') return '/requester-dashboard';
-        if (role === 'Staff') return '/staff-dashboard';
-        if (role === 'Admin') return '/admin-dashboard';
-      }
+      if (role === 'Requester') return '/requester-dashboard';
+      if (role === 'Employee') return '/requester-dashboard';
+      if (role === 'Staff') return '/staff-dashboard';
+      if (role === 'Admin') return '/admin-dashboard';
+
       return '/requester-dashboard';
     },
     meta: { requiresAuth: true }
@@ -139,6 +137,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Profile',
     component: ProfilePage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFoundPage
   }
 ]
 
@@ -152,11 +155,29 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !token) {
     next('/login');
-  } else if (to.path === '/login' && token) {
-    next('/home');
-  } else {
-    next();
+    return;
   }
+
+  if (to.path === '/login' && token) {
+    next('/home');
+    return;
+  }
+
+  if (token && to.meta.requiresAuth && to.path !== '/profile' && getStoredUser()?.must_change_password) {
+    next('/profile');
+    return;
+  }
+
+  const requiredRole = to.meta.role as string | undefined;
+  if (requiredRole && token) {
+    const userRole = getStoredUser()?.role?.name;
+    if (userRole !== requiredRole) {
+      next('/home');
+      return;
+    }
+  }
+
+  next();
 })
 
 export default router

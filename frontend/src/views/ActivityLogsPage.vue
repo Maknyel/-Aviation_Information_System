@@ -5,7 +5,7 @@
 
       <!-- Filters -->
       <div class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-gray-100 flex flex-wrap gap-4">
-        <select v-model="actionFilter" @change="fetchLogs" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
+        <select v-model="actionFilter" @change="applyFilters" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
           <option value="all">All Actions</option>
           <option value="created">Created</option>
           <option value="updated">Updated</option>
@@ -15,15 +15,15 @@
           <option value="login">Login</option>
           <option value="logout">Logout</option>
         </select>
-        <select v-model="modelFilter" @change="fetchLogs" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
+        <select v-model="modelFilter" @change="applyFilters" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
           <option value="all">All Types</option>
           <option value="FacilityRequest">Facility Requests</option>
           <option value="WorkOrder">Work Orders</option>
           <option value="User">Users</option>
           <option value="Department">Departments</option>
         </select>
-        <input v-model="dateFrom" @change="fetchLogs" type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" placeholder="From" />
-        <input v-model="dateTo" @change="fetchLogs" type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" placeholder="To" />
+        <input v-model="dateFrom" @change="applyFilters" type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" placeholder="From" />
+        <input v-model="dateTo" @change="applyFilters" type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" placeholder="To" />
       </div>
 
       <!-- Logs List -->
@@ -142,6 +142,11 @@ const fetchLogs = async () => {
 
 const goToPage = (page: number) => {
   currentPage.value = page;
+  fetchLogs();
+};
+
+const applyFilters = () => {
+  currentPage.value = 1;
   fetchLogs();
 };
 

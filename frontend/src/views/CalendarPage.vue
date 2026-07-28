@@ -193,19 +193,27 @@
               <div
                 v-for="date in mainCalendarDates"
                 :key="date.key"
+                @click="date.isCurrentMonth && openCreateForDate(date.dateObj)"
                 :class="[
-                  'bg-white p-2 min-h-[100px] relative',
-                  date.isCurrentMonth ? '' : 'bg-gray-50'
+                  'bg-white p-2 min-h-[100px] relative group',
+                  date.isCurrentMonth ? 'cursor-pointer hover:bg-aviation-olive/5' : 'bg-gray-50'
                 ]"
               >
-                <div
-                  :class="[
-                    'text-sm font-medium mb-1',
-                    date.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
-                    date.isToday ? 'w-6 h-6 bg-aviation-olive text-white rounded-full flex items-center justify-center' : ''
-                  ]"
-                >
-                  {{ date.date }}
+                <div class="flex items-center justify-between mb-1">
+                  <div
+                    :class="[
+                      'text-sm font-medium',
+                      date.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
+                      date.isToday ? 'w-6 h-6 bg-aviation-olive text-white rounded-full flex items-center justify-center' : ''
+                    ]"
+                  >
+                    {{ date.date }}
+                  </div>
+                  <span
+                    v-if="date.isCurrentMonth"
+                    class="text-aviation-olive opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                    title="New request on this date"
+                  >+</span>
                 </div>
 
                 <!-- Events for this date -->
@@ -213,7 +221,7 @@
                   <div
                     v-for="event in date.events"
                     :key="event.id"
-                    @click="viewEventDetails(event)"
+                    @click.stop="viewEventDetails(event)"
                     :class="[
                       'text-xs p-2 rounded cursor-pointer shadow-sm',
                       event.type === 'facility' ? 'bg-blue-500 text-white' : 'bg-orange-400 text-white'
@@ -243,6 +251,13 @@
       :order="selectedWorkOrder"
       @statusUpdated="handleStatusUpdated"
     />
+
+    <!-- New Request Modal (opened by clicking a calendar date) -->
+    <FacilityRequestModal
+      v-model="showCreateModal"
+      :preset-date="createPresetDate"
+      @success="handleCreateSuccess"
+    />
   </AppLayout>
 </template>
 
@@ -251,7 +266,11 @@ import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
+import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 const miniCurrentDate = ref(new Date());
 const mainCurrentDate = ref(new Date());
@@ -262,6 +281,8 @@ const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
 const selectedFacilityRequest = ref<any>(null);
 const selectedWorkOrder = ref<any>(null);
+const showCreateModal = ref(false);
+const createPresetDate = ref('');
 const showMiniMonthDropdown = ref(false);
 const showMiniYearDropdown = ref(false);
 const showMainMonthDropdown = ref(false);
@@ -472,6 +493,19 @@ function viewEventDetails(event: any) {
 }
 
 function handleStatusUpdated() {
+  fetchEvents();
+}
+
+function openCreateForDate(dateObj: Date) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  createPresetDate.value = `${y}-${m}-${d}`;
+  showCreateModal.value = true;
+}
+
+function handleCreateSuccess() {
+  toast.success('Request submitted successfully');
   fetchEvents();
 }
 

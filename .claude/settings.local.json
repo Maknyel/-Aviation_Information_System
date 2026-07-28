@@ -7,7 +7,12 @@
       "Bash(npm install:*)",
       "Bash(npx tailwindcss init -p)",
       "Bash(npm uninstall:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(grep -n 'protected $fillable' -A 20 d:/-Aviation_Information_System/backend/app/Models/WorkOrder.php d:/-Aviation_Information_System/backend/app/Models/FacilityRequest.php)",
+      "Bash(grep -n 'casts\\\\|CARBON_FORMAT\\\\|serializeDate\\\\|protected $dates' d:/-Aviation_Information_System/backend/app/Models/ActivityLog.php)",
+      "Bash(php artisan *)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(npm run *)"
     ]
   }
 }

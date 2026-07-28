@@ -48,6 +48,7 @@ import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModa
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { useDashboard } from '@/composables/useDashboard';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
 
 const props = withDefaults(defineProps<{
   limit?: number;
@@ -135,10 +136,7 @@ const refresh = () => {
 defineExpose({ refresh });
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
   fetchUpcomingRequests();
 });
 </script>

@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
 
 const props = defineProps<{
   requestType: 'facility_request' | 'work_order';
@@ -62,9 +63,8 @@ const loadFeedback = async () => {
     const data = await res.json();
     if (data.success) {
       feedbacks.value = data.data.feedbacks;
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
+      const user = getStoredUser();
+      if (user) {
         existingFeedback.value = feedbacks.value.find((f: any) => f.user_id === user.id) || null;
       }
     }

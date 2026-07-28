@@ -128,6 +128,9 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import Modal from './Modal.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 interface InventoryItem {
   id: number;
@@ -144,7 +147,7 @@ interface AvailabilityInfo {
   available: number;
 }
 
-const props = defineProps<{ modelValue: boolean }>();
+const props = defineProps<{ modelValue: boolean; presetDate?: string }>();
 const emit = defineEmits(['update:modelValue', 'success']);
 
 const isOpen = computed({
@@ -158,6 +161,12 @@ const formData = ref({
   title_of_event: '',
   time_of_event: '',
   date_of_event: '',
+});
+
+watch(() => props.modelValue, (open) => {
+  if (open && props.presetDate) {
+    formData.value.date_of_event = props.presetDate;
+  }
 });
 
 // { inventory_item_id: quantity }
@@ -297,6 +306,7 @@ const submitForm = async () => {
     setTimeout(() => closeModal(), 1500);
   } catch (err: any) {
     error.value = err.message || 'An error occurred';
+    toast.error(error.value);
   } finally {
     loading.value = false;
   }

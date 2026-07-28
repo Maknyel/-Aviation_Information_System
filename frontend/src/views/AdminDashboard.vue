@@ -182,6 +182,7 @@ import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import UpcomingRequests from '@/components/UpcomingRequests.vue';
 import { API_URL } from '@/config/api';
 import { useDashboard } from '@/composables/useDashboard';
+import { getStoredUser } from '@/utils/auth';
 
 const {
   statistics,
@@ -294,10 +295,7 @@ const handleStatusUpdated = () => {
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
   loadAllDashboardData();
 });
 </script>

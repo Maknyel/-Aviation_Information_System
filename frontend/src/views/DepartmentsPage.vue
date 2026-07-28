@@ -96,6 +96,9 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 const departments = ref<any[]>([]);
 const loading = ref(false);
@@ -166,13 +169,16 @@ const saveDepartment = async () => {
 
     if (!res.ok) {
       formError.value = data.message || 'Failed to save department';
+      toast.error(formError.value);
       return;
     }
 
     showModal.value = false;
+    toast.success(editingDept.value ? 'Department updated successfully' : 'Department created successfully');
     fetchDepartments();
   } catch (e: any) {
     formError.value = e.message;
+    toast.error(formError.value || 'Failed to save department');
   } finally {
     saving.value = false;
   }
@@ -186,11 +192,18 @@ const confirmDelete = (dept: any) => {
 const deleteDepartment = async () => {
   saving.value = true;
   try {
-    await fetch(`${API_URL}/departments/${deletingDept.value.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/departments/${deletingDept.value.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      toast.error(data.message || 'Failed to delete department');
+      return;
+    }
     showDeleteModal.value = false;
+    toast.success('Department deleted successfully');
     fetchDepartments();
   } catch (e) {
     console.error(e);
+    toast.error('Failed to delete department');
   } finally {
     saving.value = false;
   }

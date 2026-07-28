@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getStoredUser } from '@/utils/auth';
 
 const emit = defineEmits(['toggleSidebar']);
 const router = useRouter();
@@ -98,9 +99,6 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
-  }
+  user.value = getStoredUser();
 });
 </script>

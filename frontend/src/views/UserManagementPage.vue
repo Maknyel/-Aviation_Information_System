@@ -87,6 +87,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input v-model="userForm.email" type="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" />
+            <p class="text-xs text-gray-400 mt-1">Must be a recognized provider (Gmail, Yahoo, Outlook, etc.)</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Password {{ editingUser ? '(leave blank to keep)' : '' }}</label>
@@ -169,6 +170,10 @@
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import { API_URL } from '@/config/api';
+import { useToast } from '@/composables/useToast';
+import { isAllowedEmailDomain } from '@/utils/validation';
+
+const toast = useToast();
 
 const users = ref<any[]>([]);
 const roles = ref<any[]>([]);
@@ -252,6 +257,12 @@ const openEditModal = (user: any) => {
 };
 
 const saveUser = async () => {
+  if (!isAllowedEmailDomain(userForm.value.email)) {
+    formError.value = 'Please use a recognized email provider (Gmail, Yahoo, Outlook, etc.)';
+    toast.error(formError.value);
+    return;
+  }
+
   saving.value = true;
   formError.value = '';
   try {
@@ -270,13 +281,16 @@ const saveUser = async () => {
 
     if (!res.ok) {
       formError.value = data.message || 'Failed to save user';
+      toast.error(formError.value);
       return;
     }
 
     showUserModal.value = false;
+    toast.success(editingUser.value ? 'User updated successfully' : 'User created successfully');
     fetchUsers();
   } catch (e: any) {
     formError.value = e.message;
+    toast.error(formError.value || 'Failed to save user');
   } finally {
     saving.value = false;
   }
@@ -297,11 +311,18 @@ const saveSkills = async () => {
       headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ skills: skillsForm.value }),
     });
-    await res.json();
+    const data = await res.json();
+    if (!res.ok || data.success === false) {
+      toast.error(data.message || 'Failed to save skills');
+      return;
+    }
     showSkillsModal.value = false;
+    toast.success('Skills updated successfully');
     fetchUsers();
-  } catch (e) { console.error(e); }
-  finally { saving.value = false; }
+  } catch (e) {
+    console.error(e);
+    toast.error('Failed to save skills');
+  } finally { saving.value = false; }
 };
 
 const confirmDelete = (user: any) => {
@@ -312,11 +333,19 @@ const confirmDelete = (user: any) => {
 const deleteUser = async () => {
   saving.value = true;
   try {
-    await fetch(`${API_URL}/users/${deletingUser.value.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/users/${deletingUser.value.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      toast.error(data.message || 'Failed to delete user');
+      return;
+    }
     showDeleteModal.value = false;
+    toast.success('User deleted successfully');
     fetchUsers();
-  } catch (e) { console.error(e); }
-  finally { saving.value = false; }
+  } catch (e) {
+    console.error(e);
+    toast.error('Failed to delete user');
+  } finally { saving.value = false; }
 };
 
 onMounted(() => {

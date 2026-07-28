@@ -10,6 +10,7 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\EmailHelper;
+use App\Rules\AllowedEmailDomain;
 
 class UserManagementController extends Controller
 {
@@ -53,13 +54,14 @@ class UserManagementController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => ['required', 'email', 'unique:users', new AllowedEmailDomain],
             'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id',
             'department_id' => 'nullable|exists:departments,id',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+        $validated['must_change_password'] = true;
 
         $user = User::create($validated);
 
@@ -101,7 +103,7 @@ class UserManagementController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'email' => ['sometimes', 'email', 'unique:users,email,' . $id, new AllowedEmailDomain],
             'password' => 'nullable|string|min:8',
             'role_id' => 'sometimes|exists:roles,id',
             'department_id' => 'nullable|exists:departments,id',
@@ -109,6 +111,7 @@ class UserManagementController extends Controller
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
+            $validated['must_change_password'] = true;
         } else {
             unset($validated['password']);
         }

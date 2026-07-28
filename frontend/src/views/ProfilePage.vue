@@ -6,6 +6,11 @@
             <p class="text-gray-600">Manage your account information</p>
           </div>
 
+          <!-- Forced Password Change Notice -->
+          <div v-if="user?.must_change_password" class="mb-6 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+            For your security, you must set a new password before continuing to use the system.
+          </div>
+
           <!-- Profile Form -->
           <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
             <!-- Profile Picture Section -->
@@ -127,6 +132,10 @@ import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 const user = ref<any>(null);
 const loading = ref(false);
@@ -219,6 +228,7 @@ const handleSubmit = async () => {
       user.value = response.data.user;
       localStorage.setItem('user', JSON.stringify(response.data.user));
       successMessage.value = 'Profile updated successfully!';
+      toast.success('Profile updated successfully');
 
       // Clear password fields
       formData.value.current_password = '';
@@ -236,15 +246,15 @@ const handleSubmit = async () => {
     } else {
       errorMessage.value = 'Failed to update profile. Please try again.';
     }
+    toast.error(errorMessage.value);
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    user.value = JSON.parse(userStr);
+  user.value = getStoredUser();
+  if (user.value) {
     formData.value.name = user.value.name;
     formData.value.email = user.value.email;
   }

@@ -180,7 +180,10 @@ import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import InventoryItemModal from '@/components/InventoryItemModal.vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const user = ref<any>(null);
 const isAdmin = computed(() => user.value?.role?.name === 'Admin');
 
@@ -280,6 +283,7 @@ const openEditModal = (item: any) => {
 
 
 const handleItemSaved = () => {
+  toast.success(editingItem.value ? 'Item updated successfully' : 'Item added successfully');
   fetchItems();
   fetchOverview();
 };
@@ -300,21 +304,22 @@ const deleteItem = async () => {
     const data = await res.json();
     if (data.success) {
       showDeleteConfirm.value = false;
+      toast.success('Item deleted successfully');
       fetchItems();
       fetchOverview();
     } else {
-      alert(data.message || 'Cannot delete item');
+      toast.error(data.message || 'Cannot delete item');
     }
   } catch (e) {
     console.error(e);
+    toast.error('Failed to delete item');
   } finally {
     deleting.value = false;
   }
 };
 
 onMounted(() => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) user.value = JSON.parse(userStr);
+  user.value = getStoredUser();
   fetchItems();
   fetchOverview();
 });
