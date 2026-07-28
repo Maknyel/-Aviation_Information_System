@@ -36,11 +36,11 @@
       </div>
 
       <!-- Charts Row -->
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6 mb-6">
         <!-- Monthly Volume Chart -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">Monthly Request Volume ({{ selectedYear }})</h3>
-          <div class="h-96">
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Monthly Request Volume ({{ selectedYear }})</h3>
+          <div class="h-[28rem]">
             <StatsChart
               v-if="monthlyVolume.labels.length"
               type="bar"
@@ -54,9 +54,9 @@
         </div>
 
         <!-- Completion Time Chart -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
-          <div class="h-96">
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
+          <div class="h-[28rem]">
             <StatsChart
               v-if="completionTime.labels.length"
               type="line"
@@ -77,41 +77,43 @@
           <h3 class="text-lg font-semibold text-gray-800">Staff Performance</h3>
         </div>
         <div v-if="staffPerformance.length === 0" class="p-8 text-center text-gray-500">No performance data</div>
-        <table v-else class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Staff</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Assigned</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Completed</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">In Progress</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Rating</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Skills</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="staff in staffPerformance" :key="staff.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 font-medium text-gray-800">{{ staff.name }}</td>
-              <td class="px-6 py-4 text-center text-gray-600">{{ staff.total_assigned }}</td>
-              <td class="px-6 py-4 text-center text-green-600 font-medium">{{ staff.completed }}</td>
-              <td class="px-6 py-4 text-center text-blue-600">{{ staff.in_progress }}</td>
-              <td class="px-6 py-4 text-center">
-                <span :class="staff.completion_rate >= 80 ? 'text-green-600' : staff.completion_rate >= 50 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">
-                  {{ staff.completion_rate }}%
-                </span>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span v-if="staff.average_rating" class="text-yellow-600 font-medium">{{ staff.average_rating }}/5</span>
-                <span v-else class="text-gray-400">-</span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-1">
-                  <span v-for="skill in staff.skills" :key="skill" class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">{{ skill }}</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-else class="max-h-96 overflow-y-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Staff</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Assigned</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Completed</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">In Progress</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Rating</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Skills</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="staff in staffPerformance" :key="staff.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-800">{{ staff.name }}</td>
+                <td class="px-6 py-4 text-center text-gray-600">{{ staff.total_assigned }}</td>
+                <td class="px-6 py-4 text-center text-green-600 font-medium">{{ staff.completed }}</td>
+                <td class="px-6 py-4 text-center text-blue-600">{{ staff.in_progress }}</td>
+                <td class="px-6 py-4 text-center">
+                  <span :class="staff.completion_rate >= 80 ? 'text-green-600' : staff.completion_rate >= 50 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">
+                    {{ staff.completion_rate }}%
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span v-if="staff.average_rating" class="text-yellow-600 font-medium">{{ staff.average_rating }}/5</span>
+                  <span v-else class="text-gray-400">-</span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-1">
+                    <span v-for="skill in staff.skills" :key="skill" class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">{{ skill }}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Hotspots -->

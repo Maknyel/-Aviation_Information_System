@@ -46,15 +46,23 @@ const createChart = () => {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           display: false
+        },
+        tooltip: {
+          titleFont: { size: 14 },
+          bodyFont: { size: 14 }
         }
       },
       scales: props.type === 'doughnut' || props.type === 'pie' ? {} : {
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          ticks: { font: { size: 13 } }
+        },
+        x: {
+          ticks: { font: { size: 13 } }
         }
       }
     }
