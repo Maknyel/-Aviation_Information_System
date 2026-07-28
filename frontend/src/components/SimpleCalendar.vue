@@ -395,7 +395,6 @@ const openCreateForDay = (day: any) => {
 };
 
 const handleCreateSuccess = () => {
-  toast.success('Request submitted successfully');
   selectedDay.value = null;
   emit('dateUpdated');
 };

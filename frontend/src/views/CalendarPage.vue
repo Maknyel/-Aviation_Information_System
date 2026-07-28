@@ -477,6 +477,7 @@ async function fetchEvents() {
     });
   } catch (error) {
     console.error('Error fetching events:', error);
+    toast.error('Failed to load calendar events');
   } finally {
     loading.value = false;
   }
@@ -505,7 +506,6 @@ function openCreateForDate(dateObj: Date) {
 }
 
 function handleCreateSuccess() {
-  toast.success('Request submitted successfully');
   fetchEvents();
 }
 

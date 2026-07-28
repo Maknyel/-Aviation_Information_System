@@ -233,7 +233,6 @@ const fetchRequests = async () => {
 };
 
 const handleRequestSuccess = (_request: any) => {
-  toast.success('Request submitted successfully');
   fetchRequests();
   fetchCalendarEvents();
 };

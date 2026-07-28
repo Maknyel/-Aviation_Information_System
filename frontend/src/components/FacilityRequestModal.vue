@@ -302,6 +302,7 @@ const submitForm = async () => {
     if (!response.ok) throw new Error(data.message || 'Failed to submit facility request');
 
     success.value = 'Facility request submitted successfully!';
+    toast.success(success.value);
     emit('success', data.data);
     setTimeout(() => closeModal(), 1500);
   } catch (err: any) {

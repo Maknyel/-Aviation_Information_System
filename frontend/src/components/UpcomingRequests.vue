@@ -17,12 +17,12 @@
           <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span class="capitalize font-medium">{{ request.status }}</span></span>
         </div>
         <div class="flex gap-2">
-          <button
+          <!-- <button
             v-if="user?.role?.name === 'Requester'"
             class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
             Send to HR
-          </button>
+          </button> -->
           <button
             @click="viewRequestDetails(request)"
             :disabled="loadingDetails"

@@ -285,6 +285,7 @@ const submitForm = async () => {
     }
 
     success.value = 'Work order submitted successfully!';
+    toast.success(success.value);
     emit('success', data.data);
 
     // Close modal after a short delay
