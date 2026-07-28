@@ -12,7 +12,9 @@
       "Bash(grep -n 'casts\\\\|CARBON_FORMAT\\\\|serializeDate\\\\|protected $dates' d:/-Aviation_Information_System/backend/app/Models/ActivityLog.php)",
       "Bash(php artisan *)",
       "Bash(echo \"EXIT_CODE=$?\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
