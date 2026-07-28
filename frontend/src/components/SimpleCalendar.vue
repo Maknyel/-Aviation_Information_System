@@ -481,6 +481,7 @@ const updateEventDate = async () => {
     }
 
     updateSuccess.value = 'Date updated successfully!';
+    toast.success('Date updated successfully');
 
     // Emit event to refresh data
     emit('dateUpdated');
@@ -492,6 +493,7 @@ const updateEventDate = async () => {
     }, 1500);
   } catch (err: any) {
     updateError.value = err.message || 'Failed to update date';
+    toast.error(updateError.value);
   } finally {
     updating.value = false;
   }
