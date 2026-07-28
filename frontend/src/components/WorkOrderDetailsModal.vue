@@ -162,9 +162,15 @@ const saveRequest = async () => {
       body: JSON.stringify({ request_type: 'work_order', request_id: props.order.id }),
     });
     const data = await res.json();
-    if (data.success) saved.value = true;
+    if (data.success) {
+      saved.value = true;
+      toast.success('Request saved successfully');
+    } else {
+      toast.error(data.message || 'Failed to save request');
+    }
   } catch (e) {
     console.error(e);
+    toast.error('Failed to save request');
   } finally {
     saving.value = false;
   }
