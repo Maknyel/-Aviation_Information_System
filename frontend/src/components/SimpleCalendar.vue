@@ -111,6 +111,15 @@
           </button>
         </div>
         <div class="p-4 overflow-y-auto max-h-[60vh]">
+          <button
+            @click="openCreateForDay(selectedDay)"
+            class="w-full mb-4 px-3 py-2 text-sm font-medium text-white bg-aviation-olive rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            New Request for this Date
+          </button>
           <div v-if="selectedDay.events.length === 0" class="text-center text-gray-500 py-8">
             No events on this day
           </div>
@@ -209,12 +218,23 @@
         </div>
       </div>
     </div>
+
+    <!-- New Request Modal -->
+    <FacilityRequestModal
+      v-model="showCreateModal"
+      :preset-date="createPresetDate"
+      @success="handleCreateSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { API_URL } from '@/config/api';
+import FacilityRequestModal from './FacilityRequestModal.vue';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 interface CalendarEvent {
   id: number;
@@ -241,6 +261,8 @@ const newDate = ref('');
 const updating = ref(false);
 const updateError = ref('');
 const updateSuccess = ref('');
+const showCreateModal = ref(false);
+const createPresetDate = ref('');
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -361,6 +383,21 @@ const selectDay = (day: any) => {
   if (day.isCurrentMonth) {
     selectedDay.value = day;
   }
+};
+
+const openCreateForDay = (day: any) => {
+  const d: Date = day.fullDate;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  createPresetDate.value = `${y}-${m}-${dd}`;
+  showCreateModal.value = true;
+};
+
+const handleCreateSuccess = () => {
+  toast.success('Request submitted successfully');
+  selectedDay.value = null;
+  emit('dateUpdated');
 };
 
 const formatDate = (date: Date) => {
