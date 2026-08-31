@@ -150,6 +150,7 @@ import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
 import { getStoredUser } from '@/utils/auth';
 import { useToast } from '@/composables/useToast';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const toast = useToast();
 
@@ -329,6 +330,11 @@ const handleStatusUpdated = () => {
 
 watch(activeFilter, () => {
   fetchRequests();
+});
+
+useRealtimeNotifications(() => {
+  fetchRequests();
+  fetchCalendarEvents();
 });
 
 onMounted(() => {

@@ -195,6 +195,7 @@ import WorkOrderModal from '@/components/WorkOrderModal.vue';
 import UpcomingRequests from '@/components/UpcomingRequests.vue';
 import { useDashboard } from '@/composables/useDashboard';
 import { getStoredUser } from '@/utils/auth';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
@@ -289,6 +290,11 @@ const getStatusColor = (status: string) => {
 const handleMonthChange = (data: { month: number; year: number }) => {
   fetchCalendarEvents(data.month, data.year);
 };
+
+useRealtimeNotifications(() => {
+  loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
+});
 
 onMounted(() => {
   user.value = getStoredUser();

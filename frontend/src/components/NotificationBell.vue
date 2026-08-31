@@ -62,6 +62,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { API_URL } from '@/config/api';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const router = useRouter();
 const open = ref(false);
@@ -136,6 +137,11 @@ const timeAgo = (dateStr: string) => {
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
 };
+
+useRealtimeNotifications(() => {
+  fetchUnreadCount();
+  if (open.value) fetchNotifications();
+});
 
 let interval: ReturnType<typeof setInterval> | undefined;
 

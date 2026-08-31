@@ -269,6 +269,7 @@ import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import FacilityRequestModal from '@/components/FacilityRequestModal.vue';
 import { API_URL } from '@/config/api';
 import { useToast } from '@/composables/useToast';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const toast = useToast();
 
@@ -511,6 +512,10 @@ function handleCreateSuccess() {
 
 // Re-fetch events when main calendar month/year changes
 watch(mainCurrentDate, () => {
+  fetchEvents();
+});
+
+useRealtimeNotifications(() => {
   fetchEvents();
 });
 

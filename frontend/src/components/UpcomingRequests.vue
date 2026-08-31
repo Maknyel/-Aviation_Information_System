@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { useDashboard } from '@/composables/useDashboard';
@@ -135,8 +135,17 @@ const refresh = () => {
 
 defineExpose({ refresh });
 
+let pollInterval: ReturnType<typeof setInterval> | undefined;
+
 onMounted(() => {
   user.value = getStoredUser();
   fetchUpcomingRequests();
+
+  // Poll so requests submitted by other users show up here without a manual refresh
+  pollInterval = setInterval(fetchUpcomingRequests, 20000);
+});
+
+onBeforeUnmount(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 </script>

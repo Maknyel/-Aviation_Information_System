@@ -76,6 +76,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
 import { getStoredUser } from '@/utils/auth';
+import { teardownEcho } from '@/echo';
 import NotificationBell from './NotificationBell.vue';
 
 const emit = defineEmits(['toggleSidebar']);
@@ -111,6 +112,7 @@ const handleLogout = async () => {
   } catch (e) {
     console.error('Logout request failed:', e);
   } finally {
+    teardownEcho();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push('/login');

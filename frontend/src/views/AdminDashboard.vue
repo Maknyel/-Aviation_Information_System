@@ -183,6 +183,7 @@ import UpcomingRequests from '@/components/UpcomingRequests.vue';
 import { API_URL } from '@/config/api';
 import { useDashboard } from '@/composables/useDashboard';
 import { getStoredUser } from '@/utils/auth';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const {
   statistics,
@@ -298,6 +299,11 @@ const handleStatusUpdated = () => {
   loadAllDashboardData();
   upcomingRequestsRef.value?.refresh();
 };
+
+useRealtimeNotifications(() => {
+  loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
+});
 
 onMounted(() => {
   user.value = getStoredUser();

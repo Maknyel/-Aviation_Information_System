@@ -90,6 +90,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
 import PasswordInput from '@/components/PasswordInput.vue';
+import { initEcho } from '@/echo';
 
 const router = useRouter();
 const email = ref('');
@@ -110,6 +111,7 @@ const handleLogin = async () => {
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      initEcho();
       router.push('/home');
     }
   } catch (err: any) {

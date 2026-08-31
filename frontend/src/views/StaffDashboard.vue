@@ -172,6 +172,7 @@ import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';
 import { API_URL } from '@/config/api';
 import { useDashboard } from '@/composables/useDashboard';
 import { getStoredUser } from '@/utils/auth';
+import { useRealtimeNotifications } from '@/composables/useRealtimeNotifications';
 
 const {
   calendarEvents,
@@ -316,6 +317,11 @@ const handleStatusUpdated = () => {
 
 watch(activeFilter, () => {
   fetchRequests();
+});
+
+useRealtimeNotifications(() => {
+  fetchRequests();
+  fetchCalendarEvents();
 });
 
 onMounted(() => {
