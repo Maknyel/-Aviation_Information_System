@@ -3,27 +3,21 @@
     <div class="max-w-7xl mx-auto">
       <!-- Welcome Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Notification</h1>
-        <p class="text-gray-600">View all user requests</p>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Notifications</h1>
+        <p class="text-gray-600">Updates on your requests</p>
       </div>
 
       <!-- Requests List -->
       <div class="bg-white rounded-xl shadow-lg border border-gray-100">
         <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-800">All Requests</h2>
-          <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-600">Sort by User:</label>
-            <select
-              v-model="selectedUserId"
-              @change="handleUserFilter"
-              class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"
-            >
-              <option value="all">All Users</option>
-              <option v-for="userId in uniqueUserIds" :key="userId" :value="userId">
-                {{ getUserName(userId) }}
-              </option>
-            </select>
-          </div>
+          <h2 class="text-xl font-semibold text-gray-800">All Notifications</h2>
+          <button
+            v-if="allRequests.length"
+            @click="markAllRead"
+            class="text-sm text-aviation-olive hover:underline font-medium"
+          >
+            Mark all as read
+          </button>
         </div>
 
         <div class="p-6 space-y-4">
@@ -33,7 +27,7 @@
           <div v-else-if="allRequests.length === 0" class="text-center py-8 text-gray-500">
             No requests found
           </div>
-          <div v-else v-for="request in allRequests" :key="`${request.type}-${request.id}`" class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div v-else v-for="request in allRequests" :key="`${request.type}-${request.id}`" class="p-4 rounded-xl border" :class="request.is_read ? 'bg-gray-50 border-gray-200' : 'bg-green-50 border-green-200'">
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-3">
                 <div
@@ -54,6 +48,7 @@
                     >
                       {{ request.type === 'facility' ? 'Facility' : 'Work Order' }}
                     </span>
+                    <span v-if="!request.is_read" class="px-2 py-0.5 text-xs rounded font-medium bg-aviation-olive text-white">New</span>
                   </div>
                   <h3 class="font-semibold text-gray-800">
                     {{ request.type === 'facility' ? request.venue_requested : request.location }}
@@ -80,7 +75,7 @@
                   {{ request.status }}
                 </span>
                 <button
-                  @click="viewRequestDetails(request.type, request.id)"
+                  @click="viewRequestDetails(request.type, request.id, request.notification_id)"
                   :disabled="loadingDetails"
                   class="px-6 py-2 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 transition-all disabled:opacity-50"
                 >
@@ -117,10 +112,9 @@ const showWorkOrderDetailsModal = ref(false);
 const selectedWorkOrder = ref<any>(null);
 const notifications = ref<any[]>([]);
 const loading = ref(false);
-const selectedUserId = ref<string>('all');
 
 const allRequests = computed(() => {
-  let requests = notifications.value.map(notification => {
+  return notifications.value.map(notification => {
     const refData = notification.reference_data;
     if (!refData) return null;
 
@@ -141,34 +135,7 @@ const allRequests = computed(() => {
     }
     return null;
   }).filter(Boolean);
-
-  // Filter by selected user if not "all"
-  if (selectedUserId.value !== 'all') {
-    requests = requests.filter(request => request.user_id === parseInt(selectedUserId.value));
-  }
-
-  return requests;
 });
-
-const uniqueUserIds = computed(() => {
-  const userIds = new Set<number>();
-  notifications.value.forEach(notification => {
-    const refData = notification.reference_data;
-    if (refData?.user_id) {
-      userIds.add(refData.user_id);
-    }
-  });
-  return Array.from(userIds).sort((a, b) => a - b);
-});
-
-const getUserName = (userId: number): string => {
-  const request = notifications.value.find(n => n.reference_data?.user_id === userId);
-  return request?.reference_data?.user?.name || `User ${userId}`;
-};
-
-const handleUserFilter = () => {
-  // The computed property will automatically update
-};
 
 const fetchAllRequests = async () => {
   loading.value = true;
@@ -193,7 +160,35 @@ const fetchAllRequests = async () => {
   }
 };
 
-const viewRequestDetails = async (type: string, id: number) => {
+const markAsRead = async (notificationId: number) => {
+  try {
+    const token = localStorage.getItem('token');
+    await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    const n = notifications.value.find(n => n.id === notificationId);
+    if (n) n.is_read = true;
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+  }
+};
+
+const markAllRead = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    await fetch(`${API_URL}/notifications/mark-all-read`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    notifications.value = notifications.value.map(n => ({ ...n, is_read: true }));
+  } catch (error) {
+    console.error('Error marking all as read:', error);
+  }
+};
+
+const viewRequestDetails = async (type: string, id: number, notificationId?: number) => {
+  if (notificationId) markAsRead(notificationId);
   if (type === 'facility') {
     loadingDetails.value = true;
     try {

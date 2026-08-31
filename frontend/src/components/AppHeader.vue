@@ -15,6 +15,10 @@
         <h1 class="text-white text-xl font-semibold">General Service Department</h1>
       </div>
 
+      <div class="flex items-center gap-2">
+      <!-- Notifications -->
+      <NotificationBell />
+
       <!-- User Dropdown -->
       <div class="relative">
         <button
@@ -58,6 +62,7 @@
           </button>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- Click outside to close dropdown -->
@@ -68,7 +73,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { API_URL } from '@/config/api';
 import { getStoredUser } from '@/utils/auth';
+import NotificationBell from './NotificationBell.vue';
 
 const emit = defineEmits(['toggleSidebar']);
 const router = useRouter();
@@ -92,10 +100,21 @@ const getProfilePictureUrl = (path: string) => {
   return `${baseUrl.replace('/api', '')}/storage/${path}`;
 };
 
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  router.push('/login');
+const handleLogout = async () => {
+  const token = localStorage.getItem('token');
+  try {
+    if (token) {
+      await axios.post(`${API_URL}/logout`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+  } catch (e) {
+    console.error('Logout request failed:', e);
+  } finally {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/login');
+  }
 };
 
 onMounted(() => {

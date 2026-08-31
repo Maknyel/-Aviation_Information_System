@@ -109,8 +109,8 @@ class WorkOrderController extends Controller
             'status' => 'pending',
         ]);
 
-        // Notify staff
-        $staffUsers = User::whereHas('role', fn($q) => $q->where('name', 'Staff'))->get();
+        // Notify staff and admins (both can act on work orders)
+        $staffUsers = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))->get();
         foreach ($staffUsers as $staff) {
             Notification::create([
                 'user_id' => $staff->id,
@@ -221,7 +221,7 @@ class WorkOrderController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:pending,approved,rejected,in_progress,completed,canceled',
-            'remarks' => 'nullable|string|max:1000',
+            'remarks' => 'required_if:status,rejected|nullable|string|max:1000',
         ]);
 
         $workOrder = WorkOrder::findOrFail($id);
@@ -270,7 +270,7 @@ class WorkOrderController extends Controller
         // Send status update email to requester
         $requester = User::find($workOrder->user_id);
         if ($requester) {
-            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Work Order', $workOrder->id, $validated['status']);
+            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Work Order', $workOrder->id, $validated['status'], $validated['remarks'] ?? null);
         }
 
         ActivityLog::log('status_changed', "Changed work order #{$id} status from {$oldStatus} to {$validated['status']}", $workOrder);

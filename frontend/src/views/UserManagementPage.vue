@@ -91,7 +91,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Password {{ editingUser ? '(leave blank to keep)' : '' }}</label>
-            <input v-model="userForm.password" type="password" :required="!editingUser" minlength="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" />
+            <PasswordInput v-model="userForm.password" :required="!editingUser" minlength="8" dense />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -169,6 +169,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import { API_URL } from '@/config/api';
 import { useToast } from '@/composables/useToast';
 import { isAllowedEmailDomain } from '@/utils/validation';

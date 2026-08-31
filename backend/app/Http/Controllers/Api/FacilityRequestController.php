@@ -105,8 +105,8 @@ class FacilityRequestController extends Controller
             'status' => 'pending',
         ]);
 
-        // Notify staff
-        $staffUsers = User::whereHas('role', fn($q) => $q->where('name', 'Staff'))->get();
+        // Notify staff and admins (both can act on facility requests)
+        $staffUsers = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))->get();
         foreach ($staffUsers as $staff) {
             Notification::create([
                 'user_id' => $staff->id,
@@ -243,7 +243,7 @@ class FacilityRequestController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:pending,approved,rejected,canceled',
-            'remarks' => 'nullable|string|max:1000',
+            'remarks' => 'required_if:status,rejected|nullable|string|max:1000',
         ]);
 
         $facilityRequest = FacilityRequest::findOrFail($id);
@@ -282,7 +282,7 @@ class FacilityRequestController extends Controller
         // Send status update email to requester
         $requester = User::find($facilityRequest->user_id);
         if ($requester) {
-            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Facility Request', $facilityRequest->id, $validated['status']);
+            EmailHelper::sendStatusUpdate($requester->email, $requester->name, 'Facility Request', $facilityRequest->id, $validated['status'], $validated['remarks'] ?? null);
         }
 
         ActivityLog::log('status_changed', "Changed facility request #{$id} status from {$oldStatus} to {$validated['status']}", $facilityRequest);

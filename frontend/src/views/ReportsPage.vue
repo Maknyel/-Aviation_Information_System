@@ -3,9 +3,21 @@
     <div class="max-w-7xl mx-auto">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Reports & Analytics</h1>
-        <select v-model="selectedYear" @change="loadReports" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
-          <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
-        </select>
+        <div class="flex items-center gap-3">
+          <button
+            v-if="!loading && !loadError"
+            @click="downloadPdf"
+            class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-all flex items-center gap-2 text-sm font-medium"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download PDF
+          </button>
+          <select v-model="selectedYear" @change="loadReports" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
+            <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+          </select>
+        </div>
       </div>
 
       <div v-if="loading" class="p-8 text-center text-gray-500">Loading reports...</div>
@@ -146,6 +158,7 @@ import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import StatsChart from '@/components/StatsChart.vue';
 import { API_URL } from '@/config/api';
+import { escapeHtml } from '@/utils/auth';
 
 const currentYear = new Date().getFullYear();
 const selectedYear = ref(currentYear);
@@ -196,6 +209,59 @@ const loadReports = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const downloadPdf = () => {
+  const w = window.open('', '_blank');
+  if (!w) return;
+
+  const monthlyRows = monthlyVolume.value.labels.map((label: string, i: number) =>
+    `<tr><td>${escapeHtml(label)}</td><td>${monthlyVolume.value.facility_requests[i] ?? 0}</td><td>${monthlyVolume.value.work_orders[i] ?? 0}</td></tr>`
+  ).join('');
+
+  const staffRows = staffPerformance.value.map((s: any) =>
+    `<tr><td>${escapeHtml(s.name)}</td><td>${s.total_assigned}</td><td>${s.completed}</td><td>${s.in_progress}</td><td>${s.completion_rate}%</td><td>${s.average_rating ?? '-'}</td></tr>`
+  ).join('');
+
+  const hotspotRows = hotspots.value.map((h: any) =>
+    `<tr><td>${escapeHtml(h.location)}</td><td>${h.total_orders}</td><td>${h.urgent_count}</td></tr>`
+  ).join('');
+
+  w.document.write(`<html><head><title>Reports & Analytics ${escapeHtml(String(selectedYear.value))}</title>
+    <style>
+      body{font-family:sans-serif;padding:24px;color:#222}
+      h1{margin-bottom:4px}
+      h2{margin-top:28px;margin-bottom:8px;font-size:16px}
+      .summary{display:flex;gap:24px;margin:16px 0;flex-wrap:wrap}
+      .card{border:1px solid #ddd;border-radius:8px;padding:12px 16px;min-width:140px}
+      .card .num{font-size:22px;font-weight:700;color:#4A7C59}
+      .card .label{font-size:12px;color:#666}
+      table{border-collapse:collapse;width:100%;font-size:13px}
+      th,td{border-bottom:1px solid #eee;padding:6px 10px;text-align:left}
+      th{background:#f7f7f7}
+    </style>
+  </head><body>
+    <h1>Reports & Analytics</h1>
+    <p>Year: ${escapeHtml(String(selectedYear.value))} — Generated ${escapeHtml(new Date().toLocaleString())}</p>
+
+    <div class="summary">
+      <div class="card"><div class="num">${summary.value.total_facility_requests ?? 0}</div><div class="label">Total Facility Requests</div></div>
+      <div class="card"><div class="num">${summary.value.total_work_orders ?? 0}</div><div class="label">Total Work Orders</div></div>
+      <div class="card"><div class="num">${summary.value.average_feedback_rating ?? 0}</div><div class="label">Avg. Feedback Rating</div></div>
+      <div class="card"><div class="num">${summary.value.total_users ?? 0}</div><div class="label">Total Users</div></div>
+    </div>
+
+    <h2>Monthly Request Volume</h2>
+    <table><thead><tr><th>Month</th><th>Facility Requests</th><th>Work Orders</th></tr></thead><tbody>${monthlyRows || '<tr><td colspan="3">No data</td></tr>'}</tbody></table>
+
+    <h2>Staff Performance</h2>
+    <table><thead><tr><th>Staff</th><th>Assigned</th><th>Completed</th><th>In Progress</th><th>Rate</th><th>Rating</th></tr></thead><tbody>${staffRows || '<tr><td colspan="6">No data</td></tr>'}</tbody></table>
+
+    <h2>Facility Problem Hotspots</h2>
+    <table><thead><tr><th>Location</th><th>Total Orders</th><th>Urgent</th></tr></thead><tbody>${hotspotRows || '<tr><td colspan="3">No data</td></tr>'}</tbody></table>
+  </body></html>`);
+  w.document.close();
+  w.print();
 };
 
 onMounted(() => loadReports());

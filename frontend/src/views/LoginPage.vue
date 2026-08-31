@@ -35,12 +35,10 @@
             <!-- Password Input -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
+              <PasswordInput
                 v-model="password"
-                type="password"
                 required
                 placeholder="Enter your password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
               />
             </div>
 
@@ -91,6 +89,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
+import PasswordInput from '@/components/PasswordInput.vue';
 
 const router = useRouter();
 const email = ref('');

@@ -17,6 +17,13 @@
         </div>
     </div>
 
+    @if (!empty($remarks))
+    <div class="info-box">
+        <div class="label">Reason</div>
+        <div class="value">{{ $remarks }}</div>
+    </div>
+    @endif
+
     <p>You can view the full details of your request by logging into the system.</p>
 
     <a href="{{ env('FRONTEND_URL', 'https://aviation.dl-hosting.net') }}/requests" class="btn">View Request</a>

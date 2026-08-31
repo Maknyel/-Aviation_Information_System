@@ -40,7 +40,7 @@
           </div>
 
           <!-- Upcoming Requests Section -->
-          <UpcomingRequests />
+          <UpcomingRequests ref="upcomingRequestsRef" />
         </div>
 
         <!-- Right Columns: Stats Cards and Charts -->
@@ -206,6 +206,7 @@ const showWorkOrderDetailsModal = ref(false);
 const selectedWorkOrder = ref<any>(null);
 const currentMonth = ref(new Date().getMonth() + 1);
 const currentYear = ref(new Date().getFullYear());
+const upcomingRequestsRef = ref<InstanceType<typeof UpcomingRequests> | null>(null);
 
 const currentMonthLabel = computed(() => {
   const date = new Date(currentYear.value, currentMonth.value - 1);
@@ -217,16 +218,19 @@ const chartColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E', '#A0
 const handleFacilityRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);
   loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
 };
 
 const handleWorkOrderSuccess = (workOrder: any) => {
   console.log('Work order submitted:', workOrder);
   loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
 };
 
 const handleDateUpdated = () => {
   console.log('Event date updated - refreshing dashboard');
   loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
 };
 
 const handleMonthChange = ({ month, year }: { month: number; year: number }) => {
@@ -292,6 +296,7 @@ const viewRequestDetails = async (type: string, id: number) => {
 const handleStatusUpdated = () => {
   console.log('Status updated - refreshing dashboard');
   loadAllDashboardData();
+  upcomingRequestsRef.value?.refresh();
 };
 
 onMounted(() => {

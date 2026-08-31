@@ -11,23 +11,14 @@ use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     /**
-     * Get all notifications for staff/admin
+     * Get notifications belonging to the authenticated user
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $userRole = $user->role->name;
 
-        // Only allow Staff and Admin to view all notifications
-        if ($userRole !== 'Staff' && $userRole !== 'Admin') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized access'
-            ], 403);
-        }
-
-        // Get all non-deleted notifications
         $notifications = Notification::where('is_deleted', false)
+            ->where('user_id', $user->id)
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -55,7 +46,7 @@ class NotificationController extends Controller
      */
     public function markAsRead(Request $request, $id)
     {
-        $notification = Notification::findOrFail($id);
+        $notification = Notification::where('user_id', $request->user()->id)->findOrFail($id);
 
         $notification->update(['is_read' => true]);
 
@@ -73,7 +64,8 @@ class NotificationController extends Controller
     {
         $user = $request->user();
 
-        Notification::where('is_read', false)
+        Notification::where('user_id', $user->id)
+            ->where('is_read', false)
             ->where('is_deleted', false)
             ->update(['is_read' => true]);
 
@@ -88,7 +80,7 @@ class NotificationController extends Controller
      */
     public function delete(Request $request, $id)
     {
-        $notification = Notification::findOrFail($id);
+        $notification = Notification::where('user_id', $request->user()->id)->findOrFail($id);
 
         $notification->update(['is_deleted' => true]);
 
@@ -103,7 +95,8 @@ class NotificationController extends Controller
      */
     public function clearAll(Request $request)
     {
-        Notification::where('is_deleted', false)
+        Notification::where('user_id', $request->user()->id)
+            ->where('is_deleted', false)
             ->update(['is_deleted' => true]);
 
         return response()->json([
@@ -117,7 +110,8 @@ class NotificationController extends Controller
      */
     public function unreadCount(Request $request)
     {
-        $count = Notification::where('is_read', false)
+        $count = Notification::where('user_id', $request->user()->id)
+            ->where('is_read', false)
             ->where('is_deleted', false)
             ->count();
 

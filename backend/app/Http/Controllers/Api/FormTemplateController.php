@@ -168,20 +168,13 @@ class FormTemplateController extends Controller
         }
 
         if ($type === 'facility_request') {
-            $record = FacilityRequest::with(['user', 'department', 'approvalSteps'])->findOrFail($id);
-            $equipment = array_filter([
-                'Chair' => $record->chair,
-                'Podium' => $record->podium,
-                'Tent' => $record->tent,
-                'Tables' => $record->tables,
-                'Booths' => $record->booths,
-                'Sound System' => $record->sound_system,
-                'Extension' => $record->extension,
-                'Microphones' => $record->microphones,
-                'Skirting' => $record->skirting,
-                'Flags' => $record->flags,
-                'Others' => $record->others,
-            ]);
+            $record = FacilityRequest::with(['user', 'department', 'approvalSteps', 'requestItems.inventoryItem'])->findOrFail($id);
+
+            $equipment = $record->requestItems->map(function ($ri) {
+                $name = $ri->inventoryItem->name ?? 'Unknown Item';
+                $unit = $ri->inventoryItem->unit ?? '';
+                return trim("{$name} (x{$ri->quantity} {$unit})");
+            })->all();
 
             return response()->json([
                 'success' => true,
@@ -195,8 +188,7 @@ class FormTemplateController extends Controller
                     'event_title' => $record->title_of_event,
                     'date' => $record->date_of_event?->format('F d, Y'),
                     'time' => $record->time_of_event,
-                    'equipment' => array_keys($equipment),
-                    'others_description' => $record->others_description,
+                    'equipment' => count($equipment) ? $equipment : ['None'],
                     'status' => $record->status,
                     'submitted_at' => $record->created_at->format('F d, Y h:i A'),
                 ]

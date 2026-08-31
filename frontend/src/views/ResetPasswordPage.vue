@@ -15,11 +15,11 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-              <input v-model="password" type="password" required minlength="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" placeholder="Min. 8 characters" />
+              <PasswordInput v-model="password" required minlength="8" placeholder="Min. 8 characters" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-              <input v-model="passwordConfirmation" type="password" required minlength="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" placeholder="Re-enter password" />
+              <PasswordInput v-model="passwordConfirmation" required minlength="8" placeholder="Re-enter password" />
             </div>
             <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
             <button type="submit" :disabled="loading" class="w-full py-3 bg-aviation-olive text-white rounded-lg font-medium hover:bg-opacity-90 disabled:opacity-50">
@@ -53,6 +53,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { API_URL } from '@/config/api';
+import PasswordInput from '@/components/PasswordInput.vue';
 
 const route = useRoute();
 

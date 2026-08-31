@@ -24,7 +24,7 @@ class SavedRequestForm extends Model
     public function getRequestAttribute()
     {
         if ($this->request_type === 'facility_request') {
-            return FacilityRequest::with(['user', 'department'])->find($this->request_id);
+            return FacilityRequest::with(['user', 'department', 'requestItems.inventoryItem'])->find($this->request_id);
         }
         return WorkOrder::with(['user', 'department', 'assignee'])->find($this->request_id);
     }

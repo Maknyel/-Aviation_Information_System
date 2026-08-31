@@ -62,10 +62,8 @@
                   <!-- Current Password -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                    <input
+                    <PasswordInput
                       v-model="formData.current_password"
-                      type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Enter current password"
                     />
                   </div>
@@ -73,10 +71,8 @@
                   <!-- New Password -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                    <input
+                    <PasswordInput
                       v-model="formData.password"
-                      type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Enter new password (min 6 characters)"
                     />
                   </div>
@@ -84,10 +80,8 @@
                   <!-- Confirm Password -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                    <input
+                    <PasswordInput
                       v-model="formData.password_confirmation"
-                      type="password"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent outline-none transition-all bg-white text-black"
                       placeholder="Confirm new password"
                     />
                   </div>
@@ -130,6 +124,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
 import { getStoredUser } from '@/utils/auth';

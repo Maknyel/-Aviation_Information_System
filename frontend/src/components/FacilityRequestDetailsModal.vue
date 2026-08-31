@@ -139,55 +139,117 @@
       </div>
     </div>
 
+    <!-- Change Date -->
+    <div v-if="canApprove" class="mt-4 border-t border-gray-200 pt-4">
+      <button
+        v-if="!showChangeDate"
+        type="button"
+        @click="openChangeDate"
+        class="text-sm text-aviation-olive hover:underline font-medium"
+      >
+        Change Request Date
+      </button>
+      <div v-else class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-900">New Date</label>
+        <input
+          v-model="newDate"
+          type="date"
+          class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black text-sm"
+        />
+        <div v-if="dateError" class="text-sm text-red-600">{{ dateError }}</div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="confirmChangeDate"
+            :disabled="changingDate || !newDate"
+            class="px-4 py-1.5 bg-aviation-olive text-white text-sm rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ changingDate ? 'Updating...' : 'Confirm New Date' }}
+          </button>
+          <button type="button" @click="showChangeDate = false" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disapproval Reason -->
+    <div v-if="showRejectReason" class="mt-4 border-t border-gray-200 pt-4">
+      <label class="block text-sm font-semibold text-gray-900 mb-2">Reason for Disapproval <span class="text-red-500">*</span></label>
+      <textarea
+        v-model="rejectReason"
+        rows="3"
+        required
+        placeholder="Explain why this request is being disapproved..."
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black text-sm"
+      ></textarea>
+      <div v-if="rejectError" class="text-sm text-red-600 mt-1">{{ rejectError }}</div>
+    </div>
+
     <!-- Feedback -->
     <FeedbackForm v-if="request?.id" :request-type="'facility_request'" :request-id="request.id" :request-status="request?.status" />
 
     <template #footer>
       <div class="flex flex-wrap justify-center gap-3">
-        <button
-          v-if="canApprove"
-          type="button"
-          @click="saveRequest"
-          :disabled="saving"
-          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
-        >
-          {{ saving ? 'Saving...' : (saved ? 'Saved' : 'Save') }}
-        </button>
-        <button
-          v-if="canApprove"
-          type="button"
-          @click="printRequest"
-          :disabled="printing"
-          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
-        >
-          {{ printing ? '...' : 'Print' }}
-        </button>
-        <button
-          v-if="canApprove && request?.status === 'pending'"
-          type="button"
-          @click="updateStatus('approved')"
-          :disabled="updating"
-          class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-        >
-          {{ updating ? 'Updating...' : 'Approved' }}
-        </button>
-        <button
-          v-if="canApprove && request?.status === 'pending'"
-          type="button"
-          @click="updateStatus('rejected')"
-          :disabled="updating"
-          class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-        >
-          {{ updating ? 'Updating...' : 'Disapproved' }}
-        </button>
-        <button
-          v-if="!canApprove || request?.status !== 'pending'"
-          type="button"
-          @click="close"
-          class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Close
-        </button>
+        <template v-if="showRejectReason">
+          <button
+            type="button"
+            @click="confirmReject"
+            :disabled="updating"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            {{ updating ? 'Submitting...' : 'Confirm Disapproval' }}
+          </button>
+          <button type="button" @click="cancelReject" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+        </template>
+        <template v-else>
+          <button
+            v-if="canApprove"
+            type="button"
+            @click="saveRequest"
+            :disabled="saving"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+          >
+            {{ saving ? 'Saving...' : (saved ? 'Saved' : 'Save') }}
+          </button>
+          <button
+            v-if="canApprove"
+            type="button"
+            @click="printRequest"
+            :disabled="printing"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+          >
+            {{ printing ? '...' : 'Print' }}
+          </button>
+          <button
+            v-if="canApprove && request?.status === 'pending'"
+            type="button"
+            @click="updateStatus('approved')"
+            :disabled="updating"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            {{ updating ? 'Updating...' : 'Approved' }}
+          </button>
+          <button
+            v-if="canApprove && request?.status === 'pending'"
+            type="button"
+            @click="showRejectReason = true"
+            :disabled="updating"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            Disapproved
+          </button>
+          <button
+            v-if="!canApprove || request?.status !== 'pending'"
+            type="button"
+            @click="close"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
+        </template>
       </div>
     </template>
   </Modal>
@@ -231,6 +293,13 @@ const saved = ref(false);
 const printing = ref(false);
 const inventoryData = ref<any>(null);
 const loadingInventory = ref(false);
+const showRejectReason = ref(false);
+const rejectReason = ref('');
+const rejectError = ref('');
+const showChangeDate = ref(false);
+const newDate = ref('');
+const dateError = ref('');
+const changingDate = ref(false);
 
 const fetchInventoryCheck = async (requestId: number) => {
   loadingInventory.value = true;
@@ -253,6 +322,11 @@ const fetchInventoryCheck = async (requestId: number) => {
 watch(() => props.request, (req) => {
   inventoryData.value = null;
   saved.value = false;
+  showRejectReason.value = false;
+  rejectReason.value = '';
+  rejectError.value = '';
+  showChangeDate.value = false;
+  dateError.value = '';
   if (req?.id && canApprove.value) {
     fetchInventoryCheck(req.id);
   }
@@ -328,7 +402,7 @@ const close = () => {
   isOpen.value = false;
 };
 
-const updateStatus = async (status: 'approved' | 'rejected') => {
+const updateStatus = async (status: 'approved' | 'rejected', remarks?: string) => {
   if (!props.request) return;
 
   updating.value = true;
@@ -341,7 +415,7 @@ const updateStatus = async (status: 'approved' | 'rejected') => {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, remarks })
     });
 
     const data = await response.json();
@@ -358,6 +432,60 @@ const updateStatus = async (status: 'approved' | 'rejected') => {
     toast.error('Failed to update status. Please try again.');
   } finally {
     updating.value = false;
+  }
+};
+
+const confirmReject = async () => {
+  if (!rejectReason.value.trim()) {
+    rejectError.value = 'Please provide a reason for disapproval.';
+    return;
+  }
+  rejectError.value = '';
+  await updateStatus('rejected', rejectReason.value.trim());
+};
+
+const cancelReject = () => {
+  showRejectReason.value = false;
+  rejectReason.value = '';
+  rejectError.value = '';
+};
+
+const openChangeDate = () => {
+  showChangeDate.value = true;
+  newDate.value = props.request?.date_of_event ? String(props.request.date_of_event).slice(0, 10) : '';
+  dateError.value = '';
+};
+
+const confirmChangeDate = async () => {
+  if (!props.request || !newDate.value) return;
+  changingDate.value = true;
+  dateError.value = '';
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/facility-requests/${props.request.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ date_of_event: newDate.value })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update date');
+    }
+
+    toast.success('Request date updated successfully');
+    showChangeDate.value = false;
+    emit('statusUpdated', data.data);
+  } catch (error: any) {
+    dateError.value = error.message || 'Failed to update date';
+    toast.error(dateError.value);
+  } finally {
+    changingDate.value = false;
   }
 };
 

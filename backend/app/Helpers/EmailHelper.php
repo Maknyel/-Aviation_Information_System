@@ -26,13 +26,14 @@ class EmailHelper
     /**
      * Send request status update notification.
      */
-    public static function sendStatusUpdate(string $to, string $userName, string $requestType, int $requestId, string $status): bool
+    public static function sendStatusUpdate(string $to, string $userName, string $requestType, int $requestId, string $status, ?string $remarks = null): bool
     {
         return self::send($to, "Request #{$requestId} Status Update", 'emails.status-update', [
             'userName' => $userName,
             'requestType' => $requestType === 'facility_request' ? 'Facility Request' : 'Work Order',
             'requestId' => $requestId,
             'status' => ucfirst($status),
+            'remarks' => $remarks,
         ]);
     }
 
@@ -93,7 +94,8 @@ class EmailHelper
                 'userName' => 'Juan Dela Cruz',
                 'requestType' => 'Facility Request',
                 'requestId' => 1001,
-                'status' => 'Approved',
+                'status' => 'Rejected',
+                'remarks' => 'Venue is already booked for maintenance on the requested date.',
             ],
             'assignment' => [
                 'staffName' => 'Maria Santos',

@@ -40,7 +40,7 @@
           </div>
 
           <!-- Upcoming Requests Section -->
-          <UpcomingRequests />
+          <UpcomingRequests ref="upcomingRequestsRef" />
         </div>
 
         <!-- Right Columns: Stats Cards and Charts -->
@@ -199,6 +199,7 @@ import { getStoredUser } from '@/utils/auth';
 const user = ref<any>(null);
 const showFacilityModal = ref(false);
 const showWorkOrderModal = ref(false);
+const upcomingRequestsRef = ref<InstanceType<typeof UpcomingRequests> | null>(null);
 
 const canSubmitWorkOrders = computed(() =>
   ['Admin', 'Staff', 'Employee'].includes(user.value?.role?.name)
@@ -258,16 +259,19 @@ const maintenanceColors = computed(() => {
 const handleFacilityRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);
   loadAllDashboardData(); // Refresh dashboard data
+  upcomingRequestsRef.value?.refresh();
 };
 
 const handleWorkOrderSuccess = (workOrder: any) => {
   console.log('Work order submitted:', workOrder);
   loadAllDashboardData(); // Refresh dashboard data
+  upcomingRequestsRef.value?.refresh();
 };
 
 const handleDateUpdated = () => {
   console.log('Event date updated');
   loadAllDashboardData(); // Refresh all dashboard data including calendar
+  upcomingRequestsRef.value?.refresh();
 };
 
 const getStatusColor = (status: string) => {
