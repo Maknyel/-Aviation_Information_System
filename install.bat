@@ -2,31 +2,20 @@
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-REM Look for mysql.exe within this project's folder structure
-set "MYSQL_BIN="
-
-if exist "%~dp0xampp\mysql\bin\mysql.exe" (
-    set "MYSQL_BIN=%~dp0xampp\mysql\bin\mysql.exe"
-) else if exist "%~dp0mysql\bin\mysql.exe" (
-    set "MYSQL_BIN=%~dp0mysql\bin\mysql.exe"
+if exist "C:\xampp\mysql\bin\mysql.exe" (
+    set "MYSQL_BIN=C:\xampp\mysql\bin\mysql.exe"
+) else if exist "D:\xampp\mysql\bin\mysql.exe" (
+    set "MYSQL_BIN=D:\xampp\mysql\bin\mysql.exe"
 ) else (
-    for /r "%~dp0" %%F in (mysql.exe) do (
-        if not defined MYSQL_BIN (
-            set "MYSQL_BIN=%%F"
-        )
-    )
-)
-
-if not defined MYSQL_BIN (
     echo.
-    echo ERROR: Could not find mysql.exe inside this project folder.
-    echo Please place your XAMPP folder inside this project directory
-    echo ^(e.g. .\xampp\mysql\bin\mysql.exe^) or edit install.bat manually.
+    echo ERROR: Could not find XAMPP's mysql.exe on C:\xampp or D:\xampp.
+    echo Please edit install.bat and set MYSQL_BIN to your XAMPP mysql.exe path.
     pause
     exit /b 1
 )
 
-set DB_NAME=aviation09032026
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "Get-Date -Format 'MMddyyyy'"`) do set "TODAY=%%i"
+set "DB_NAME=aviation%TODAY%"
 
 echo ============================================
 echo  Aviation Information System - Install
@@ -51,8 +40,8 @@ echo [2/8] Creating database "%DB_NAME%" if it does not exist...
 if errorlevel 1 goto :error
 
 echo.
-echo [3/8] Setting backend\.env to use "%DB_NAME%"...
-powershell -NoProfile -Command "(Get-Content 'backend\.env') -replace '^DB_DATABASE=.*', 'DB_DATABASE=%DB_NAME%' -replace '^DB_USERNAME=.*', 'DB_USERNAME=root' | Set-Content 'backend\.env'"
+echo [3/8] Decrypting secrets.enc and building backend\.env for "%DB_NAME%"...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Build-Env.ps1" -DbName "%DB_NAME%"
 if errorlevel 1 goto :error
 
 echo.
