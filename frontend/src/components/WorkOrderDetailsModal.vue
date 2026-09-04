@@ -56,12 +56,17 @@
             {{ step.step_order }}
           </div>
           <div>
-            <span class="font-medium">{{ step.approver_role }}</span>
-            <span v-if="step.approver" class="text-gray-500"> - {{ step.approver.name }}</span>
-            <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="{ 'bg-green-100 text-green-700': step.status === 'approved', 'bg-red-100 text-red-700': step.status === 'rejected', 'bg-gray-100 text-gray-600': step.status === 'pending' }">
-              {{ step.status }}
-            </span>
-            <span v-if="step.acted_at" class="text-xs text-gray-400 ml-2">{{ new Date(step.acted_at).toLocaleString() }}</span>
+            <div>
+              <span class="font-medium text-gray-500">{{ step.approver_role }}</span>
+              <span v-if="step.approver" class="font-medium text-gray-800"> - {{ step.approver.name }}</span>
+              <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="{ 'bg-green-100 text-green-700': step.status === 'approved', 'bg-red-100 text-red-700': step.status === 'rejected', 'bg-gray-100 text-gray-600': step.status === 'pending' }">
+                {{ step.status }}
+              </span>
+              <span v-if="step.acted_at" class="text-xs text-gray-400 ml-2">{{ new Date(step.acted_at).toLocaleString() }}</span>
+            </div>
+            <p v-if="step.remarks" class="text-xs text-gray-600 mt-1">
+              <span class="font-medium text-gray-800">{{ step.status === 'rejected' ? 'Reason' : 'Remarks' }}:</span> {{ step.remarks }}
+            </p>
           </div>
         </div>
       </div>
@@ -115,7 +120,7 @@
     </div>
 
     <!-- Feedback -->
-    <FeedbackForm v-if="order?.id" :request-type="'work_order'" :request-id="order.id" :request-status="order?.status" />
+    <FeedbackForm v-if="order?.id" :request-type="'work_order'" :request-id="order.id" :request-status="order?.status" :requester-id="order?.user_id" />
 
     <template #footer>
       <div class="flex flex-wrap justify-center gap-3">

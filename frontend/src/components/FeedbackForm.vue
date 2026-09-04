@@ -2,18 +2,23 @@
   <div v-if="show" class="mt-4 border-t border-gray-200 pt-4">
     <h4 class="text-sm font-semibold text-gray-800 mb-2">Feedback & Rating</h4>
 
-    <!-- Existing feedback -->
-    <div v-if="existingFeedback" class="bg-green-50 rounded-lg p-3 mb-3">
-      <div class="flex items-center gap-1 mb-1">
-        <span v-for="i in 5" :key="i" class="text-lg" :class="i <= existingFeedback.rating ? 'text-yellow-400' : 'text-gray-300'">&#9733;</span>
-        <span class="text-sm text-gray-600 ml-2">{{ existingFeedback.rating }}/5</span>
+    <!-- All feedback submitted for this request -->
+    <div v-if="feedbacks.length" class="space-y-2 mb-3">
+      <div v-for="fb in feedbacks" :key="fb.id" class="bg-gray-50 rounded-lg p-3">
+        <div class="flex items-center gap-1 mb-1">
+          <span v-for="i in 5" :key="i" class="text-lg" :class="i <= fb.rating ? 'text-yellow-400' : 'text-gray-300'">&#9733;</span>
+          <span class="text-sm text-gray-600 ml-2">{{ fb.rating }}/5</span>
+        </div>
+        <p v-if="fb.comment" class="text-sm text-gray-600">{{ fb.comment }}</p>
+        <p class="text-xs text-gray-400 mt-1">
+          {{ fb.user?.name || 'User' }}<span v-if="fb.user_id === currentUserId"> (You)</span>
+        </p>
       </div>
-      <p v-if="existingFeedback.comment" class="text-sm text-gray-600">{{ existingFeedback.comment }}</p>
-      <p class="text-xs text-gray-400 mt-1">Submitted by {{ existingFeedback.user?.name }}</p>
     </div>
+    <p v-else class="text-sm text-gray-400 italic mb-3">No feedback submitted yet.</p>
 
-    <!-- Submit feedback form -->
-    <div v-else-if="canSubmit">
+    <!-- Submit feedback form — only the requester who owns this request, and only once -->
+    <div v-if="canSubmit">
       <div class="flex items-center gap-1 mb-2">
         <button v-for="i in 5" :key="i" @click="rating = i" class="text-2xl transition-colors" :class="i <= rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'">
           &#9733;
@@ -37,19 +42,28 @@ const props = defineProps<{
   requestType: 'facility_request' | 'work_order';
   requestId: number;
   requestStatus: string;
+  requesterId?: number | null;
 }>();
 
 const emit = defineEmits(['submitted']);
+
+const currentUserId = getStoredUser()?.id ?? null;
 
 const rating = ref(0);
 const comment = ref('');
 const submitting = ref(false);
 const error = ref('');
-const existingFeedback = ref<any>(null);
 const feedbacks = ref<any[]>([]);
 
 const show = computed(() => props.requestStatus === 'completed' || props.requestStatus === 'approved');
-const canSubmit = computed(() => !existingFeedback.value && show.value);
+
+const myFeedback = computed(() => feedbacks.value.find((f: any) => f.user_id === currentUserId) || null);
+
+// Only the person who submitted the request gets to rate the service they received,
+// and only once.
+const canSubmit = computed(() =>
+  show.value && !myFeedback.value && !!currentUserId && currentUserId === props.requesterId
+);
 
 const getAuthHeaders = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -63,10 +77,6 @@ const loadFeedback = async () => {
     const data = await res.json();
     if (data.success) {
       feedbacks.value = data.data.feedbacks;
-      const user = getStoredUser();
-      if (user) {
-        existingFeedback.value = feedbacks.value.find((f: any) => f.user_id === user.id) || null;
-      }
     }
   } catch (e) { console.error(e); }
 };
@@ -90,7 +100,7 @@ const submitFeedback = async () => {
       error.value = data.message || 'Failed to submit feedback';
       return;
     }
-    existingFeedback.value = data.data;
+    feedbacks.value.push(data.data);
     emit('submitted');
   } catch (e: any) {
     error.value = e.message;
@@ -103,7 +113,7 @@ watch(() => props.requestId, () => {
   if (props.requestId) {
     rating.value = 0;
     comment.value = '';
-    existingFeedback.value = null;
+    feedbacks.value = [];
     loadFeedback();
   }
 }, { immediate: true });
