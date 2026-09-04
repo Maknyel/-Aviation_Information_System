@@ -12,11 +12,13 @@ echo  Aviation Information System - Extract
 echo ============================================
 echo.
 echo  This will copy all project files into a zip,
-echo  excluding: .git, .claude, arduinocode.txt
+echo  excluding: .git, .claude, arduinocode.txt,
+echo  backend\vendor (composer install) and
+echo  frontend\node_modules (npm install)
 echo.
 
 echo [1/3] Copying files...
-robocopy "%SRC%" "%STAGING%" /E /XD .git .claude /XF arduinocode.txt "%OUTNAME%" /NFL /NDL /NJH /NJS /R:2 /W:1 >nul
+robocopy "%SRC%" "%STAGING%" /E /XD .git .claude vendor node_modules /XF arduinocode.txt "%OUTNAME%" /NFL /NDL /NJH /NJS /R:2 /W:1 >nul
 if errorlevel 8 goto :error
 
 echo [2/3] Compressing to %OUTNAME%...
