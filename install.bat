@@ -2,21 +2,36 @@
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-if exist "C:\xampp\mysql\bin\mysql.exe" (
-    set "MYSQL_BIN=C:\xampp\mysql\bin\mysql.exe"
-) else if exist "D:\xampp\mysql\bin\mysql.exe" (
-    set "MYSQL_BIN=D:\xampp\mysql\bin\mysql.exe"
+REM Look for mysql.exe within this project's folder structure
+set "MYSQL_BIN="
+
+if exist "%~dp0xampp\mysql\bin\mysql.exe" (
+    set "MYSQL_BIN=%~dp0xampp\mysql\bin\mysql.exe"
+) else if exist "%~dp0mysql\bin\mysql.exe" (
+    set "MYSQL_BIN=%~dp0mysql\bin\mysql.exe"
 ) else (
+    for /r "%~dp0" %%F in (mysql.exe) do (
+        if not defined MYSQL_BIN (
+            set "MYSQL_BIN=%%F"
+        )
+    )
+)
+
+if not defined MYSQL_BIN (
     echo.
-    echo ERROR: Could not find XAMPP's mysql.exe on C:\xampp or D:\xampp.
-    echo Please edit install.bat and set MYSQL_BIN to your XAMPP mysql.exe path.
+    echo ERROR: Could not find mysql.exe inside this project folder.
+    echo Please place your XAMPP folder inside this project directory
+    echo ^(e.g. .\xampp\mysql\bin\mysql.exe^) or edit install.bat manually.
     pause
     exit /b 1
 )
+
 set DB_NAME=aviation09032026
 
 echo ============================================
 echo  Aviation Information System - Install
+echo ============================================
+echo  Using MySQL: %MYSQL_BIN%
 echo ============================================
 
 echo.
