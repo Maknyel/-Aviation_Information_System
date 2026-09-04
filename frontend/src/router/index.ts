@@ -16,6 +16,7 @@ import DepartmentsPage from '../views/DepartmentsPage.vue'
 import ResetPasswordPage from '../views/ResetPasswordPage.vue'
 import InventoryPage from '../views/InventoryPage.vue'
 import FormManagementPage from '../views/FormManagementPage.vue'
+import MyFeedbackPage from '../views/MyFeedbackPage.vue'
 import NotFoundPage from '../views/NotFoundPage.vue'
 import { getStoredUser } from '../utils/auth'
 
@@ -137,6 +138,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Profile',
     component: ProfilePage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/my-feedback',
+    name: 'MyFeedback',
+    component: MyFeedbackPage,
+    meta: { requiresAuth: true, role: 'Requester' }
   },
   {
     path: '/:pathMatch(.*)*',

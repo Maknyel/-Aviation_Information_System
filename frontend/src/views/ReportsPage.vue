@@ -37,10 +37,14 @@
           <div class="text-3xl font-bold text-aviation-olive">{{ summary.total_work_orders }}</div>
           <p class="text-xs text-gray-600 mt-1">Total Work Orders</p>
         </div>
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
+        <button
+          type="button"
+          @click="openFeedbackModal"
+          class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl hover:border-aviation-olive transition-all cursor-pointer"
+        >
           <div class="text-3xl font-bold text-aviation-olive">{{ summary.average_feedback_rating || 0 }}</div>
           <p class="text-xs text-gray-600 mt-1">Avg. Feedback Rating</p>
-        </div>
+        </button>
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
           <div class="text-3xl font-bold text-aviation-olive">{{ summary.total_users }}</div>
           <p class="text-xs text-gray-600 mt-1">Total Users</p>
@@ -150,6 +154,40 @@
       </div>
       </template>
     </div>
+
+    <!-- Feedback List Modal -->
+    <div v-if="showFeedbackModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" @click.self="showFeedbackModal = false">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between shrink-0">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800">All Feedback</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Avg. {{ summary.average_feedback_rating || 0 }}/5 &middot; {{ feedbackList.length }} review{{ feedbackList.length === 1 ? '' : 's' }}</p>
+          </div>
+          <button @click="showFeedbackModal = false" class="p-2 hover:bg-gray-100 rounded-lg">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="overflow-y-auto flex-1 p-6 space-y-3">
+          <div v-if="loadingFeedback" class="text-center py-8 text-gray-500">Loading...</div>
+          <div v-else-if="feedbackList.length === 0" class="text-center py-8 text-gray-400">No feedback submitted yet</div>
+          <div v-else v-for="fb in feedbackList" :key="fb.id" class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-1">
+                <span v-for="i in 5" :key="i" class="text-lg" :class="i <= fb.rating ? 'text-yellow-400' : 'text-gray-300'">&#9733;</span>
+                <span class="text-sm text-gray-600 ml-1">{{ fb.rating }}/5</span>
+              </div>
+              <span class="px-2 py-0.5 text-xs rounded font-medium" :class="fb.request_type === 'facility_request' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'">
+                {{ fb.request_type === 'facility_request' ? 'Facility' : 'Work Order' }} #{{ fb.request_id }}
+              </span>
+            </div>
+            <p v-if="fb.comment" class="text-sm text-gray-700 mt-1">{{ fb.comment }}</p>
+            <p class="text-xs text-gray-400 mt-2">{{ fb.user?.name || 'User' }} &middot; {{ formatDate(fb.created_at) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </AppLayout>
 </template>
 
@@ -171,6 +209,11 @@ const staffPerformance = ref<any[]>([]);
 const hotspots = ref<any[]>([]);
 const loading = ref(false);
 const loadError = ref('');
+
+const showFeedbackModal = ref(false);
+const feedbackList = ref<any[]>([]);
+const loadingFeedback = ref(false);
+const feedbackLoaded = ref(false);
 
 const maxHotspot = computed(() => Math.max(...hotspots.value.map((h: any) => h.total_orders), 1));
 
@@ -208,6 +251,30 @@ const loadReports = async () => {
     loadError.value = 'Failed to load reports. Please try again.';
   } finally {
     loading.value = false;
+  }
+};
+
+const formatDate = (d: string) => {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+const openFeedbackModal = async () => {
+  showFeedbackModal.value = true;
+  if (feedbackLoaded.value) return;
+
+  loadingFeedback.value = true;
+  try {
+    const res = await fetch(`${API_URL}/feedbacks`, { headers: getAuthHeaders() });
+    const data = await res.json();
+    if (data.success) {
+      feedbackList.value = data.data;
+      feedbackLoaded.value = true;
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loadingFeedback.value = false;
   }
 };
 
