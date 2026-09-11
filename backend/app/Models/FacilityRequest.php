@@ -19,15 +19,23 @@ class FacilityRequest extends Model
         'date_of_event',
         'status',
         'attachment_path',
+        'assigned_to',
+        'assigned_at',
     ];
 
     protected $casts = [
         'date_of_event' => 'date',
+        'assigned_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     public function department()

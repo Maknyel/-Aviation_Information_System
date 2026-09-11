@@ -125,7 +125,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/inventory',
     name: 'Inventory',
     component: InventoryPage,
-    meta: { requiresAuth: true, role: 'Admin' }
+    meta: { requiresAuth: true, role: ['Admin', 'Staff'] }
   },
   {
     path: '/form-management',
@@ -175,10 +175,11 @@ router.beforeEach((to, from, next) => {
     return;
   }
 
-  const requiredRole = to.meta.role as string | undefined;
+  const requiredRole = to.meta.role as string | string[] | undefined;
   if (requiredRole && token) {
     const userRole = getStoredUser()?.role?.name;
-    if (userRole !== requiredRole) {
+    const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (!userRole || !allowedRoles.includes(userRole)) {
       next('/home');
       return;
     }

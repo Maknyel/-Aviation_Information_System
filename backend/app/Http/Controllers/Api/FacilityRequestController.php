@@ -19,7 +19,7 @@ class FacilityRequestController extends Controller
 {
     public function index(Request $request)
     {
-        $query = FacilityRequest::with(['user.role', 'department', 'requestItems.inventoryItem']);
+        $query = FacilityRequest::with(['user.role', 'department', 'requestItems.inventoryItem', 'assignee']);
 
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -27,6 +27,10 @@ class FacilityRequestController extends Controller
 
         if ($request->has('department_id')) {
             $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->has('assigned_to')) {
+            $query->where('assigned_to', $request->assigned_to);
         }
 
         if ($request->user()->role->name !== 'Admin' && $request->user()->role->name !== 'Staff') {
@@ -130,7 +134,7 @@ class FacilityRequestController extends Controller
 
     public function show($id)
     {
-        $facilityRequest = FacilityRequest::with(['user.role', 'department', 'approvalSteps.approver', 'feedbacks.user', 'requestItems.inventoryItem'])->findOrFail($id);
+        $facilityRequest = FacilityRequest::with(['user.role', 'department', 'approvalSteps.approver', 'feedbacks.user', 'requestItems.inventoryItem', 'assignee'])->findOrFail($id);
 
         return response()->json([
             'success' => true,
@@ -291,6 +295,51 @@ class FacilityRequestController extends Controller
             'success' => true,
             'message' => 'Status updated successfully',
             'data' => $facilityRequest->fresh()->load(['user.role', 'department', 'approvalSteps.approver'])
+        ]);
+    }
+
+    /**
+     * Assign a facility request to a staff member
+     */
+    public function assign(Request $request, $id)
+    {
+        $userRole = $request->user()->role->name;
+        if ($userRole !== 'Admin' && $userRole !== 'Staff') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'assigned_to' => 'required|exists:users,id',
+        ]);
+
+        $facilityRequest = FacilityRequest::findOrFail($id);
+        $facilityRequest->update([
+            'assigned_to' => $validated['assigned_to'],
+            'assigned_at' => now(),
+        ]);
+
+        $assignee = User::find($validated['assigned_to']);
+
+        // Notify the assigned staff
+        Notification::create([
+            'user_id' => $validated['assigned_to'],
+            'type' => 'facility_request',
+            'reference_id' => $facilityRequest->id,
+            'title' => 'Facility Request Assigned',
+            'message' => "You have been assigned to the facility request for {$facilityRequest->venue_requested} by {$request->user()->name}.",
+            'is_read' => false,
+            'is_deleted' => false,
+        ]);
+
+        // Send assignment email to staff
+        EmailHelper::sendAssignment($assignee->email, $assignee->name, 'Facility Request', $facilityRequest->id, $facilityRequest->title_of_event);
+
+        ActivityLog::log('assigned', "Assigned facility request #{$id} to {$assignee->name}", $facilityRequest);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Facility request assigned to {$assignee->name}",
+            'data' => $facilityRequest->fresh()->load(['user.role', 'department', 'assignee'])
         ]);
     }
 

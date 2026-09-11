@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/facility-requests/{id}/status', [FacilityRequestController::class, 'updateStatus']);
     Route::get('/facility-requests/{id}/inventory-check', [FacilityRequestController::class, 'inventoryCheck']);
     Route::post('/facility-requests/check-conflict', [FacilityRequestController::class, 'checkConflict']);
+    Route::post('/facility-requests/{id}/assign', [FacilityRequestController::class, 'assign']);
 
     // Work Order routes
     Route::apiResource('work-orders', WorkOrderController::class);
@@ -77,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy']);
     Route::put('/users/{id}/skills', [UserManagementController::class, 'updateSkills']);
     Route::get('/roles', [UserManagementController::class, 'roles']);
+    Route::get('/staff-members', [UserManagementController::class, 'staffList']);
 
     // Feedback routes
     Route::get('/feedbacks', [FeedbackController::class, 'index']);

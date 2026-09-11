@@ -35,7 +35,20 @@
     </div>
 
     <!-- Assigned To -->
-    <div v-if="order?.assignee" class="mt-3 flex gap-2">
+    <div v-if="canApprove" class="mt-3 flex gap-2 items-center">
+      <label class="text-sm font-semibold text-gray-900 min-w-[140px]">Assigned To:</label>
+      <select
+        v-model="assigneeSelection"
+        @change="handleAssign"
+        :disabled="assigning"
+        class="text-sm px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-aviation-olive focus:border-transparent disabled:opacity-50"
+      >
+        <option value="">Unassigned</option>
+        <option v-for="member in staffMembers" :key="member.id" :value="member.id">{{ member.name }}</option>
+      </select>
+      <span v-if="assigning" class="text-xs text-gray-400">Assigning...</span>
+    </div>
+    <div v-else-if="order?.assignee" class="mt-3 flex gap-2">
       <label class="text-sm font-semibold text-gray-900 min-w-[140px]">Assigned To:</label>
       <p class="text-sm text-aviation-olive font-medium">{{ order.assignee.name }}</p>
     </div>
@@ -221,6 +234,46 @@ const showChangeDate = ref(false);
 const newDate = ref('');
 const dateError = ref('');
 const changingDate = ref(false);
+const staffMembers = ref<any[]>([]);
+const assigneeSelection = ref<number | ''>('');
+const assigning = ref(false);
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('token')}`,
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+});
+
+const fetchStaffMembers = async () => {
+  try {
+    const res = await fetch(`${API_URL}/staff-members`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) staffMembers.value = data.data;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const handleAssign = async () => {
+  if (!props.order || !assigneeSelection.value) return;
+  assigning.value = true;
+  try {
+    const res = await fetch(`${API_URL}/work-orders/${props.order.id}/assign`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ assigned_to: assigneeSelection.value }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to assign work order');
+    toast.success(data.message || 'Work order assigned successfully');
+    emit('statusUpdated', data.data);
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to assign work order');
+    assigneeSelection.value = props.order?.assigned_to || '';
+  } finally {
+    assigning.value = false;
+  }
+};
 
 const saveRequest = async () => {
   if (!props.order) return;
@@ -276,13 +329,18 @@ const printRequest = async () => {
   }
 };
 
-watch(() => props.order, () => {
+watch(() => props.order, (order) => {
   saved.value = false;
   showRejectReason.value = false;
   rejectReason.value = '';
   rejectError.value = '';
   showChangeDate.value = false;
   dateError.value = '';
+  assigneeSelection.value = order?.assigned_to || '';
+  const role = getStoredUser()?.role?.name;
+  if (order?.id && (role === 'Staff' || role === 'Admin') && staffMembers.value.length === 0) {
+    fetchStaffMembers();
+  }
 }, { immediate: true });
 
 const isOpen = computed({

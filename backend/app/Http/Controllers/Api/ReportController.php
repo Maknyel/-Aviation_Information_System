@@ -108,31 +108,51 @@ class ReportController extends Controller
 
         $staff = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))
             ->withCount([
-                'assignedWorkOrders as total_assigned' => function ($q) use ($month, $year) {
+                'assignedWorkOrders as wo_total_assigned' => function ($q) use ($month, $year) {
                     $q->whereMonth('date', $month)->whereYear('date', $year);
                 },
-                'assignedWorkOrders as completed' => function ($q) use ($month, $year) {
+                'assignedWorkOrders as wo_completed' => function ($q) use ($month, $year) {
                     $q->whereMonth('date', $month)->whereYear('date', $year)->where('status', 'completed');
                 },
-                'assignedWorkOrders as in_progress' => function ($q) use ($month, $year) {
+                'assignedWorkOrders as wo_in_progress' => function ($q) use ($month, $year) {
                     $q->whereMonth('date', $month)->whereYear('date', $year)->where('status', 'in_progress');
+                },
+                // A facility request's job is "in progress" while still pending assignee action,
+                // and "completed" once it has reached a final state (approved/rejected/canceled).
+                'assignedFacilityRequests as fr_total_assigned' => function ($q) use ($month, $year) {
+                    $q->whereMonth('date_of_event', $month)->whereYear('date_of_event', $year);
+                },
+                'assignedFacilityRequests as fr_completed' => function ($q) use ($month, $year) {
+                    $q->whereMonth('date_of_event', $month)->whereYear('date_of_event', $year)
+                        ->whereIn('status', ['approved', 'rejected', 'canceled']);
+                },
+                'assignedFacilityRequests as fr_in_progress' => function ($q) use ($month, $year) {
+                    $q->whereMonth('date_of_event', $month)->whereYear('date_of_event', $year)->where('status', 'pending');
                 },
             ])
             ->with('skills')
             ->get()
             ->map(function ($user) {
-                $avgRating = Feedback::whereIn('request_id',
-                    WorkOrder::where('assigned_to', $user->id)->pluck('id')
-                )->where('request_type', 'work_order')->avg('rating');
+                $totalAssigned = $user->wo_total_assigned + $user->fr_total_assigned;
+                $completed = $user->wo_completed + $user->fr_completed;
+                $inProgress = $user->wo_in_progress + $user->fr_in_progress;
+
+                $avgRating = Feedback::where(function ($q) use ($user) {
+                    $q->whereIn('request_id', WorkOrder::where('assigned_to', $user->id)->pluck('id'))
+                        ->where('request_type', 'work_order');
+                })->orWhere(function ($q) use ($user) {
+                    $q->whereIn('request_id', FacilityRequest::where('assigned_to', $user->id)->pluck('id'))
+                        ->where('request_type', 'facility_request');
+                })->avg('rating');
 
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'total_assigned' => $user->total_assigned,
-                    'completed' => $user->completed,
-                    'in_progress' => $user->in_progress,
-                    'completion_rate' => $user->total_assigned > 0
-                        ? round(($user->completed / $user->total_assigned) * 100, 1)
+                    'total_assigned' => $totalAssigned,
+                    'completed' => $completed,
+                    'in_progress' => $inProgress,
+                    'completion_rate' => $totalAssigned > 0
+                        ? round(($completed / $totalAssigned) * 100, 1)
                         : 0,
                     'average_rating' => $avgRating ? round($avgRating, 1) : null,
                     'skills' => $user->skills->pluck('skill'),

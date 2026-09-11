@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->hasMany(WorkOrder::class, 'assigned_to');
     }
 
+    public function assignedFacilityRequests()
+    {
+        return $this->hasMany(FacilityRequest::class, 'assigned_to');
+    }
+
     public function sendPasswordResetNotification($token)
     {
         $frontendUrl = env('FRONTEND_URL', 'https://aviation.dl-hosting.net');

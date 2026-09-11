@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="bg-aviation-olive shadow-md">
       <div class="max-w-7xl mx-auto px-4 py-4">
-        <h1 class="text-white text-xl font-semibold text-center">Philippine State College of Aeronotics</h1>
+        <h1 class="text-white text-xl font-semibold text-center">National Aviation Academy of the Philippines</h1>
       </div>
     </header>
 

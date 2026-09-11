@@ -196,4 +196,27 @@ class UserManagementController extends Controller
             'data' => Role::all()
         ]);
     }
+
+    /**
+     * Lightweight list of Staff/Admin users for assignment dropdowns.
+     * Accessible to Admin and Staff (unlike the full user index, which is Admin-only).
+     */
+    public function staffList(Request $request)
+    {
+        $userRole = $request->user()->role->name;
+        if ($userRole !== 'Admin' && $userRole !== 'Staff') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $staff = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))
+            ->select('id', 'name', 'role_id')
+            ->with('role:id,name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $staff
+        ]);
+    }
 }

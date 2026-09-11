@@ -25,6 +25,25 @@
         <p class="text-sm text-aviation-olive font-medium">{{ formatDateTime(request?.date_of_event, request?.time_of_event) }}</p>
       </div>
 
+      <!-- Assigned To -->
+      <div v-if="canApprove" class="flex gap-2 items-center">
+        <label class="text-sm font-semibold text-gray-900 min-w-[140px]">Assigned To:</label>
+        <select
+          v-model="assigneeSelection"
+          @change="handleAssign"
+          :disabled="assigning"
+          class="text-sm px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-aviation-olive focus:border-transparent disabled:opacity-50"
+        >
+          <option value="">Unassigned</option>
+          <option v-for="member in staffMembers" :key="member.id" :value="member.id">{{ member.name }}</option>
+        </select>
+        <span v-if="assigning" class="text-xs text-gray-400">Assigning...</span>
+      </div>
+      <div v-else-if="request?.assignee" class="flex gap-2">
+        <label class="text-sm font-semibold text-gray-900 min-w-[140px]">Assigned To:</label>
+        <p class="text-sm text-aviation-olive font-medium">{{ request.assignee.name }}</p>
+      </div>
+
       <!-- Attachment -->
       <div v-if="request?.attachment_path" class="flex gap-2 items-start">
         <label class="text-sm font-semibold text-gray-900 min-w-[140px]">Attachment:</label>
@@ -305,6 +324,40 @@ const showChangeDate = ref(false);
 const newDate = ref('');
 const dateError = ref('');
 const changingDate = ref(false);
+const staffMembers = ref<any[]>([]);
+const assigneeSelection = ref<number | ''>('');
+const assigning = ref(false);
+
+const fetchStaffMembers = async () => {
+  try {
+    const res = await fetch(`${API_URL}/staff-members`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) staffMembers.value = data.data;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const handleAssign = async () => {
+  if (!props.request || !assigneeSelection.value) return;
+  assigning.value = true;
+  try {
+    const res = await fetch(`${API_URL}/facility-requests/${props.request.id}/assign`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ assigned_to: assigneeSelection.value }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to assign request');
+    toast.success(data.message || 'Request assigned successfully');
+    emit('statusUpdated', data.data);
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to assign request');
+    assigneeSelection.value = props.request?.assigned_to || '';
+  } finally {
+    assigning.value = false;
+  }
+};
 
 const fetchInventoryCheck = async (requestId: number) => {
   loadingInventory.value = true;
@@ -332,8 +385,10 @@ watch(() => props.request, (req) => {
   rejectError.value = '';
   showChangeDate.value = false;
   dateError.value = '';
+  assigneeSelection.value = req?.assigned_to || '';
   if (req?.id && canApprove.value) {
     fetchInventoryCheck(req.id);
+    if (staffMembers.value.length === 0) fetchStaffMembers();
   }
 }, { immediate: true });
 

@@ -259,6 +259,7 @@ const menuItems = computed(() => {
     return [
       ...baseMenu,
       { path: '/requests', label: 'Request', icon: RequestsIcon },
+      { path: '/inventory', label: 'Inventory', icon: InventoryIcon },
     ];
   } else if (role === 'Employee') {
     return [
