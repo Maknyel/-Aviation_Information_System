@@ -4,14 +4,25 @@ cd /d "%~dp0"
 
 if exist "C:\xampp\mysql\bin\mysql.exe" (
     set "MYSQL_BIN=C:\xampp\mysql\bin\mysql.exe"
+    set "PHP_INI=C:\xampp\php\php.ini"
 ) else if exist "D:\xampp\mysql\bin\mysql.exe" (
     set "MYSQL_BIN=D:\xampp\mysql\bin\mysql.exe"
+    set "PHP_INI=D:\xampp\php\php.ini"
 ) else (
     echo.
     echo ERROR: Could not find XAMPP's mysql.exe on C:\xampp or D:\xampp.
     echo Please edit install.bat and set MYSQL_BIN to your XAMPP mysql.exe path.
     pause
     exit /b 1
+)
+
+if exist "%PHP_INI%" (
+    findstr /r /c:"^;extension=zip" "%PHP_INI%" >nul
+    if not errorlevel 1 (
+        echo.
+        echo Enabling PHP's zip extension in %PHP_INI% (required by composer)...
+        powershell -NoProfile -Command "(Get-Content '%PHP_INI%') -replace '^;extension=zip$','extension=zip' | Set-Content '%PHP_INI%'"
+    )
 )
 
 for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "Get-Date -Format 'MMddyyyy'"`) do set "TODAY=%%i"
