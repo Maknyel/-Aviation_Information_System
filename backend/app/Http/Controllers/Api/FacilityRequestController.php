@@ -100,12 +100,13 @@ class FacilityRequestController extends Controller
             ]);
         }
 
-        // Create approval workflow step
+        // Create approval workflow step (either Staff or Admin may act on it;
+        // approver_role is updated to whoever actually approves/rejects it)
         ApprovalStep::create([
             'request_type' => 'facility_request',
             'request_id' => $facilityRequest->id,
             'step_order' => 1,
-            'approver_role' => 'Admin',
+            'approver_role' => 'Staff/Admin',
             'status' => 'pending',
         ]);
 
@@ -253,16 +254,17 @@ class FacilityRequestController extends Controller
         $facilityRequest = FacilityRequest::findOrFail($id);
         $oldStatus = $facilityRequest->status;
 
-        // Update the current pending approval step
+        // Update the current pending approval step with whoever actually acted on it
         $currentStep = ApprovalStep::where('request_type', 'facility_request')
             ->where('request_id', $id)
-            ->where('approver_role', $userRole)
             ->where('status', 'pending')
+            ->orderBy('step_order')
             ->first();
 
         if ($currentStep) {
             $stepStatus = $validated['status'] === 'rejected' ? 'rejected' : 'approved';
             $currentStep->update([
+                'approver_role' => $userRole,
                 'status' => $stepStatus,
                 'approver_id' => $user->id,
                 'remarks' => $validated['remarks'] ?? null,

@@ -198,8 +198,9 @@ class UserManagementController extends Controller
     }
 
     /**
-     * Lightweight list of Staff/Admin users for assignment dropdowns.
+     * Lightweight list of Staff users for assignment dropdowns (e.g. "Assigned To").
      * Accessible to Admin and Staff (unlike the full user index, which is Admin-only).
+     * Admins are intentionally excluded — only Staff can be assigned to requests.
      */
     public function staffList(Request $request)
     {
@@ -208,7 +209,7 @@ class UserManagementController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $staff = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))
+        $staff = User::whereHas('role', fn($q) => $q->where('name', 'Staff'))
             ->select('id', 'name', 'role_id')
             ->with('role:id,name')
             ->orderBy('name')
