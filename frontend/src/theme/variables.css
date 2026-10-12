@@ -2,21 +2,30 @@
 http://ionicframework.com/docs/theming/ */
 
 :root {
-  /* Primary - White (#F0F5F0) */
-  --ion-color-primary: #F0F5F0;
-  --ion-color-primary-rgb: 240, 245, 240;
-  --ion-color-primary-contrast: #000000;
-  --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #d3d8d3;
-  --ion-color-primary-tint: #f2f6f2;
+  /* System color scheme (NAAP). Defaults here; the Admin-managed values are
+     applied at runtime by src/theme/colorScheme.ts. */
+  --color-primary: #002F6C;
+  --color-primary-rgb: 0 47 108;
+  --color-accent: #FFCC00;
+  --color-accent-rgb: 255 204 0;
+  --color-surface: #FFFFFF;
+  --color-surface-rgb: 255 255 255;
 
-  /* Secondary - Olive (#6C9A6C) */
-  --ion-color-secondary: #6C9A6C;
-  --ion-color-secondary-rgb: 108, 154, 108;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #5f885f;
-  --ion-color-secondary-tint: #7ba47b;
+  /* Primary - Deep Blue (#002F6C) */
+  --ion-color-primary: #002F6C;
+  --ion-color-primary-rgb: 0, 47, 108;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #002959;
+  --ion-color-primary-tint: #1a4479;
+
+  /* Secondary - Golden Yellow (#FFCC00) */
+  --ion-color-secondary: #FFCC00;
+  --ion-color-secondary-rgb: 255, 204, 0;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0, 0, 0;
+  --ion-color-secondary-shade: #e0b400;
+  --ion-color-secondary-tint: #ffd11a;
 
   --ion-color-tertiary: #5260ff;
   --ion-color-tertiary-rgb: 82, 96, 255;

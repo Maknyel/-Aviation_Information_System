@@ -65,7 +65,10 @@
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
                   <button @click="openEditModal(user)" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">Edit</button>
-                  <button @click="openSkillsModal(user)" v-if="['Staff', 'Admin', 'Employee'].includes(user.role?.name)" class="px-3 py-1 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100">Skills</button>
+                  <template v-if="['Staff', 'Admin', 'Employee'].includes(user.role?.name)">
+                    <button @click="openSkillsModal(user, 'add')" class="px-3 py-1 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100">Add Skills</button>
+                    <button @click="openSkillsModal(user, 'edit')" :disabled="!user.skills?.length" class="px-3 py-1 text-sm bg-yellow-50 text-yellow-800 rounded-lg hover:bg-yellow-100 disabled:opacity-40 disabled:cursor-not-allowed">Edit Skills</button>
+                  </template>
                   <button @click="confirmDelete(user)" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-100">Delete</button>
                 </div>
               </td>
@@ -96,7 +99,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <select v-model="userForm.role_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black">
-              <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+              <option v-for="role in assignableRoles" :key="role.id" :value="role.id">{{ role.name }}</option>
             </select>
           </div>
           <div>
@@ -117,34 +120,54 @@
       </div>
     </div>
 
-    <!-- Skills Modal -->
+    <!-- Skills Modal (Add Skills / Edit Skills) -->
     <div v-if="showSkillsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Manage Skills - {{ skillsUser?.name }}</h2>
-        <div class="space-y-3 mb-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          {{ skillsMode === 'add' ? 'Add Skills' : 'Edit Skills' }} - {{ skillsUser?.name }}
+        </h2>
+
+        <!-- Existing skills (read-only when adding) -->
+        <div v-if="skillsMode === 'add' && existingSkills.length" class="mb-4">
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">Current skills</p>
+          <div class="flex flex-wrap gap-1">
+            <span v-for="(sk, i) in existingSkills" :key="i" class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+              {{ sk.skill }} ({{ sk.proficiency }})
+            </span>
+          </div>
+        </div>
+
+        <datalist id="skill-suggestions">
+          <option v-for="name in skillSuggestions" :key="name" :value="name" />
+        </datalist>
+
+        <div class="space-y-3 mb-4 max-h-72 overflow-y-auto">
           <div v-for="(skill, index) in skillsForm" :key="index" class="flex gap-2">
-            <select v-model="skill.skill" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-black">
-              <option value="electrical">Electrical</option>
-              <option value="plumbing">Plumbing</option>
-              <option value="IT">IT</option>
-              <option value="carpentry">Carpentry</option>
-              <option value="general">General</option>
-            </select>
+            <input
+              v-model="skill.skill"
+              list="skill-suggestions"
+              type="text"
+              maxlength="100"
+              placeholder="Skill name"
+              class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-black"
+            />
             <select v-model="skill.proficiency" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-black">
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="expert">Expert</option>
             </select>
-            <button @click="skillsForm.splice(index, 1)" class="px-2 text-red-500 hover:text-red-700">
+            <button v-if="skillsMode === 'edit' || skillsForm.length > 1" @click="skillsForm.splice(index, 1)" class="px-2 text-red-500 hover:text-red-700" title="Remove">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
+          <p v-if="skillsMode === 'edit' && skillsForm.length === 0" class="text-sm text-gray-500">All skills removed. Saving will clear this user's skills.</p>
         </div>
-        <button @click="skillsForm.push({ skill: 'general', proficiency: 'intermediate' })" class="text-sm text-aviation-olive hover:underline mb-4">+ Add Skill</button>
+        <button v-if="skillsMode === 'add'" @click="skillsForm.push({ skill: '', proficiency: 'intermediate' })" class="text-sm text-aviation-olive hover:underline mb-4">+ Add another skill</button>
+        <div v-if="skillsError" class="text-red-600 text-sm mb-2">{{ skillsError }}</div>
         <div class="flex gap-3 justify-end pt-2">
           <button @click="showSkillsModal = false" class="px-4 py-2 border border-gray-300 white rounded-lg hover:bg-gray-500 transition-colors bg-gray-400">Cancel</button>
           <button @click="saveSkills" :disabled="saving" class="px-4 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
-            {{ saving ? 'Saving...' : 'Save Skills' }}
+            {{ saving ? 'Saving...' : (skillsMode === 'add' ? 'Add Skills' : 'Save Changes') }}
           </button>
         </div>
       </div>
@@ -167,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { API_URL } from '@/config/api';
@@ -243,9 +266,15 @@ const fetchDepartments = async () => {
   } catch (e) { console.error(e); }
 };
 
+// Only one Admin account exists, so Admin is never offered as a role to assign.
+// The existing admin keeps the option so editing that account still works.
+const assignableRoles = computed(() =>
+  roles.value.filter(r => r.name !== 'Admin' || editingUser.value?.role?.name === 'Admin')
+);
+
 const openCreateModal = () => {
   editingUser.value = null;
-  userForm.value = { name: '', email: '', password: '', role_id: roles.value[0]?.id, department_id: null };
+  userForm.value = { name: '', email: '', password: '', role_id: assignableRoles.value[0]?.id, department_id: null };
   formError.value = '';
   showUserModal.value = true;
 };
@@ -297,20 +326,50 @@ const saveUser = async () => {
   }
 };
 
-const openSkillsModal = (user: any) => {
+const skillsMode = ref<'add' | 'edit'>('add');
+const skillsError = ref('');
+const existingSkills = ref<{ skill: string; proficiency: string }[]>([]);
+const skillSuggestions = ['electrical', 'plumbing', 'IT', 'carpentry', 'general'];
+
+const openSkillsModal = (user: any, mode: 'add' | 'edit') => {
   skillsUser.value = user;
-  skillsForm.value = (user.skills || []).map((s: any) => ({ skill: s.skill, proficiency: s.proficiency }));
-  if (skillsForm.value.length === 0) skillsForm.value.push({ skill: 'general', proficiency: 'intermediate' });
+  skillsMode.value = mode;
+  skillsError.value = '';
+  existingSkills.value = (user.skills || []).map((sk: any) => ({ skill: sk.skill, proficiency: sk.proficiency }));
+  // Add: start with one blank entry. Edit: work on a copy of the current skills.
+  skillsForm.value = mode === 'add'
+    ? [{ skill: '', proficiency: 'intermediate' }]
+    : existingSkills.value.map(sk => ({ ...sk }));
   showSkillsModal.value = true;
 };
 
 const saveSkills = async () => {
+  skillsError.value = '';
+  const entered = skillsForm.value.map(sk => ({ skill: sk.skill.trim(), proficiency: sk.proficiency }));
+
+  if (entered.some(sk => !sk.skill)) {
+    skillsError.value = 'Skill name cannot be empty.';
+    return;
+  }
+  if (skillsMode.value === 'add' && entered.length === 0) {
+    skillsError.value = 'Enter at least one skill.';
+    return;
+  }
+
+  // Add keeps the existing skills and appends the new ones; Edit replaces the whole list
+  const payload = skillsMode.value === 'add' ? [...existingSkills.value, ...entered] : entered;
+  const names = payload.map(sk => sk.skill.toLowerCase());
+  if (new Set(names).size !== names.length) {
+    skillsError.value = 'Each skill can only be listed once for a user.';
+    return;
+  }
+
   saving.value = true;
   try {
     const res = await fetch(`${API_URL}/users/${skillsUser.value.id}/skills`, {
       method: 'PUT',
       headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ skills: skillsForm.value }),
+      body: JSON.stringify({ skills: payload }),
     });
     const data = await res.json();
     if (!res.ok || data.success === false) {
@@ -318,7 +377,7 @@ const saveSkills = async () => {
       return;
     }
     showSkillsModal.value = false;
-    toast.success('Skills updated successfully');
+    toast.success(skillsMode.value === 'add' ? 'Skills added successfully' : 'Skills updated successfully');
     fetchUsers();
   } catch (e) {
     console.error(e);

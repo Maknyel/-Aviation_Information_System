@@ -30,20 +30,20 @@
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
-          <div class="text-3xl font-bold text-aviation-olive mb-1">{{ overview.total_items }}</div>
+          <div class="text-3xl font-bold text-aviation-olive mb-1">{{ summary.totalItems }}</div>
           <div class="text-sm text-gray-600">Total Items</div>
         </div>
         <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
-          <div class="text-3xl font-bold text-blue-600 mb-1">{{ overview.total_deployed }}</div>
+          <div class="text-3xl font-bold text-blue-600 mb-1">{{ summary.deployed }}</div>
           <div class="text-sm text-gray-600">Deployed Today</div>
         </div>
         <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
-          <div class="text-3xl font-bold text-green-600 mb-1">{{ overview.total_available }}</div>
+          <div class="text-3xl font-bold text-green-600 mb-1">{{ summary.available }}</div>
           <div class="text-sm text-gray-600">Available Today</div>
         </div>
         <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
-          <div class="text-3xl font-bold text-gray-700 mb-1">{{ overview.by_category?.length || 0 }}</div>
-          <div class="text-sm text-gray-600">Categories</div>
+          <div class="text-3xl font-bold text-gray-700 mb-1">{{ summary.categories }}</div>
+          <div class="text-sm text-gray-600">{{ categoryFilter ? formatCategory(categoryFilter) : 'Categories' }}</div>
         </div>
       </div>
 
@@ -205,6 +205,21 @@ const editingItem = ref<any>(null);
 const showDeleteConfirm = ref(false);
 const deletingItem = ref<any>(null);
 const deleting = ref(false);
+
+// Everything in the selected category (ignores the search box) drives the summary boxes
+const categoryItems = computed(() =>
+  items.value.filter(item => !categoryFilter.value || item.category === categoryFilter.value)
+);
+
+const summary = computed(() => {
+  const list = categoryItems.value;
+  return {
+    totalItems: list.length,
+    deployed: list.reduce((n, i) => n + (i.deployed_quantity ?? 0), 0),
+    available: list.reduce((n, i) => n + (i.available_quantity ?? i.total_quantity ?? 0), 0),
+    categories: categoryFilter.value ? (list.length ? 1 : 0) : new Set(list.map(i => i.category)).size,
+  };
+});
 
 const filteredItems = computed(() => {
   return items.value.filter(item => {

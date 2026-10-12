@@ -51,7 +51,8 @@ class FacilityRequestController extends Controller
             'venue_requested'      => 'required|string|max:255',
             'location_room_number' => 'nullable|string|max:255',
             'title_of_event'       => 'required|string|max:255',
-            'time_of_event'        => 'required|string',
+            'start_time'           => 'required|date_format:H:i',
+            'end_time'             => 'required|date_format:H:i|after:start_time',
             'date_of_event'        => 'required|date',
             'department_id'        => 'nullable|exists:departments,id',
             'items'                => 'nullable|array',
@@ -59,6 +60,14 @@ class FacilityRequestController extends Controller
             'items.*.quantity'     => 'required|integer|min:1',
             'attachment'           => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+
+        // time_of_event mirrors the start time for older screens/reports
+        $validated['time_of_event'] = $validated['start_time'];
+
+        // A date that already has a facility request cannot be requested again
+        if ($existing = $this->existingRequestOnDate($validated['date_of_event'])) {
+            return $this->dateTakenResponse($existing);
+        }
 
         // Conflict detection
         $conflict = ConflictDetector::check(
@@ -155,7 +164,8 @@ class FacilityRequestController extends Controller
             'venue_requested'      => 'sometimes|string|max:255',
             'location_room_number' => 'nullable|string|max:255',
             'title_of_event'       => 'sometimes|string|max:255',
-            'time_of_event'        => 'sometimes|string',
+            'start_time'           => 'sometimes|date_format:H:i',
+            'end_time'             => 'sometimes|date_format:H:i',
             'date_of_event'        => 'sometimes|date',
             'department_id'        => 'nullable|exists:departments,id',
             'status'               => 'sometimes|in:pending,approved,rejected,canceled',
@@ -164,6 +174,26 @@ class FacilityRequestController extends Controller
             'items.*.quantity'     => 'required|integer|min:1',
             'attachment'           => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+
+        if (isset($validated['start_time'])) {
+            $validated['time_of_event'] = $validated['start_time'];
+        }
+
+        $effectiveStart = $validated['start_time'] ?? $facilityRequest->start_time ?? $facilityRequest->time_of_event;
+        $effectiveEnd = $validated['end_time'] ?? $facilityRequest->end_time;
+        if ($effectiveEnd && $effectiveStart && $effectiveEnd <= $effectiveStart) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The end time must be after the start time.',
+                'errors' => ['end_time' => ['The end time must be after the start time.']],
+            ], 422);
+        }
+
+        if (isset($validated['date_of_event'])
+            && $validated['date_of_event'] !== $facilityRequest->date_of_event->format('Y-m-d')
+            && ($existing = $this->existingRequestOnDate($validated['date_of_event'], $facilityRequest->id))) {
+            return $this->dateTakenResponse($existing);
+        }
 
         if (isset($validated['venue_requested']) || isset($validated['date_of_event']) || isset($validated['time_of_event'])) {
             $conflict = ConflictDetector::check(
@@ -408,6 +438,49 @@ class FacilityRequestController extends Controller
                 'inventory'               => $inventoryStatus,
                 'other_bookings_same_day' => $otherBookings,
             ]
+        ]);
+    }
+
+    /**
+     * First pending/approved facility request already holding the given date.
+     */
+    private function existingRequestOnDate(string $date, ?int $excludeId = null): ?FacilityRequest
+    {
+        return FacilityRequest::whereDate('date_of_event', $date)
+            ->whereIn('status', ['pending', 'approved'])
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->first();
+    }
+
+    private function dateTakenResponse(FacilityRequest $existing)
+    {
+        $message = 'The selected date already has a facility request. Please select a different date.';
+
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+            'errors' => ['date_of_event' => [$message]],
+        ], 422);
+    }
+
+    /**
+     * Tell the requester whether a date already has a facility request.
+     */
+    public function dateCheck(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'exclude_id' => 'nullable|integer',
+        ]);
+
+        $existing = $this->existingRequestOnDate($request->date, $request->exclude_id);
+
+        return response()->json([
+            'success' => true,
+            'has_request' => $existing !== null,
+            'message' => $existing
+                ? 'The selected date already has a facility request. Please select a different date.'
+                : null,
         ]);
     }
 

@@ -17,6 +17,7 @@ import ResetPasswordPage from '../views/ResetPasswordPage.vue'
 import InventoryPage from '../views/InventoryPage.vue'
 import FormManagementPage from '../views/FormManagementPage.vue'
 import MyFeedbackPage from '../views/MyFeedbackPage.vue'
+import ColorSchemePage from '../views/ColorSchemePage.vue'
 import NotFoundPage from '../views/NotFoundPage.vue'
 import { getStoredUser } from '../utils/auth'
 
@@ -113,6 +114,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/departments',
     name: 'Departments',
     component: DepartmentsPage,
+    meta: { requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/color-scheme',
+    name: 'ColorScheme',
+    component: ColorSchemePage,
     meta: { requiresAuth: true, role: 'Admin' }
   },
   {

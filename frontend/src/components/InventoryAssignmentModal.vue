@@ -44,8 +44,8 @@
                 </div>
               </div>
               <span :class="['text-xs px-2 py-1 rounded-full font-medium shrink-0 ml-3 mt-0.5',
-                dep.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700']">
-                {{ dep.status }}
+                statusBadgeClass(dep.status)]">
+                {{ statusLabel(dep.status) }}
               </span>
             </div>
           </div>
@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { ref, computed, watch } from 'vue';
 import { API_URL } from '@/config/api';
 

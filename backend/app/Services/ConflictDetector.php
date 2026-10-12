@@ -31,7 +31,7 @@ class ConflictDetector
                 'user' => $conflict->user->name ?? 'Unknown',
                 'status' => $conflict->status,
                 'date' => $conflict->date_of_event->format('Y-m-d'),
-                'time' => $conflict->time_of_event,
+                'time' => $conflict->time_range,
             ];
         }
 
@@ -51,7 +51,7 @@ class ConflictDetector
             ->map(fn($r) => [
                 'id' => $r->id,
                 'title' => $r->title_of_event,
-                'time' => $r->time_of_event,
+                'time' => $r->time_range,
                 'status' => $r->status,
                 'user' => $r->user->name ?? 'Unknown',
             ])

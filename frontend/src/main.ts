@@ -37,9 +37,14 @@ import './theme/variables.css';
 /* Tailwind CSS */
 import './assets/tailwind.css';
 
+import { initColorScheme } from './theme/colorScheme';
+
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
+
+// Apply the saved system color scheme (cached copy first, then refreshed from the server)
+initColorScheme();
 
 router.isReady().then(() => {
   app.mount('#app');

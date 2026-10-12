@@ -186,6 +186,7 @@
 </template>
 
 <script setup lang="ts">
+import { getChartColors } from '@/theme/colorScheme';
 import { ref, onMounted, computed } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
@@ -246,13 +247,13 @@ const nextChartMonth = () => {
 
 // Computed properties for chart colors
 const chartColors = computed(() => {
-  const baseColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E'];
+  const baseColors = getChartColors(5);
   const labels = venueUsageData.value.labels.length;
   return baseColors.slice(0, labels);
 });
 
 const maintenanceColors = computed(() => {
-  const baseColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E'];
+  const baseColors = getChartColors(5);
   const labels = maintenanceData.value.labels.length;
   return baseColors.slice(0, labels);
 });
@@ -278,8 +279,8 @@ const handleDateUpdated = () => {
 const getStatusColor = (status: string) => {
   const colors: { [key: string]: string } = {
     pending: 'bg-yellow-500',
-    approved: 'bg-green-500',
-    rejected: 'bg-red-500',
+    approved: 'status-dot-approved',
+    rejected: 'status-dot-disapproved',
     canceled: 'bg-gray-500',
     in_progress: 'bg-blue-500',
     completed: 'bg-green-600',

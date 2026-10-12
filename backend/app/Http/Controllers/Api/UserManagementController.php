@@ -60,6 +60,13 @@ class UserManagementController extends Controller
             'department_id' => 'nullable|exists:departments,id',
         ]);
 
+        if ($validated['role_id'] == Role::where('name', 'Admin')->value('id')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only one Admin account is allowed. Please choose a different role.',
+            ], 422);
+        }
+
         $validated['password'] = Hash::make($validated['password']);
         $validated['must_change_password'] = true;
 
@@ -108,6 +115,17 @@ class UserManagementController extends Controller
             'role_id' => 'sometimes|exists:roles,id',
             'department_id' => 'nullable|exists:departments,id',
         ]);
+
+        // The single Admin account keeps its role; nobody else may be promoted to Admin
+        $adminRoleId = Role::where('name', 'Admin')->value('id');
+        if (isset($validated['role_id'])
+            && $validated['role_id'] == $adminRoleId
+            && $user->role_id != $adminRoleId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only one Admin account is allowed. Please choose a different role.',
+            ], 422);
+        }
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
@@ -159,7 +177,7 @@ class UserManagementController extends Controller
         }
 
         $request->validate([
-            'skills' => 'required|array',
+            'skills' => 'present|array',
             'skills.*.skill' => 'required|string|max:100',
             'skills.*.proficiency' => 'required|in:beginner,intermediate,expert',
         ]);

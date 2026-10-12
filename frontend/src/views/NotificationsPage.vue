@@ -32,13 +32,7 @@
               <div class="flex items-center gap-3">
                 <div
                   class="w-3 h-3 rounded-full mt-1"
-                  :class="{
-                    'bg-yellow-500': request.status === 'pending',
-                    'bg-green-500': request.status === 'approved',
-                    'bg-red-500': request.status === 'rejected',
-                    'bg-gray-500': request.status === 'canceled',
-                    'bg-blue-500': request.status === 'in_progress',
-                  }"
+                  :class="statusDotClass(request.status)"
                 ></div>
                 <div>
                   <div class="flex items-center gap-2 mb-1">
@@ -57,22 +51,16 @@
                     {{ request.type === 'facility' ? (request.user?.name || request.title_of_event) : request.requisitioner }}
                   </p>
                   <p class="text-xs text-gray-500 mt-1">
-                    {{ request.type === 'facility' ? `${request.time_of_event}, ${request.date_of_event}` : `${request.time}, ${request.date}` }}
+                    {{ request.type === 'facility' ? formatRequestSchedule(request) : formatRequestSchedule({ time_of_event: request.time, date_of_event: request.date }) }}
                   </p>
                 </div>
               </div>
               <div class="flex flex-col items-end gap-2">
                 <span
                   class="px-3 py-1 text-xs rounded-full font-medium whitespace-nowrap capitalize"
-                  :class="{
-                    'bg-yellow-100 text-yellow-700': request.status === 'pending',
-                    'bg-green-100 text-green-700': request.status === 'approved',
-                    'bg-red-100 text-red-700': request.status === 'rejected',
-                    'bg-gray-100 text-gray-700': request.status === 'canceled',
-                    'bg-blue-100 text-blue-700': request.status === 'in_progress',
-                  }"
+                  :class="statusBadgeClass(request.status)"
                 >
-                  {{ request.status }}
+                  {{ statusLabel(request.status) }}
                 </span>
                 <button
                   @click="viewRequestDetails(request.type, request.id, request.notification_id)"
@@ -97,6 +85,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatRequestSchedule } from '@/utils/time';
+import { statusBadgeClass, statusDotClass, statusLabel } from '@/utils/status';
 import { ref, onMounted, computed } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';

@@ -27,17 +27,37 @@
         <input v-model="formData.title_of_event" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" />
       </div>
 
-      <!-- Time + Date -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-aviation-olive mb-2">Time of Event</label>
-          <input v-model="formData.time_of_event" type="time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" />
-        </div>
+      <!-- Date + Start/End Time -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-aviation-olive mb-2">Date of Event</label>
-          <input v-model="formData.date_of_event" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" />
+          <input
+            v-model="formData.date_of_event"
+            type="date"
+            required
+            :class="['w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black', dateError ? 'border-red-500' : 'border-gray-300']"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">Start Time</label>
+          <input v-model="formData.start_time" type="time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-aviation-olive mb-2">End Time</label>
+          <input
+            v-model="formData.end_time"
+            type="time"
+            required
+            :min="formData.start_time || undefined"
+            :class="['w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-aviation-olive bg-white text-black', timeError ? 'border-red-500' : 'border-gray-300']"
+          />
         </div>
       </div>
+      <p v-if="checkingDate" class="text-xs text-gray-400 -mt-2">Checking date...</p>
+      <div v-if="dateError" class="p-3 bg-red-50 border border-red-200 rounded-lg -mt-2">
+        <p class="text-sm text-red-600">{{ dateError }}</p>
+      </div>
+      <p v-if="timeError" class="text-xs text-red-600 -mt-2">{{ timeError }}</p>
 
       <!-- Details of Request — Inventory Items -->
       <div>
@@ -116,7 +136,7 @@
         <button type="button" @click="closeModal" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-500 transition-colors bg-gray-400">
           Cancel
         </button>
-        <button type="button" @click="submitForm" :disabled="loading" class="px-6 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50">
+        <button type="button" @click="submitForm" :disabled="loading || !!dateError || !!timeError" class="px-6 py-2 bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50">
           {{ loading ? 'Submitting...' : 'Submit Request' }}
         </button>
       </div>
@@ -159,9 +179,18 @@ const formData = ref({
   venue_requested: '',
   location_room_number: '',
   title_of_event: '',
-  time_of_event: '',
+  start_time: '',
+  end_time: '',
   date_of_event: '',
 });
+
+const dateError = ref('');
+const checkingDate = ref(false);
+const timeError = computed(() =>
+  formData.value.start_time && formData.value.end_time && formData.value.end_time <= formData.value.start_time
+    ? 'End time must be later than the start time.'
+    : ''
+);
 
 watch(() => props.modelValue, (open) => {
   if (open && props.presetDate) {
@@ -217,7 +246,28 @@ const fetchAvailability = async (date: string) => {
   }
 };
 
+// Tell the requester right away when the chosen date already has a facility request
+const checkDate = async (date: string) => {
+  dateError.value = '';
+  if (!date) return;
+  checkingDate.value = true;
+  try {
+    const res = await fetch(`${API_URL}/facility-requests/date-check?date=${date}`, { headers: authHeaders() });
+    const data = await res.json();
+    // Ignore stale responses if the date changed while waiting
+    if (data.success && data.has_request && formData.value.date_of_event === date) {
+      dateError.value = data.message;
+      toast.error(data.message);
+    }
+  } catch {
+    // the server re-checks on submit
+  } finally {
+    checkingDate.value = false;
+  }
+};
+
 watch(() => formData.value.date_of_event, async (date) => {
+  checkDate(date);
   await fetchAvailability(date);
   for (const id in selectedItems.value) {
     const numId = Number(id);
@@ -262,7 +312,8 @@ const toggleItem = (id: number) => {
 };
 
 const resetForm = () => {
-  formData.value = { venue_requested: '', location_room_number: '', title_of_event: '', time_of_event: '', date_of_event: '' };
+  formData.value = { venue_requested: '', location_room_number: '', title_of_event: '', start_time: '', end_time: '', date_of_event: '' };
+  dateError.value = '';
   selectedItems.value = {};
   availability.value = {};
   attachmentFile.value = null;
@@ -276,9 +327,24 @@ const closeModal = () => {
 };
 
 const submitForm = async () => {
-  loading.value = true;
   error.value = '';
   success.value = '';
+
+  if (dateError.value) {
+    error.value = dateError.value;
+    toast.error('Please select a different date before submitting.');
+    return;
+  }
+  if (!formData.value.date_of_event || !formData.value.start_time || !formData.value.end_time) {
+    error.value = 'Please fill in the date, start time and end time.';
+    return;
+  }
+  if (timeError.value) {
+    error.value = timeError.value;
+    return;
+  }
+
+  loading.value = true;
 
   try {
     const fd = new FormData();
@@ -299,7 +365,10 @@ const submitForm = async () => {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to submit facility request');
+    if (!response.ok) {
+      if (data.errors?.date_of_event) dateError.value = data.errors.date_of_event[0];
+      throw new Error(data.errors?.date_of_event?.[0] || data.errors?.end_time?.[0] || data.message || 'Failed to submit facility request');
+    }
 
     success.value = 'Facility request submitted successfully!';
     toast.success(success.value);

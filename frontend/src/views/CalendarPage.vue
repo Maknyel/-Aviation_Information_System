@@ -230,7 +230,7 @@
                     <div class="font-semibold mb-0.5">{{ event.organization || 'Organization' }}</div>
                     <div class="font-medium">{{ event.title }}</div>
                     <div class="text-xs opacity-90 mt-1">{{ event.time }}</div>
-                    <div class="text-xs opacity-90 capitalize">{{ event.status }}</div>
+                    <div class="text-xs opacity-90">{{ statusLabel(event.status) }}</div>
                   </div>
                 </div>
               </div>
@@ -262,6 +262,7 @@
 </template>
 
 <script setup lang="ts">
+import { statusLabel } from '@/utils/status';
 import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
@@ -456,7 +457,7 @@ async function fetchEvents() {
           title: event.title || 'Facility Request',
           subtitle: request?.title_of_event || '',
           date: event.date,
-          time: request?.time_of_event || '',
+          time: request?.time_range || request?.time_of_event || '',
           status: event.status,
           data: request || event
         };

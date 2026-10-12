@@ -142,7 +142,7 @@
                   class="px-2 py-1 text-xs rounded capitalize"
                   :class="getStatusBadgeClass(event.status)"
                 >
-                  {{ event.status }}
+                  {{ statusLabel(event.status) }}
                 </span>
               </div>
               <p class="text-xs text-gray-600 mb-1">
@@ -229,6 +229,7 @@
 </template>
 
 <script setup lang="ts">
+import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { ref, computed, watch } from 'vue';
 import { API_URL } from '@/config/api';
 import FacilityRequestModal from './FacilityRequestModal.vue';
@@ -403,17 +404,7 @@ const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-const getStatusBadgeClass = (status: string) => {
-  const classes: { [key: string]: string } = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    canceled: 'bg-gray-100 text-gray-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-  };
-  return classes[status] || 'bg-gray-100 text-gray-800';
-};
+const getStatusBadgeClass = statusBadgeClass;
 
 const getPriorityClass = (priority: string) => {
   const classes: { [key: string]: string } = {

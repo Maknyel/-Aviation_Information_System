@@ -97,7 +97,7 @@
                     type="doughnut"
                     :labels="['Pending', 'Approved', 'Rejected']"
                     :data="[15, 25, 5]"
-                    :backgroundColor="['#6C9A6C', '#90EE90', '#FF6B6B']"
+                    :backgroundColor="['#EAB308', '#16A34A', '#DC2626']"
                   />
                 </div>
               </div>

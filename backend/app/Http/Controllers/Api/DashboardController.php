@@ -69,7 +69,7 @@ class DashboardController extends Controller
                     'title' => $request->venue_requested,
                     'subtitle' => $request->title_of_event,
                     'date' => $request->date_of_event,
-                    'time' => $request->time_of_event,
+                    'time' => $request->time_range,
                     'status' => $request->status,
                     'user' => $request->user->name ?? 'Unknown',
                 ];

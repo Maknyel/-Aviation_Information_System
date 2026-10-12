@@ -187,7 +187,7 @@ class FormTemplateController extends Controller
                     'location' => $record->location_room_number,
                     'event_title' => $record->title_of_event,
                     'date' => $record->date_of_event?->format('F d, Y'),
-                    'time' => $record->time_of_event,
+                    'time' => $record->time_range,
                     'equipment' => count($equipment) ? $equipment : ['None'],
                     'status' => $record->status,
                     'submitted_at' => $record->created_at->format('F d, Y h:i A'),

@@ -69,13 +69,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-3 h-3 rounded-full mt-1"
-                    :class="{
-                      'bg-yellow-500': request.status === 'pending',
-                      'bg-green-500': request.status === 'approved',
-                      'bg-red-500': request.status === 'rejected',
-                      'bg-gray-500': request.status === 'canceled',
-                      'bg-blue-500': request.status === 'in_progress',
-                    }"
+                    :class="statusDotClass(request.status)"
                   ></div>
                   <div>
                     <h3 class="font-semibold text-gray-800">
@@ -85,7 +79,7 @@
                       {{ requestType === 'facility' ? (request.user?.name || request.title_of_event) : request.requisitioner }}
                     </p>
                     <p class="text-xs text-gray-500 mt-1">
-                      {{ requestType === 'facility' ? `${formatTime(request.time_of_event)}, ${formatDate(request.date_of_event)}` : `${formatTime(request.time)}, ${formatDate(request.date)}` }}
+                      {{ requestType === "facility" ? formatRequestSchedule(request) : formatRequestSchedule({ time_of_event: request.time, date_of_event: request.date }) }}
                     </p>
                     <p v-if="request.assignee" class="text-xs text-blue-600 mt-1">
                       Assigned to: {{ request.assignee.name }}
@@ -94,15 +88,9 @@
                 </div>
                 <span
                   class="px-3 py-1 text-xs rounded-full font-medium whitespace-nowrap capitalize"
-                  :class="{
-                    'bg-yellow-100 text-yellow-700': request.status === 'pending',
-                    'bg-green-100 text-green-700': request.status === 'approved',
-                    'bg-red-100 text-red-700': request.status === 'rejected',
-                    'bg-gray-100 text-gray-700': request.status === 'canceled',
-                    'bg-blue-100 text-blue-700': request.status === 'in_progress',
-                  }"
+                  :class="statusBadgeClass(request.status)"
                 >
-                  {{ request.status }}
+                  {{ statusLabel(request.status) }}
                 </span>
               </div>
               <div class="flex justify-end">
@@ -140,6 +128,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatTimeRange, formatRequestSchedule } from '@/utils/time';
+import { statusBadgeClass, statusDotClass, statusLabel } from '@/utils/status';
 import { ref, onMounted, computed, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';

@@ -171,6 +171,7 @@
 </template>
 
 <script setup lang="ts">
+import { getChartColors } from '@/theme/colorScheme';
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import SimpleCalendar from '@/components/SimpleCalendar.vue';
@@ -214,7 +215,7 @@ const currentMonthLabel = computed(() => {
   return date.toLocaleString('default', { month: 'long', year: 'numeric' });
 });
 
-const chartColors = ['#4A7C59', '#5A8C69', '#6C9A6C', '#7DAA7D', '#8EBA8E', '#A0CCA0', '#B2DDB2'];
+const chartColors = getChartColors(7);
 
 const handleFacilityRequestSuccess = (request: any) => {
   console.log('Facility request submitted:', request);

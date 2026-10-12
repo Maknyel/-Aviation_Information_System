@@ -65,15 +65,15 @@
       <div class="space-y-2">
         <div v-for="step in order.approval_steps" :key="step.id" class="flex items-center gap-3 text-sm">
           <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
-            :class="{ 'bg-green-500': step.status === 'approved', 'bg-red-500': step.status === 'rejected', 'bg-gray-300': step.status === 'pending' }">
+            :class="{ 'status-dot-approved': step.status === 'approved', 'status-dot-disapproved': step.status === 'rejected', 'bg-gray-300': step.status === 'pending' }">
             {{ step.step_order }}
           </div>
           <div>
             <div>
               <span class="font-medium text-gray-500">{{ step.approver_role }}</span>
               <span v-if="step.approver" class="font-medium text-gray-800"> - {{ step.approver.name }}</span>
-              <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="{ 'bg-green-100 text-green-700': step.status === 'approved', 'bg-red-100 text-red-700': step.status === 'rejected', 'bg-gray-100 text-gray-600': step.status === 'pending' }">
-                {{ step.status }}
+              <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="statusBadgeClass(step.status)">
+                {{ statusLabel(step.status) }}
               </span>
               <span v-if="step.acted_at" class="text-xs text-gray-400 ml-2">{{ new Date(step.acted_at).toLocaleString() }}</span>
             </div>
@@ -202,6 +202,7 @@
 </template>
 
 <script setup lang="ts">
+import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { computed, ref, watch } from 'vue';
 import Modal from './Modal.vue';
 import FeedbackForm from './FeedbackForm.vue';

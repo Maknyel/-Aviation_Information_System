@@ -14,7 +14,7 @@
               <p class="text-xs text-gray-500 mt-1">{{ formatTime(request.time) }}, {{ formatDate(request.date) }}</p>
             </div>
           </div>
-          <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span class="capitalize font-medium">{{ request.status }}</span></span>
+          <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span :class="[statusBadgeClass(request.status), 'px-2 py-0.5 rounded-full']">{{ statusLabel(request.status) }}</span></span>
         </div>
         <div class="flex gap-2">
           <!-- <button
@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';
 import WorkOrderDetailsModal from '@/components/WorkOrderDetailsModal.vue';

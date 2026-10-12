@@ -237,7 +237,7 @@ class InventoryController extends Controller
                 'title'        => $ri->facilityRequest->title_of_event,
                 'location'     => $ri->facilityRequest->venue_requested,
                 'date'         => $ri->facilityRequest->date_of_event->format('Y-m-d'),
-                'time'         => $ri->facilityRequest->time_of_event,
+                'time'         => $ri->facilityRequest->time_range,
                 'status'       => $ri->facilityRequest->status,
                 'quantity'     => $ri->quantity,
                 'requested_by' => $ri->facilityRequest->user?->name,

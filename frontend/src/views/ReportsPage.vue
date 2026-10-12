@@ -63,7 +63,7 @@
               :labels="monthlyVolume.labels"
               :data="monthlyVolume.facility_requests"
               title="Facility Requests"
-              :backgroundColor="'#4A7C59'"
+              :backgroundColor="chartPrimary"
             />
             <p v-else class="text-gray-400 text-sm text-center mt-32">No data available</p>
           </div>
@@ -79,8 +79,8 @@
               :labels="completionTime.labels"
               :data="completionTime.values"
               title="Hours"
-              :backgroundColor="'#5A8C69'"
-              :borderColor="'#4A7C59'"
+              :backgroundColor="chartTint"
+              :borderColor="chartPrimary"
             />
             <p v-else class="text-gray-400 text-sm text-center mt-32">No data available</p>
           </div>
@@ -135,7 +135,7 @@
       <!-- Hotspots -->
       <div class="bg-white rounded-xl shadow-lg border border-gray-100">
         <div class="p-6 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Facility Problem Hotspots (Last 6 Months)</h3>
+          <h3 class="text-lg font-semibold text-gray-800">Location Problem Hotspots (Last 6 Months)</h3>
         </div>
         <div v-if="hotspots.length === 0" class="p-8 text-center text-gray-500">No hotspot data</div>
         <div v-else class="p-6 space-y-3">
@@ -192,6 +192,7 @@
 </template>
 
 <script setup lang="ts">
+import { getChartColors } from '@/theme/colorScheme';
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import StatsChart from '@/components/StatsChart.vue';
@@ -215,6 +216,7 @@ const feedbackList = ref<any[]>([]);
 const loadingFeedback = ref(false);
 const feedbackLoaded = ref(false);
 
+const [chartPrimary, , chartTint] = getChartColors(3);
 const maxHotspot = computed(() => Math.max(...hotspots.value.map((h: any) => h.total_orders), 1));
 
 const getAuthHeaders = () => ({
@@ -301,7 +303,7 @@ const downloadPdf = () => {
       h2{margin-top:28px;margin-bottom:8px;font-size:16px}
       .summary{display:flex;gap:24px;margin:16px 0;flex-wrap:wrap}
       .card{border:1px solid #ddd;border-radius:8px;padding:12px 16px;min-width:140px}
-      .card .num{font-size:22px;font-weight:700;color:#4A7C59}
+      .card .num{font-size:22px;font-weight:700;color:${chartPrimary}}
       .card .label{font-size:12px;color:#666}
       table{border-collapse:collapse;width:100%;font-size:13px}
       th,td{border-bottom:1px solid #eee;padding:6px 10px;text-align:left}
@@ -324,7 +326,7 @@ const downloadPdf = () => {
     <h2>Staff Performance</h2>
     <table><thead><tr><th>Staff</th><th>Assigned</th><th>Completed</th><th>In Progress</th><th>Rate</th><th>Rating</th></tr></thead><tbody>${staffRows || '<tr><td colspan="6">No data</td></tr>'}</tbody></table>
 
-    <h2>Facility Problem Hotspots</h2>
+    <h2>Location Problem Hotspots</h2>
     <table><thead><tr><th>Location</th><th>Total Orders</th><th>Urgent</th></tr></thead><tbody>${hotspotRows || '<tr><td colspan="3">No data</td></tr>'}</tbody></table>
   </body></html>`);
   w.document.close();

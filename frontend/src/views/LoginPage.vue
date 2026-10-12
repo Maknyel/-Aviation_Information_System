@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="bg-aviation-olive shadow-md">
+    <header class="bg-aviation-olive shadow-md border-b-4 border-aviation-gold">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <h1 class="text-white text-xl font-semibold text-center">National Aviation Academy of the Philippines</h1>
       </div>

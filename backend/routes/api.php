@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\EmailController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\FormTemplateController;
+use App\Http\Controllers\Api\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/settings/color-scheme', [SettingsController::class, 'colorScheme']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
@@ -36,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update']);
 
     // Facility Request routes
+    Route::get('/facility-requests/date-check', [FacilityRequestController::class, 'dateCheck']);
     Route::apiResource('facility-requests', FacilityRequestController::class);
     Route::patch('/facility-requests/{id}/status', [FacilityRequestController::class, 'updateStatus']);
     Route::get('/facility-requests/{id}/inventory-check', [FacilityRequestController::class, 'inventoryCheck']);
@@ -92,6 +95,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/staff-performance', [ReportController::class, 'staffPerformance']);
     Route::get('/reports/hotspots', [ReportController::class, 'hotspots']);
     Route::get('/reports/summary', [ReportController::class, 'summary']);
+
+    // Settings routes (Admin only)
+    Route::put('/settings/color-scheme', [SettingsController::class, 'updateColorScheme']);
+    Route::post('/settings/color-scheme/reset', [SettingsController::class, 'resetColorScheme']);
 
     // Activity Log routes
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);

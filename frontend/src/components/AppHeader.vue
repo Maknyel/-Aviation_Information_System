@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-aviation-olive shadow-md">
+  <header class="bg-aviation-olive shadow-md border-b-4 border-aviation-gold">
     <div class="max-w-full mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
         <!-- Hamburger Menu Button (Mobile) -->

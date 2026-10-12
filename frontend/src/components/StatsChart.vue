@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+import { getChartColors } from '@/theme/colorScheme';
 import { ref, onMounted, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 
@@ -39,8 +40,8 @@ const createChart = () => {
       datasets: [{
         label: props.title || 'Statistics',
         data: props.data,
-        backgroundColor: props.backgroundColor || '#6C9A6C',
-        borderColor: props.borderColor || '#6C9A6C',
+        backgroundColor: props.backgroundColor || getChartColors(1)[0],
+        borderColor: props.borderColor || getChartColors(1)[0],
         borderWidth: 1
       }]
     },
