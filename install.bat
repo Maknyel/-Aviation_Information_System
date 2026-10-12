@@ -20,7 +20,7 @@ if exist "%PHP_INI%" (
     findstr /r /c:"^;extension=zip" "%PHP_INI%" >nul
     if not errorlevel 1 (
         echo.
-        echo Enabling PHP's zip extension in %PHP_INI% (required by composer)...
+        echo Enabling PHP zip extension - required by composer...
         powershell -NoProfile -Command "(Get-Content '%PHP_INI%') -replace '^;extension=zip$','extension=zip' | Set-Content '%PHP_INI%'"
     )
 )
