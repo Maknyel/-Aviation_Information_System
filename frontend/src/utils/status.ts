@@ -34,3 +34,14 @@ export const statusDotClass = (status: string): string => {
 };
 
 export const STATUS_CHART_COLORS = { approved: '#16A34A', disapproved: '#DC2626' };
+
+/** Solid fill for calendar events: green approved, yellow pending, red disapproved. */
+export const statusEventClass = (status: string): string => {
+  const map: Record<string, string> = {
+    approved: 'event-approved',
+    completed: 'event-approved',
+    pending: 'event-pending',
+    rejected: 'event-disapproved',
+  };
+  return map[status] || 'event-other';
+};

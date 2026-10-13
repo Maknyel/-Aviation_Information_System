@@ -89,6 +89,16 @@
               </div>
             </div>
 
+            <!-- Status Legend -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <h3 class="text-sm font-semibold text-gray-800 mb-3">Status</h3>
+              <div class="space-y-2 text-sm text-gray-700">
+                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-approved"></span>Approved</div>
+                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-pending"></span>Pending</div>
+                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-disapproved"></span>Disapproved</div>
+              </div>
+            </div>
+
             <!-- People Section -->
             <div class="mt-6 pt-6 border-t border-gray-200">
               <h3 class="text-sm font-semibold text-gray-800 mb-3">People</h3>
@@ -224,7 +234,7 @@
                     @click.stop="viewEventDetails(event)"
                     :class="[
                       'text-xs p-2 rounded cursor-pointer shadow-sm',
-                      event.type === 'facility' ? 'bg-blue-500 text-white' : 'bg-orange-400 text-white'
+                      statusEventClass(event.status)
                     ]"
                   >
                     <div class="font-semibold mb-0.5">{{ event.organization || 'Organization' }}</div>
@@ -262,7 +272,7 @@
 </template>
 
 <script setup lang="ts">
-import { statusLabel } from '@/utils/status';
+import { statusLabel, statusEventClass } from '@/utils/status';
 import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';

@@ -53,7 +53,7 @@
           />
         </div>
       </div>
-      <p v-if="checkingDate" class="text-xs text-gray-400 -mt-2">Checking date...</p>
+      <p v-if="checkingDate" class="text-xs text-gray-400 -mt-2">Checking schedule...</p>
       <div v-if="dateError" class="p-3 bg-red-50 border border-red-200 rounded-lg -mt-2">
         <p class="text-sm text-red-600">{{ dateError }}</p>
       </div>
@@ -246,16 +246,18 @@ const fetchAvailability = async (date: string) => {
   }
 };
 
-// Tell the requester right away when the chosen date already has a facility request
-const checkDate = async (date: string) => {
+// Tell the requester right away when the chosen date and time overlap an existing facility request
+const checkSchedule = async () => {
   dateError.value = '';
-  if (!date) return;
+  const { date_of_event: date, start_time: start, end_time: end } = formData.value;
+  if (!date || !start || !end || end <= start) return;
   checkingDate.value = true;
   try {
-    const res = await fetch(`${API_URL}/facility-requests/date-check?date=${date}`, { headers: authHeaders() });
+    const res = await fetch(`${API_URL}/facility-requests/date-check?date=${date}&start_time=${start}&end_time=${end}`, { headers: authHeaders() });
     const data = await res.json();
     // Ignore stale responses if the date changed while waiting
-    if (data.success && data.has_request && formData.value.date_of_event === date) {
+    if (data.success && data.has_request
+      && formData.value.date_of_event === date && formData.value.start_time === start && formData.value.end_time === end) {
       dateError.value = data.message;
       toast.error(data.message);
     }
@@ -266,8 +268,12 @@ const checkDate = async (date: string) => {
   }
 };
 
+watch(
+  () => [formData.value.date_of_event, formData.value.start_time, formData.value.end_time],
+  checkSchedule
+);
+
 watch(() => formData.value.date_of_event, async (date) => {
-  checkDate(date);
   await fetchAvailability(date);
   for (const id in selectedItems.value) {
     const numId = Number(id);
@@ -332,7 +338,7 @@ const submitForm = async () => {
 
   if (dateError.value) {
     error.value = dateError.value;
-    toast.error('Please select a different date before submitting.');
+    toast.error('Please select a different date or time before submitting.');
     return;
   }
   if (!formData.value.date_of_event || !formData.value.start_time || !formData.value.end_time) {

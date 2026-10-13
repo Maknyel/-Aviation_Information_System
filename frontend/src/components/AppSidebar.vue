@@ -266,7 +266,7 @@ const menuItems = computed(() => {
       // { path: '/form-management', label: 'Form Management', icon: FormIcon },
       { path: '/users', label: 'User Management', icon: UsersIcon },
       { path: '/departments', label: 'Departments', icon: DepartmentsIcon },
-      { path: '/color-scheme', label: 'Color Scheme', icon: PaletteIcon },
+      // { path: '/color-scheme', label: 'Color Scheme', icon: PaletteIcon },
       { path: '/reports', label: 'Reports', icon: ReportsIcon },
       { path: '/activity-logs', label: 'Audit Logs', icon: AuditIcon },
     ];

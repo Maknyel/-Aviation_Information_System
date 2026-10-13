@@ -18,3 +18,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .status-in-progress { background-color: #DBEAFE; color: #1E40AF; }
 .status-dot-approved { background-color: #16A34A; }
 .status-dot-disapproved { background-color: #DC2626; }
+
+/* Calendar event fills: solid status colors (green approved, yellow pending, red disapproved) */
+.event-approved { background-color: #16A34A; color: #fff; }
+.event-pending { background-color: #FACC15; color: #1F2937; }
+.event-disapproved { background-color: #DC2626; color: #fff; }
+.event-other { background-color: #6B7280; color: #fff; }

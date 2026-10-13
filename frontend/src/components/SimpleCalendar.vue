@@ -86,7 +86,7 @@
             :key="idx"
             :class="[
               'w-1 h-1 rounded-full',
-              event.type === 'facility' ? 'bg-blue-500' : 'bg-orange-500'
+              statusEventClass(event.status)
             ]"
           ></div>
         </div>
@@ -229,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { statusBadgeClass, statusLabel } from '@/utils/status';
+import { statusBadgeClass, statusLabel, statusEventClass } from '@/utils/status';
 import { ref, computed, watch } from 'vue';
 import { API_URL } from '@/config/api';
 import FacilityRequestModal from './FacilityRequestModal.vue';

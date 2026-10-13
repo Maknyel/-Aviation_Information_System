@@ -28,7 +28,7 @@
         <span class="font-semibold text-aviation-olive">{{ todayPH }}</span>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
           <div class="text-3xl font-bold text-aviation-olive mb-1">{{ summary.totalItems }}</div>
           <div class="text-sm text-gray-600">Total Items</div>
@@ -41,10 +41,10 @@
           <div class="text-3xl font-bold text-green-600 mb-1">{{ summary.available }}</div>
           <div class="text-sm text-gray-600">Available Today</div>
         </div>
-        <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
+        <!-- <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-100 text-center">
           <div class="text-3xl font-bold text-gray-700 mb-1">{{ summary.categories }}</div>
           <div class="text-sm text-gray-600">{{ categoryFilter ? formatCategory(categoryFilter) : 'Categories' }}</div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Items Table -->
