@@ -71,15 +71,64 @@
       <!-- Equipment Needed and Quantity -->
       <div class="mt-4">
         <h3 class="text-sm font-semibold text-gray-900 mb-3">Equipment Needed and Quantity:</h3>
-        <div v-if="!request?.request_items?.length" class="text-sm text-gray-400 italic ml-4">No items requested.</div>
+        <div v-if="!displayItems.length" class="text-sm text-gray-400 italic ml-4">No items requested.</div>
         <div v-else class="grid grid-cols-2 gap-2 ml-4">
           <div
-            v-for="ri in request.request_items"
+            v-for="ri in displayItems"
             :key="ri.id"
             class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-100"
           >
             <span class="text-sm text-gray-700">{{ ri.inventory_item?.name }}</span>
             <span class="text-sm font-semibold text-aviation-olive">{{ ri.quantity }} {{ ri.inventory_item?.unit }}</span>
+          </div>
+        </div>
+
+        <!-- Extra equipment: added to this same request, inventory updates right away -->
+        <div v-if="canAddExtra" class="mt-4 ml-4 p-3 border border-dashed border-gray-300 rounded-lg">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-semibold text-gray-800">Need more equipment?</h4>
+            <button
+              v-if="!showExtra"
+              type="button"
+              @click="openExtra"
+              class="px-3 py-1 text-xs bg-aviation-olive text-white rounded-lg hover:bg-opacity-90"
+            >
+              + Add Extra Equipment
+            </button>
+          </div>
+          <div v-if="showExtra" class="mt-3 space-y-3">
+            <p class="text-xs text-gray-500">
+              Extra items are added to this request (no new request needed) and are taken from inventory immediately.
+              Availability is for {{ request?.date_of_event }}.
+            </p>
+            <div class="flex flex-wrap gap-2 items-center">
+              <select v-model="extraItemId" class="flex-1 min-w-[160px] px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-black">
+                <option :value="null">Select equipment</option>
+                <option v-for="it in extraOptions" :key="it.id" :value="it.id" :disabled="it.available <= 0">
+                  {{ it.name }} — {{ it.available > 0 ? it.available + ' available' : 'not available' }}
+                </option>
+              </select>
+              <input
+                v-model.number="extraQty"
+                type="number"
+                min="1"
+                :max="selectedExtra?.available || undefined"
+                class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-black"
+              />
+              <span class="text-xs text-gray-500">{{ selectedExtra?.unit }}</span>
+            </div>
+            <p v-if="extraError" class="text-xs text-red-600">{{ extraError }}</p>
+            <div class="flex gap-2 justify-end">
+              <button type="button" @click="showExtra = false" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg bg-gray-400 hover:bg-gray-500">Cancel</button>
+              <button
+                type="button"
+                @click="submitExtra"
+                :disabled="addingExtra || !extraItemId || !extraQty || extraQty < 1"
+                class="px-3 py-1.5 text-xs bg-aviation-olive text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+              >
+                {{ addingExtra ? 'Adding...' : 'Add to Request' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +180,7 @@
         <div v-if="inventoryData.other_bookings_same_day?.length > 0" class="mt-3 p-2 bg-amber-50 rounded-lg">
           <p class="text-xs font-medium text-amber-700 mb-1">Other bookings at this venue on the same date:</p>
           <div v-for="booking in inventoryData.other_bookings_same_day" :key="booking.id" class="text-xs text-gray-600 ml-2">
-            • {{ booking.title_of_event }} at {{ booking.time_of_event }} ({{ booking.user?.name }})
+            • {{ booking.title_of_event }} at {{ to12HourText(booking.time_of_event) }} ({{ booking.user?.name }})
           </div>
         </div>
       </div>
@@ -280,6 +329,7 @@
 </template>
 
 <script setup lang="ts">
+import { to12HourText } from '@/utils/time';
 import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { computed, ref, watch } from 'vue';
 import Modal from './Modal.vue';
@@ -378,6 +428,79 @@ const fetchInventoryCheck = async (requestId: number) => {
   }
 };
 
+// ---- Extra equipment ----
+const showExtra = ref(false);
+const addingExtra = ref(false);
+const extraError = ref('');
+const extraItemId = ref<number | null>(null);
+const extraQty = ref(1);
+const extraOptions = ref<{ id: number; name: string; unit: string; available: number }[]>([]);
+
+// Shows the latest equipment list even on pages that do not refresh the request after an add
+const liveItems = ref<any[] | null>(null);
+const displayItems = computed(() => liveItems.value ?? props.request?.request_items ?? []);
+
+const selectedExtra = computed(() => extraOptions.value.find(o => o.id === extraItemId.value));
+
+// The owner, Staff and Admin can add extra equipment while the request is pending or approved
+const canAddExtra = computed(() => {
+  const user = getStoredUser();
+  if (!user || !props.request) return false;
+  const open = ['pending', 'approved'].includes(props.request.status);
+  const allowed = ['Admin', 'Staff'].includes(user.role?.name ?? '') || user.id === props.request.user_id;
+  return open && allowed;
+});
+
+const openExtra = async () => {
+  extraError.value = '';
+  extraItemId.value = null;
+  extraQty.value = 1;
+  showExtra.value = true;
+  try {
+    const headers = { Authorization: `Bearer ${localStorage.getItem('token')}`, Accept: 'application/json' };
+    const [itemsRes, availRes] = await Promise.all([
+      fetch(`${API_URL}/inventory`, { headers }),
+      fetch(`${API_URL}/inventory/facility-availability?date=${props.request.date_of_event}`, { headers }),
+    ]);
+    const items = await itemsRes.json();
+    const avail = await availRes.json();
+    extraOptions.value = (items.data || []).map((it: any) => ({
+      id: it.id,
+      name: it.name,
+      unit: it.unit,
+      available: avail.data?.[it.id]?.available ?? it.total_quantity,
+    }));
+  } catch {
+    extraError.value = 'Could not load equipment availability.';
+  }
+};
+
+const submitExtra = async () => {
+  if (!extraItemId.value || !props.request) return;
+  addingExtra.value = true;
+  extraError.value = '';
+  try {
+    const res = await fetch(`${API_URL}/facility-requests/${props.request.id}/extra-items`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ items: [{ inventory_item_id: extraItemId.value, quantity: extraQty.value }] }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      extraError.value = data.message || Object.values(data.errors || {}).flat()[0] as string || 'Failed to add equipment';
+      return;
+    }
+    toast.success('Extra equipment added to the request');
+    showExtra.value = false;
+    liveItems.value = data.data?.request_items ?? null;
+    emit('statusUpdated', data.data);
+  } catch (e) {
+    extraError.value = 'Failed to add equipment. Please try again.';
+  } finally {
+    addingExtra.value = false;
+  }
+};
+
 watch(() => props.request, (req) => {
   inventoryData.value = null;
   saved.value = false;
@@ -385,6 +508,8 @@ watch(() => props.request, (req) => {
   rejectReason.value = '';
   rejectError.value = '';
   showChangeDate.value = false;
+  showExtra.value = false;
+  liveItems.value = null;
   dateError.value = '';
   assigneeSelection.value = req?.assigned_to || '';
   if (req?.id && canApprove.value) {
@@ -558,7 +683,7 @@ const formatDateTime = (date: string, time: string) => {
     month: 'long',
     day: 'numeric'
   });
-  return time ? `${formattedDate} at ${time}` : formattedDate;
+  return time ? `${formattedDate} at ${to12HourText(time)}` : formattedDate;
 };
 
 

@@ -93,28 +93,18 @@
             <div class="mt-6 pt-6 border-t border-gray-200">
               <h3 class="text-sm font-semibold text-gray-800 mb-3">Status</h3>
               <div class="space-y-2 text-sm text-gray-700">
-                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-approved"></span>Approved</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-pending"></span>Pending</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded event-disapproved"></span>Disapproved</div>
+                <div class="flex items-center gap-2"><span class="status-badge status-approved px-2 py-0.5 rounded-full text-xs">Approved</span></div>
+                <div class="flex items-center gap-2"><span class="status-badge status-pending px-2 py-0.5 rounded-full text-xs">Pending</span></div>
+                <div class="flex items-center gap-2"><span class="status-badge status-disapproved px-2 py-0.5 rounded-full text-xs">Disapproved</span></div>
               </div>
             </div>
 
-            <!-- People Section -->
+            <!-- Type Legend -->
             <div class="mt-6 pt-6 border-t border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-800 mb-3">People</h3>
-              <div class="space-y-2">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    SSC
-                  </div>
-                  <span class="text-sm text-gray-700">Supreme Student Council</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    AMT
-                  </div>
-                  <span class="text-sm text-gray-700">AMT Organization</span>
-                </div>
+              <h3 class="text-sm font-semibold text-gray-800 mb-3">Type</h3>
+              <div class="space-y-2 text-sm text-gray-700">
+                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-blue-500"></span>Facility Request</div>
+                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-orange-500"></span>Work Order</div>
               </div>
             </div>
           </div>
@@ -233,14 +223,14 @@
                     :key="event.id"
                     @click.stop="viewEventDetails(event)"
                     :class="[
-                      'text-xs p-2 rounded cursor-pointer shadow-sm',
-                      statusEventClass(event.status)
+                      'text-xs p-2 rounded cursor-pointer shadow-sm text-white',
+                      event.type === 'facility' ? 'bg-blue-500' : 'bg-orange-500'
                     ]"
                   >
                     <div class="font-semibold mb-0.5">{{ event.organization || 'Organization' }}</div>
                     <div class="font-medium">{{ event.title }}</div>
-                    <div class="text-xs opacity-90 mt-1">{{ event.time }}</div>
-                    <div class="text-xs opacity-90">{{ statusLabel(event.status) }}</div>
+                    <div class="text-xs opacity-90 mt-1">{{ to12HourText(event.time) }}</div>
+                    <span :class="[statusBadgeClass(event.status), 'inline-block mt-1 px-2 py-0.5 rounded-full text-xs']">{{ statusLabel(event.status) }}</span>
                   </div>
                 </div>
               </div>
@@ -272,7 +262,8 @@
 </template>
 
 <script setup lang="ts">
-import { statusLabel, statusEventClass } from '@/utils/status';
+import { to12HourText } from '@/utils/time';
+import { statusLabel, statusBadgeClass } from '@/utils/status';
 import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\FacilityRequest;
 use App\Models\WorkOrder;
+use App\Services\PendingRequestReminder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class NotificationController extends Controller
 {
@@ -16,6 +18,8 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
+        $this->remindAdminOfPendingRequests($user);
 
         $notifications = Notification::where('is_deleted', false)
             ->where('user_id', $user->id)
@@ -108,8 +112,21 @@ class NotificationController extends Controller
     /**
      * Get unread notification count
      */
+    /**
+     * The scheduler may not be running on every install, so Admins also trigger the
+     * 2-day pending check themselves (at most once every 30 minutes).
+     */
+    private function remindAdminOfPendingRequests($user): void
+    {
+        if ($user->role->name === 'Admin' && Cache::add('pending-request-reminder', true, now()->addMinutes(30))) {
+            PendingRequestReminder::run();
+        }
+    }
+
     public function unreadCount(Request $request)
     {
+        $this->remindAdminOfPendingRequests($request->user());
+
         $count = Notification::where('user_id', $request->user()->id)
             ->where('is_read', false)
             ->where('is_deleted', false)

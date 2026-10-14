@@ -39,7 +39,7 @@
                 <div class="text-xs text-gray-600 mt-0.5 truncate">{{ dep.title }}</div>
                 <div class="text-xs text-gray-500 mt-1">
                   <span class="font-medium">{{ dep.quantity }} {{ item?.unit || 'pcs' }}</span>
-                  &nbsp;·&nbsp;{{ dep.date }} at {{ dep.time }}
+                  &nbsp;·&nbsp;{{ dep.date }} at {{ to12HourText(dep.time) }}
                   &nbsp;·&nbsp;by {{ dep.requested_by }}
                 </div>
               </div>
@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { to12HourText } from '@/utils/time';
 import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { ref, computed, watch } from 'vue';
 import { API_URL } from '@/config/api';

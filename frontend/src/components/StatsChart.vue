@@ -18,6 +18,8 @@ const props = defineProps<{
   title?: string;
   backgroundColor?: string | string[];
   borderColor?: string | string[];
+  // Optional extra series for grouped bars/lines; when given, data/title/colors above are ignored
+  datasets?: { label: string; data: number[]; color: string }[];
 }>();
 
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
@@ -37,20 +39,29 @@ const createChart = () => {
     type: props.type || 'bar',
     data: {
       labels: props.labels,
-      datasets: [{
-        label: props.title || 'Statistics',
-        data: props.data,
-        backgroundColor: props.backgroundColor || getChartColors(1)[0],
-        borderColor: props.borderColor || getChartColors(1)[0],
-        borderWidth: 1
-      }]
+      datasets: props.datasets?.length
+        ? props.datasets.map(d => ({
+            label: d.label,
+            data: d.data,
+            backgroundColor: d.color,
+            borderColor: d.color,
+            borderWidth: 1
+          }))
+        : [{
+            label: props.title || 'Statistics',
+            data: props.data,
+            backgroundColor: props.backgroundColor || getChartColors(1)[0],
+            borderColor: props.borderColor || getChartColors(1)[0],
+            borderWidth: 1
+          }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: false
+          display: !!props.datasets?.length,
+          position: 'bottom'
         },
         tooltip: {
           titleFont: { size: 14 },
@@ -74,7 +85,7 @@ onMounted(() => {
   createChart();
 });
 
-watch(() => [props.labels, props.data], () => {
+watch(() => [props.labels, props.data, props.datasets], () => {
   createChart();
 }, { deep: true });
 </script>

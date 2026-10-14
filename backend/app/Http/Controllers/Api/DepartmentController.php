@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
 {
     public function index()
     {
-        $departments = Department::withCount(['users', 'facilityRequests', 'workOrders'])->get();
+        $departments = Department::withCount(['facilityRequests', 'workOrders'])
+            ->with('users:id,name,department_id')
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -28,7 +32,7 @@ class DepartmentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:departments',
             'code' => 'required|string|max:20|unique:departments',
-            'description' => 'nullable|string|max:255',
+            'type' => ['required', Rule::in(Department::TYPES)],
         ]);
 
         $department = Department::create($validated);
@@ -54,7 +58,7 @@ class DepartmentController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255|unique:departments,name,' . $id,
             'code' => 'sometimes|string|max:20|unique:departments,code,' . $id,
-            'description' => 'nullable|string|max:255',
+            'type' => ['sometimes', Rule::in(Department::TYPES)],
         ]);
 
         $department->update($validated);

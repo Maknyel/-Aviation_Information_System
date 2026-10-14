@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Remind Admins about requests pending for 2+ days
+        $schedule->command('requests:remind-pending')->hourly();
     }
 
     /**

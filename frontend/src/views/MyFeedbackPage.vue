@@ -111,6 +111,10 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/components/AppLayout.vue';
 import { API_URL } from '@/config/api';
+import { getStoredUser } from '@/utils/auth';
+
+// Staff and Admin APIs return everyone's records, so keep only the signed-in user's own
+const myId = getStoredUser()?.id;
 
 const feedbackList = ref<any[]>([]);
 const loading = ref(false);
@@ -183,7 +187,7 @@ const fetchFeedback = async () => {
   try {
     const res = await fetch(`${API_URL}/feedbacks`, { headers: getAuthHeaders() });
     const data = await res.json();
-    if (data.success) feedbackList.value = data.data;
+    if (data.success) feedbackList.value = data.data.filter((fb: any) => fb.user_id === myId);
   } catch (e) {
     console.error('Error fetching feedback:', e);
   } finally {
@@ -199,8 +203,8 @@ const fetchEligibleSource = async () => {
       fetch(`${API_URL}/work-orders`, { headers: getAuthHeaders() }),
     ]);
     const [frData, woData] = await Promise.all([frRes.json(), woRes.json()]);
-    if (frData.success) facilityRequests.value = frData.data;
-    if (woData.success) workOrders.value = woData.data;
+    if (frData.success) facilityRequests.value = frData.data.filter((r: any) => r.user_id === myId);
+    if (woData.success) workOrders.value = woData.data.filter((o: any) => o.user_id === myId);
   } catch (e) {
     console.error('Error fetching requests:', e);
   } finally {

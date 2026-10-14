@@ -381,6 +381,105 @@ class FacilityRequestController extends Controller
     }
 
     /**
+     * Add extra equipment to an existing request (owner, Staff or Admin).
+     * Quantities are merged into the same request and counted against inventory
+     * immediately; they cannot exceed what is still available on the event date.
+     */
+    public function addExtraItems(Request $request, $id)
+    {
+        $user = $request->user();
+        $facilityRequest = FacilityRequest::findOrFail($id);
+
+        $isStaffOrAdmin = in_array($user->role->name, ['Admin', 'Staff']);
+        if (!$isStaffOrAdmin && $facilityRequest->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized to add equipment to this request'], 403);
+        }
+
+        if (!in_array($facilityRequest->status, ['pending', 'approved'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Extra equipment can only be added to pending or approved requests.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.inventory_item_id' => 'required|exists:inventory_items,id|distinct',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $date = $facilityRequest->date_of_event->format('Y-m-d');
+        $added = [];
+
+        DB::transaction(function () use ($validated, $facilityRequest, $date, &$added) {
+            foreach ($validated['items'] as $row) {
+                $item = \App\Models\InventoryItem::lockForUpdate()->findOrFail($row['inventory_item_id']);
+
+                // Everything already reserved on this date, this request included
+                $inUse = (int) FacilityRequestInventory::where('inventory_item_id', $item->id)
+                    ->whereHas('facilityRequest', fn($q) => $q
+                        ->whereDate('date_of_event', $date)
+                        ->whereIn('status', ['pending', 'approved'])
+                    )
+                    ->sum('quantity');
+                $available = max(0, $item->total_quantity - $inUse);
+
+                if ($row['quantity'] > $available) {
+                    abort(response()->json([
+                        'success' => false,
+                        'message' => "Only {$available} {$item->unit} of {$item->name} available on this date (you asked for {$row['quantity']}).",
+                    ], 422));
+                }
+
+                $existing = FacilityRequestInventory::where('facility_request_id', $facilityRequest->id)
+                    ->where('inventory_item_id', $item->id)
+                    ->first();
+
+                if ($existing) {
+                    $existing->increment('quantity', $row['quantity']);
+                } else {
+                    FacilityRequestInventory::create([
+                        'facility_request_id' => $facilityRequest->id,
+                        'inventory_item_id' => $item->id,
+                        'quantity' => $row['quantity'],
+                    ]);
+                }
+
+                $added[] = "{$row['quantity']} {$item->name}";
+            }
+        });
+
+        $summary = implode(', ', $added);
+
+        // Let the other side know: staff/admins when the requester adds, the requester when staff/admin adds
+        if ($isStaffOrAdmin && $facilityRequest->user_id !== $user->id) {
+            $recipients = collect([$facilityRequest->user_id]);
+        } else {
+            $recipients = User::whereHas('role', fn($q) => $q->whereIn('name', ['Staff', 'Admin']))
+                ->where('id', '!=', $user->id)->pluck('id');
+        }
+        foreach ($recipients as $recipientId) {
+            Notification::create([
+                'user_id' => $recipientId,
+                'type' => 'facility_request',
+                'reference_id' => $facilityRequest->id,
+                'title' => 'Extra Equipment Added',
+                'message' => "{$user->name} added extra equipment ({$summary}) to the facility request for {$facilityRequest->venue_requested}.",
+                'is_read' => false,
+                'is_deleted' => false,
+            ]);
+        }
+
+        ActivityLog::log('updated', "Added extra equipment to facility request #{$id}: {$summary}", $facilityRequest);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Extra equipment added to the request',
+            'data' => $facilityRequest->fresh()->load(['user.role', 'department', 'approvalSteps.approver', 'requestItems.inventoryItem', 'assignee']),
+        ]);
+    }
+
+    /**
      * Inventory availability check for a specific facility request.
      */
     public function inventoryCheck(Request $request, $id)

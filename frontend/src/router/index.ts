@@ -150,7 +150,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/my-feedback',
     name: 'MyFeedback',
     component: MyFeedbackPage,
-    meta: { requiresAuth: true, role: 'Requester' }
+    meta: { requiresAuth: true, role: ['Requester', 'Employee', 'Staff'] }
   },
   {
     path: '/:pathMatch(.*)*',

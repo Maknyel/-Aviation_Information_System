@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/facility-requests/{id}/status', [FacilityRequestController::class, 'updateStatus']);
     Route::get('/facility-requests/{id}/inventory-check', [FacilityRequestController::class, 'inventoryCheck']);
     Route::post('/facility-requests/check-conflict', [FacilityRequestController::class, 'checkConflict']);
+    Route::post('/facility-requests/{id}/extra-items', [FacilityRequestController::class, 'addExtraItems']);
     Route::post('/facility-requests/{id}/assign', [FacilityRequestController::class, 'assign']);
 
     // Work Order routes

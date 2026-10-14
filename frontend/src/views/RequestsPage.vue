@@ -120,7 +120,7 @@
     <WorkOrderModal v-if="canAccessWorkOrders" v-model="showWorkOrderModal" @success="handleRequestSuccess" />
 
     <!-- Facility Request Details Modal -->
-    <FacilityRequestDetailsModal v-model="showDetailsModal" :request="selectedRequest" @statusUpdated="handleStatusUpdated" />
+    <FacilityRequestDetailsModal v-model="showDetailsModal" :request="selectedRequest" @statusUpdated="handleFacilityUpdated" />
 
     <!-- Work Order Details Modal -->
     <WorkOrderDetailsModal v-model="showWorkOrderDetailsModal" :order="selectedWorkOrder" @statusUpdated="handleStatusUpdated" />
@@ -311,6 +311,14 @@ const viewRequestDetails = async (type: string, id: number) => {
       loadingDetails.value = false;
     }
   }
+};
+
+// Keep the open details modal in sync (e.g. after extra equipment is added)
+const handleFacilityUpdated = (updated?: any) => {
+  if (updated?.id && selectedRequest.value?.id === updated.id) {
+    selectedRequest.value = { ...selectedRequest.value, ...updated };
+  }
+  handleStatusUpdated();
 };
 
 const handleStatusUpdated = () => {

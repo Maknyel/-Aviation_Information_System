@@ -12,8 +12,11 @@ class Department extends Model
     protected $fillable = [
         'name',
         'code',
+        'type',
         'description',
     ];
+
+    public const TYPES = ['Office', 'Student Org', 'Faculty', 'Employee'];
 
     public function users()
     {

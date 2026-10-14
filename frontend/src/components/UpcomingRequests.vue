@@ -11,7 +11,7 @@
             <div>
               <h4 class="text-sm font-semibold text-gray-800">{{ request.title }}</h4>
               <p class="text-xs text-gray-600 mt-0.5">{{ request.subtitle }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ formatTime(request.time) }}, {{ formatDate(request.date) }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ to12HourText(request.time) }}, {{ formatDate(request.date) }}</p>
             </div>
           </div>
           <span class="text-xs text-gray-600 whitespace-nowrap">Status: <span :class="[statusBadgeClass(request.status), 'px-2 py-0.5 rounded-full']">{{ statusLabel(request.status) }}</span></span>
@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import { to12HourText } from '@/utils/time';
 import { statusBadgeClass, statusLabel } from '@/utils/status';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import FacilityRequestDetailsModal from '@/components/FacilityRequestDetailsModal.vue';

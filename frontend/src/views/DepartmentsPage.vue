@@ -11,7 +11,7 @@
 
       <!-- Search -->
       <div class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-gray-100">
-        <input v-model="searchQuery" type="text" placeholder="Search by name or code..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" />
+        <input v-model="searchQuery" type="text" placeholder="Search by name, code or type..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" />
       </div>
 
       <!-- Departments Table -->
@@ -23,8 +23,8 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Users</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
@@ -34,8 +34,10 @@
                 <span class="px-2 py-1 text-xs bg-aviation-olive bg-opacity-10 text-aviation-olive rounded-full font-medium">{{ dept.code }}</span>
               </td>
               <td class="px-6 py-4 font-medium text-gray-800">{{ dept.name }}</td>
-              <td class="px-6 py-4 text-sm text-gray-600">{{ dept.description || '-' }}</td>
-              <td class="px-6 py-4 text-sm text-gray-600">{{ dept.users_count ?? 0 }}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs rounded-full font-medium" :class="typeBadge(dept.type)">{{ dept.type }}</span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ dept.users?.map((u: any) => u.name).join(', ') || '-' }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
                   <button @click="openEditModal(dept)" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">Edit</button>
@@ -62,8 +64,10 @@
             <input v-model="form.code" type="text" required maxlength="20" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea v-model="form.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black"></textarea>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <select v-model="form.type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aviation-olive focus:border-transparent bg-white text-black">
+              <option v-for="t in departmentTypes" :key="t" :value="t">{{ t }}</option>
+            </select>
           </div>
           <div v-if="formError" class="text-red-600 text-sm">{{ formError }}</div>
           <div class="flex gap-3 justify-end pt-2">
@@ -111,7 +115,19 @@ const showDeleteModal = ref(false);
 const editingDept = ref<any>(null);
 const deletingDept = ref<any>(null);
 
-const form = ref({ name: '', code: '', description: '' });
+const departmentTypes = ['Office', 'Student Org', 'Faculty', 'Employee'];
+
+const form = ref({ name: '', code: '', type: 'Office' });
+
+const typeBadge = (type: string) => {
+  const map: Record<string, string> = {
+    Office: 'bg-blue-100 text-blue-700',
+    'Student Org': 'bg-purple-100 text-purple-700',
+    Faculty: 'bg-green-100 text-green-700',
+    Employee: 'bg-yellow-100 text-yellow-700',
+  };
+  return map[type] || 'bg-gray-100 text-gray-700';
+};
 
 const getAuthHeaders = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -122,7 +138,7 @@ const filteredDepartments = computed(() => {
   if (!searchQuery.value) return departments.value;
   const q = searchQuery.value.toLowerCase();
   return departments.value.filter(
-    (d: any) => d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q)
+    (d: any) => d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q) || (d.type || '').toLowerCase().includes(q)
   );
 });
 
@@ -141,14 +157,14 @@ const fetchDepartments = async () => {
 
 const openCreateModal = () => {
   editingDept.value = null;
-  form.value = { name: '', code: '', description: '' };
+  form.value = { name: '', code: '', type: 'Office' };
   formError.value = '';
   showModal.value = true;
 };
 
 const openEditModal = (dept: any) => {
   editingDept.value = dept;
-  form.value = { name: dept.name, code: dept.code, description: dept.description || '' };
+  form.value = { name: dept.name, code: dept.code, type: dept.type || 'Office' };
   formError.value = '';
   showModal.value = true;
 };

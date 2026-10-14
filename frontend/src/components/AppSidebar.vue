@@ -275,11 +275,13 @@ const menuItems = computed(() => {
       ...baseMenu,
       { path: '/requests', label: 'Request', icon: RequestsIcon },
       { path: '/inventory', label: 'Inventory', icon: InventoryIcon },
+      { path: '/my-feedback', label: 'My Feedback', icon: FeedbackIcon },
     ];
   } else if (role === 'Employee') {
     return [
       ...baseMenu,
       { path: '/requests', label: 'Request', icon: RequestsIcon },
+      { path: '/my-feedback', label: 'My Feedback', icon: FeedbackIcon },
     ];
   } else if (role === 'Requester') {
     return [

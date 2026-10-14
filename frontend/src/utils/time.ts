@@ -23,3 +23,10 @@ export const formatDisplayDate = (date: string): string => {
 /** Time range plus date, e.g. "7:00 AM - 9:00 AM, October 12, 2026". */
 export const formatRequestSchedule = (request: { start_time?: string; end_time?: string; time_of_event?: string; date_of_event?: string }): string =>
   `${formatTimeRange(request)}, ${formatDisplayDate(request.date_of_event || '')}`;
+
+/** Converts every 24-hour time inside a string to 12-hour AM/PM: "07:00 - 15:00" -> "7:00 AM - 3:00 PM". */
+export const to12HourText = (text: string | null | undefined): string =>
+  (text ?? '').replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?\b/g, (_, h, m) => {
+    const hours = Number(h);
+    return `${hours % 12 || 12}:${m} ${hours >= 12 ? 'PM' : 'AM'}`;
+  });

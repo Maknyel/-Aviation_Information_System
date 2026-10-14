@@ -55,15 +55,18 @@
       <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6 mb-6">
         <!-- Monthly Volume Chart -->
         <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Monthly Request Volume ({{ selectedYear }})</h3>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-2">Monthly Request Volume ({{ selectedYear }})</h3>
+          <p class="text-xs text-gray-500 mb-4">Facility requests (blue) and work orders (orange) received each month, counted by the event date (facility requests) or work order date.</p>
           <div class="h-[28rem]">
             <StatsChart
               v-if="monthlyVolume.labels.length"
               type="bar"
               :labels="monthlyVolume.labels"
               :data="monthlyVolume.facility_requests"
-              title="Facility Requests"
-              :backgroundColor="chartPrimary"
+              :datasets="[
+                { label: 'Facility Requests', data: monthlyVolume.facility_requests, color: '#3B82F6' },
+                { label: 'Work Orders', data: monthlyVolume.work_orders, color: '#F97316' },
+              ]"
             />
             <p v-else class="text-gray-400 text-sm text-center mt-32">No data available</p>
           </div>
@@ -71,7 +74,12 @@
 
         <!-- Completion Time Chart -->
         <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-2">Avg. Completion Time - Hours ({{ selectedYear }})</h3>
+          <p class="text-xs text-gray-500 mb-4">
+            How long a work order takes from the moment it is submitted until it is marked completed, in hours.
+            Each point is the average of all completed work orders for that month, so a value of 24 means those jobs took about one day on average.
+            Work orders that are not completed yet are not counted, and a month with no completed work orders shows 0.
+          </p>
           <div class="h-[28rem]">
             <StatsChart
               v-if="completionTime.labels.length"
